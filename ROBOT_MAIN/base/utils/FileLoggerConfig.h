@@ -14,7 +14,7 @@
 #include <pantheios/backends/bec.file.h> // include file backend
 #include <pantheios/backends/bec.fprintf.h> // include console backend
 
-const PAN_CHAR_T PANTHEIOS_FE_PROCESS_IDENTITY[] = "TBU_ACAPS"; // set process name
+const PAN_CHAR_T PANTHEIOS_FE_PROCESS_IDENTITY[] = "ROBOT_MAIN"; // set process name
 
 PANTHEIOS_CALL(void) pantheios_be_file_getAppInit(int backEndId, pan_be_file_init_t* init) // configure file backend
 {

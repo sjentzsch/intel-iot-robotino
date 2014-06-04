@@ -48,15 +48,11 @@ struct LeavePoiWithoutPuck : sc::state<LeavePoiWithoutPuck,StateMachine1, lpwopI
 
 
 	void reserveAccessTriplet(){
-		stateBehavCtrl->getPathFinder()->getAccessTriplet(poiFrom,accessDirectionFrom,leaveDir);
+		//stateBehavCtrl->getPathFinder()->getAccessTriplet(poiFrom,accessDirectionFrom,leaveDir);
 	}
 
 	void findPath(){
 		Grid* grid = context<StateMachine1>().getGrid();
-		if(leaveDir == LeaveDirection::LEFT)
-			stateBehavCtrl->getPathFinder()->findPathTo(grid->getAccessNode(poiFrom, POIAccessFrom::LEFT), grid->getAccessDirection(poiFrom, POIAccessFrom::LEFT), context<StateMachine1>().poiTo, context<StateMachine1>().accessDirectionTo, context<StateMachine1>().poiFrom, context<StateMachine1>().accessDirectionFrom);
-		else
-			stateBehavCtrl->getPathFinder()->findPathTo(grid->getAccessNode(poiFrom, POIAccessFrom::RIGHT), grid->getAccessDirection(poiFrom, POIAccessFrom::RIGHT), context<StateMachine1>().poiTo, context<StateMachine1>().accessDirectionTo, context<StateMachine1>().poiFrom, context<StateMachine1>().accessDirectionFrom);
 	}
 
 	void moveSideForwards(){
@@ -163,7 +159,7 @@ struct lpwopPreparePath : sc::state< lpwopPreparePath, LeavePoiWithoutPuck>
 		if(context<StateMachine1>().poiTo == NULL)
 		{
 			Node *nodeBackPOI = grid->getAccessNode(context<LeavePoiWithoutPuck>().poiFrom, POIAccessFrom::FRONT);
-			context<LeavePoiWithoutPuck>().leavePoint.set(nodeBackPOI->getXPos(), nodeBackPOI->getYPos(), context<LeavePoiWithoutPuck>().stateBehavCtrl->getPathFinder()->getPhi(grid->getAccessDirection(context<LeavePoiWithoutPuck>().poiFrom, POIAccessFrom::FRONT)));
+			//context<LeavePoiWithoutPuck>().leavePoint.set(nodeBackPOI->getXPos(), nodeBackPOI->getYPos(), context<LeavePoiWithoutPuck>().stateBehavCtrl->getPathFinder()->getPhi(grid->getAccessDirection(context<LeavePoiWithoutPuck>().poiFrom, POIAccessFrom::FRONT)));
 
 			context<LeavePoiWithoutPuck>().moveSideForwards();
 			return transit<lpwopMovingSideForwards>();
@@ -172,10 +168,6 @@ struct lpwopPreparePath : sc::state< lpwopPreparePath, LeavePoiWithoutPuck>
 		{
 			Node *nodeBackPOI = grid->getAccessNode(context<LeavePoiWithoutPuck>().poiFrom, POIAccessFrom::FRONT);
 			float rotation = 0.0f;
-			if(context<LeavePoiWithoutPuck>().poiFrom->y == 8)
-				rotation = context<LeavePoiWithoutPuck>().stateBehavCtrl->getPathFinder()->getPhi(POIDirection::WEST);
-			else if(context<LeavePoiWithoutPuck>().poiFrom->y == 0)
-				rotation = context<LeavePoiWithoutPuck>().stateBehavCtrl->getPathFinder()->getPhi(POIDirection::EAST);
 			context<LeavePoiWithoutPuck>().leavePoint.set(nodeBackPOI->getXPos(), nodeBackPOI->getYPos(), rotation);
 
 			context<LeavePoiWithoutPuck>().moveSideForwards();

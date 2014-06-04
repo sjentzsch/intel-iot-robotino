@@ -27,9 +27,7 @@ void initApi2(rec::robotino::api2::Com *api2Com) {
 	FileLog::log_NOTICE("[Api2Com] Initializing API2 Com");
 	api2Com->setAddress( "127.0.0.1" );
 
-	cout << "BP1" << endl;
 	api2Com->connectToServer( true );
-	cout << "BP2" << endl;
 
 	if( !api2Com->isConnected() )
 	{
@@ -43,7 +41,7 @@ void initApi2(rec::robotino::api2::Com *api2Com) {
 	}
 
 	if (!api2Com->isLocalConnection()) {
-		//TODO FileLogger
+		//TODO FileLoggerb
 		FileLog::log_WARNING("[Api2Com] WARNING: Api2 connection isn't local (SharedMemory disabled). ",api2Com->address());
 	}
 }
@@ -66,51 +64,12 @@ int main(int argc, char* argv[])
 		api2Com = new Api2Com();
 		initApi2(api2Com);
 
-		// set HWID and ID of the robots with respect to the arguments of the program call
-		if(argc>1){
-			try
-			{
-				ModelProvider::getInstance()->setHWID((ID::ID)lexical_cast<int>(argv[1]));
-			}
-			catch(bad_lexical_cast &)
-			{
-				ModelProvider::getInstance()->setHWID(ID::ROBO1);
-			}
-		}else{
-			ModelProvider::getInstance()->setHWID(ID::ROBO1);
-		}
-
-		if(argc>2){
-			try
-			{
-				ModelProvider::getInstance()->setID((ID::ID)lexical_cast<int>(argv[2]));
-			}
-			catch(bad_lexical_cast &)
-			{
-				ModelProvider::getInstance()->setID(ID::ROBO1);
-			}
-		}else{
-			ModelProvider::getInstance()->setID(ModelProvider::getInstance()->getHWID());
-		}
-
-		// set own enabled-flag to true
-		ModelProvider::getInstance()->getComDataObject()->enabled[(int)ModelProvider::getInstance()->getHWID()-1] = true;
-
-		// start the communication threads (to be able to receive data from other stations during the initialization pahse)
-		communication::startDynamicDataSender();
-		communication::startComDataObjectServer();
-		communication::startWorldModelServer();
-
 		// wait some time to search for active stations -> setting the comData-enabled-flags appropriately
 		FileLog::log_NOTICE("[TBU_ACAPS] Searching for active stations ...");
 		if(BaseParameterProvider::getInstance()->getParams()->simulation_mode)
 			boost::this_thread::sleep(boost::posix_time::milliseconds(500));
 		else
 			boost::this_thread::sleep(boost::posix_time::milliseconds(5000));
-		for(unsigned int i=1; i<=3; i++)
-		{
-			FileLog::log_NOTICE("-> Robot", std::to_string(i), ": ", std::to_string(ModelProvider::getInstance()->getComDataObject()->enabled[i-1]));
-		}
 
 		SensorServer* sensorSrv = new SensorServer();
 		FileLog::log_NOTICE("Instantiated SensorServer");
@@ -124,13 +83,8 @@ int main(int argc, char* argv[])
 
 		while(true)
 		{
-			if(!BaseParameterProvider::getInstance()->getParams()->simulation_mode){
-				api2Com->processEvents();
-				rec::robotino::api2::msleep(10);
-			}
-			else{
-				boost::this_thread::sleep(boost::posix_time::milliseconds(10));
-			}
+			api2Com->processEvents();
+			rec::robotino::api2::msleep(10);
 		}
 	}
 	catch( const std::exception& e )

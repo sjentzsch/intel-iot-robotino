@@ -48,29 +48,8 @@ void AbstractV4LCamera::loop()
 				initCounter_mutex.unlock();
 				FileLog::log_NOTICE("[V4LCamera] Init phase, waiting ...");
 			}
-
-			#if SEND_BINARY_IMAGE == 0
-			sendImage();	// comment if you want to send other images, e.g. binary ones
-			#endif
 		}
 		boost::this_thread::sleep(boost::posix_time::milliseconds(10));
-	}
-}
-
-void AbstractV4LCamera::sendImage()
-{
-	// TODO: optimize me!!! --> memcpy;
-	unsigned char *pnewImageRGBGUI;
-	ID::ID id = ModelProvider::getInstance()->getID();
-	for(unsigned int i=0; i<CAM_HEIGHT; i++)
-	{
-		pnewImageRGBGUI = newImageRGBGUI.ptr<uchar>(i);
-		for(unsigned int u=0; u<CAM_WIDTH; ++u) // zwei Pixel pro schleife
-		{
-			DynDataProvider::getInstance()->getImageData(id)->imageData[(i*CAM_WIDTH*3)+(3*u)] = pnewImageRGBGUI[3*u]; // R
-			DynDataProvider::getInstance()->getImageData(id)->imageData[(i*CAM_WIDTH*3)+(3*u+1)] = pnewImageRGBGUI[3*u+1]; // G
-			DynDataProvider::getInstance()->getImageData(id)->imageData[(i*CAM_WIDTH*3)+(3*u+2)] = pnewImageRGBGUI[3*u+2]; // B
-		}
 	}
 }
 

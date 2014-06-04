@@ -10,9 +10,6 @@
 
 #include <iostream>
 
-//#include "../model/ComDataObject.h"
-//#include "../model/WorldModel.h"
-
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>

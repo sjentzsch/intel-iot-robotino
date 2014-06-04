@@ -19,13 +19,12 @@ typedef unsigned char IP_ADDRESS[4];
 struct ComDataObject{
 
 		COMMAND::COMMAND command;
-		IP_ADDRESS addresses[3];
-		int client_ports[3]; //ports for WM-Server, ComDataObjectServer,DynamicDataServer-ports will be calculated with +100 respectively
-		int simulation_ports[3];
-		bool enabled[3];
-		bool image_enabled[3];
-		bool laserscanner_enabled[3];
-		bool stateinfo_enabled[3];
+		IP_ADDRESS robot_address;
+		int client_ports;
+		int simulation_ports;
+		bool image_enabled;
+		bool laserscanner_enabled;
+		bool stateinfo_enabled;
 		IP_ADDRESS server_address;
 		int server_port;
 		bool server_enabled;
@@ -33,49 +32,25 @@ struct ComDataObject{
 		ComDataObject(){
 			command = COMMAND::START;
 
-			/*IP_ADDRESS robo1 = {172,26,104,1};
-			IP_ADDRESS robo2 = {172,26,104,2};
-			IP_ADDRESS robo3 = {172,26,104,3};
-			IP_ADDRESS wmserver = {172,26,108,33};*/
+			IP_ADDRESS robot = {172,36,40,1};
+			IP_ADDRESS server = {172,36,40,42};
 
-			IP_ADDRESS robo1 = {172,36,40,1};
-			IP_ADDRESS robo2 = {172,36,40,2};
-			IP_ADDRESS robo3 = {172,36,40,3};
-			IP_ADDRESS wmserver = {172,36,40,42};
+			memcpy(robot_address,robot,4);
+			memcpy(server_address,server,4);
 
-			enabled[0] = false;
-			enabled[1] = false;
-			enabled[2] = false;
+			image_enabled = false;
 
-			image_enabled[0] = false;
-			image_enabled[1] = false;
-			image_enabled[2] = false;
+			laserscanner_enabled = false;
 
-			laserscanner_enabled[0] = false;
-			laserscanner_enabled[1] = false;
-			laserscanner_enabled[2] = false;
-
-			stateinfo_enabled[0] = true;
-			stateinfo_enabled[1] = true;
-			stateinfo_enabled[2] = true;
+			stateinfo_enabled = true;
 
 			server_enabled = true;
 
-			client_ports[0] = 8190;
-			client_ports[1] = 8191;
-			client_ports[2] = 8192;
+			client_ports = 8190;
 
-			simulation_ports[0] = 7100;
-			simulation_ports[1] = 7101;
-			simulation_ports[2] = 7102;
+			simulation_ports = 7100;
 
 			server_port = 8193;
-
-			memcpy(addresses[0],robo1,4);
-			memcpy(addresses[1],robo2,4);
-			memcpy(addresses[2],robo3,4);
-			memcpy(server_address,wmserver,4);
-
 		}
 
 	};

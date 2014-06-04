@@ -8,7 +8,6 @@
 #include "MotorController.h"
 #include "StateBehaviorController.h"
 #include "StateMachineEvents.h"
-#include "model/DynDataProvider.h"
 
 const float MotorController::MIN_SPEED(40.0f); // original value 40.0f (03.06.11)
 const float MotorController::MIN_ROT_SPEED(8.0f); // original value 5.0f (03.06.11), increased to 7.0f (29.0
@@ -226,11 +225,6 @@ void MotorController::moveToAbsPos2_impl(vector<vec3D> vPoints, float myMaxSpeed
 			currPhi = pose.phi;
 
 			//FileLog::log(log_MotorController, "CP 4");
-
-			ID::ID id = ModelProvider::getInstance()->getID();
-			DynDataProvider::getInstance()->getStateInformation(id)->x = currX;
-			DynDataProvider::getInstance()->getStateInformation(id)->y = currY;
-			DynDataProvider::getInstance()->getStateInformation(id)->phi = currPhi;
 
 			//Make FPS calculation
 	//		dtToLastImageInMs = (int)timer.msecsElapsed();
@@ -827,11 +821,6 @@ void MotorController::driveLSPBTrajectory_impl(vector<struct vec3D> viaPoints, d
 //		timer.start();
 //		if(coutCounter % 100 == 0)
 //			FileLog::log_NOTICE("[MotorController] Current FPS: ", FileLog::integer(fps));
-
-		ID::ID id = ModelProvider::getInstance()->getID();
-		DynDataProvider::getInstance()->getStateInformation(id)->x = nowPose.x;
-		DynDataProvider::getInstance()->getStateInformation(id)->y = nowPose.y;
-		DynDataProvider::getInstance()->getStateInformation(id)->phi = nowPose.phi;
 
 		boost::this_thread::sleep(boost::posix_time::milliseconds(5));
 

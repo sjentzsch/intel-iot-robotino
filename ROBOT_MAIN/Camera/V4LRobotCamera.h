@@ -15,7 +15,6 @@
 #include "utils/FileLogger.h"
 #include "model/Timer.h"
 #include "model/ModelProvider.h"
-#include "model/DynDataProvider.h"
 #include "model/ImageData.h"
 #include "model/RobotCameraEnums.h"
 #include "../pathfinder/Grid.h"

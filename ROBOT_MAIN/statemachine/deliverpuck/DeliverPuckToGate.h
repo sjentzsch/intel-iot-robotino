@@ -56,7 +56,7 @@ struct DeliverPuckToGate : sc::state<DeliverPuckToGate,StateMachine1, dptgInit>
 	}
 
 	void getAccess(const EvInit&){
-		stateBehavCtrl->getPathFinder()->getAccessToDeliveryZone();
+		//stateBehavCtrl->getPathFinder()->getAccessToDeliveryZone();
 	}
 
 	void driveToMid() {

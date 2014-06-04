@@ -63,12 +63,6 @@ private:
 	boost::mutex signal_mutex; //mutex for access control
 	boost::condition_variable signal_cond; //condition variable, signals changes to control signal
 
-	// simulation thread
-	boost::thread *exec_simClientThread;
-	void simClientThread();
-	boost::mutex mutexSimData;
-	SimData currSimData;
-
 	SensorEventGeneratorBuffer *oldSensorState;
 	SensorEventGeneratorBuffer *newSensorState;
 	bool cameraPuckPosWasJustSent;

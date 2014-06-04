@@ -42,11 +42,6 @@ SensorEventGenerator::SensorEventGenerator(SensorServer *sensorSrv_):sensorSrv(s
 	pause();
 
 	lastObstacleNodesInRange = NULL;
-
-	if(BaseParameterProvider::getInstance()->getParams()->simulation_mode)
-	{
-		exec_simClientThread = new boost::thread(&SensorEventGenerator::simClientThread, this);
-	}
 }
 
 SensorEventGenerator::~SensorEventGenerator()
@@ -648,23 +643,6 @@ void SensorEventGenerator::getNewSensorValues()
 {
 	newSensorState = new SensorEventGeneratorBuffer();
 	sensorSrv->getNewSensorValues(newSensorState, oldSensorState);
-
-	if(BaseParameterProvider::getInstance()->getParams()->simulation_mode)
-	{
-		boost::mutex::scoped_lock scopedLock(mutexSimData);
-
-		//newSensorState->sensorPuckBias = currSimData.sensorPuckBias;
-		newSensorState->cameraPuckState = currSimData.cameraPuckState;
-		newSensorState->gotCameraPuckPos = true;
-		newSensorState->cameraPuckPos = vec3D(currSimData.puckPosition.absX, currSimData.puckPosition.absY, sqrt(currSimData.puckPosition.absX*currSimData.puckPosition.absX+currSimData.puckPosition.absY*currSimData.puckPosition.absY));
-		newSensorState->havingPuck = false;
-
-		newSensorState->cameraLightState = currSimData.cameraLightState;
-
-		newSensorState->cameraLampState = currSimData.cameraLampState;
-		newSensorState->gotCameraLampPos = true;
-		newSensorState->cameraLampPos = vec3D(currSimData.deliveryGatePosition.absX, currSimData.deliveryGatePosition.absY, sqrt(currSimData.deliveryGatePosition.absX*currSimData.deliveryGatePosition.absX+currSimData.deliveryGatePosition.absY*currSimData.deliveryGatePosition.absY));
-	}
 }
 
 void SensorEventGenerator::setStateBehaviorController(StateBehaviorController *stateCtrl_)
@@ -805,133 +783,6 @@ float SensorEventGenerator::getDistDegree(float phi1, float phi2) const
 		return diff;
 	else
 		return 360-diff;
-}
-
-void SensorEventGenerator::simClientThread()
-{
-	while (1)
-	{
-		stringstream* str = new std::stringstream("");
-		for(unsigned int i=0; i<3; i++){
-			*str<<(int)ModelProvider::getInstance()->getComDataObject()->server_address[i];
-			*str<<".";
-		}
-		*str<<(int)ModelProvider::getInstance()->getComDataObject()->server_address[3];
-		string ip(str->str().c_str());
-		delete str;
-		string port = to_string(ModelProvider::getInstance()->getComDataObject()->simulation_ports[(int)(ModelProvider::getInstance()->getHWID())-1]);
-
-		FileLog::log_NOTICE("Connect to simulation data server ", ip, ":", port, " ...");
-
-		try {
-			boost::asio::io_service io_service;
-			tcp::resolver resolver(io_service);
-			tcp::resolver::query query(ip, port);
-			tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
-			tcp::resolver::iterator end;
-			boost::system::error_code error;
-
-			tcp::socket socket(io_service);
-			error = boost::asio::error::host_not_found;
-			while (error && endpoint_iterator != end) {
-				socket.close();
-				socket.connect(*endpoint_iterator++, error);
-			}
-			if (error)
-				throw boost::system::system_error(error);
-
-			for (;;) {
-				boost::system::error_code ignored_error;
-				boost::array<char, sizeof(struct SimData)> buf;
-				// size_t len = socket.read_some(boost::asio::buffer(buf), error);
-				boost::asio::read(socket, boost::asio::buffer(buf));
-
-				struct SimData newSimData;
-				memcpy(&newSimData, buf.data(), sizeof(struct SimData));
-
-
-				{
-					boost::mutex::scoped_lock scopedLock(mutexSimData);
-					currSimData = newSimData;
-				}
-
-				// distance sensors
-				if(currSimData.distanceSensorLeft == SimSensorTransit::WHITE_TO_BLACK)
-				{
-					boost::shared_ptr<EvSensorFrontLeftFoundObstacle> ev(new EvSensorFrontLeftFoundObstacle());
-					FileLog::log_NOTICE("[SensorEventGenerator(Sim)] EvSensorFrontLeftFoundObstacle");
-					stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-				}
-				else if(currSimData.distanceSensorLeft == SimSensorTransit::BLACK_TO_WHITE)
-				{
-					boost::shared_ptr<EvSensorFrontLeftIsFree> ev(new EvSensorFrontLeftIsFree());
-					FileLog::log_NOTICE("[SensorEventGenerator(Sim)] EvSensorFrontLeftIsFree");
-					stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-				}
-				if(currSimData.distanceSensorRight == SimSensorTransit::WHITE_TO_BLACK)
-				{
-					boost::shared_ptr<EvSensorFrontRightFoundObstacle> ev(new EvSensorFrontRightFoundObstacle());
-					FileLog::log_NOTICE("[SensorEventGenerator(Sim)] EvSensorFrontRightFoundObstacle");
-					stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-				}
-				else if(currSimData.distanceSensorRight == SimSensorTransit::BLACK_TO_WHITE)
-				{
-					boost::shared_ptr<EvSensorFrontRightIsFree> ev(new EvSensorFrontRightIsFree());
-					FileLog::log_NOTICE("[SensorEventGenerator(Sim)] EvSensorFrontRightIsFree");
-					stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-				}
-
-				// floor sensors
-				if(currSimData.brightnessSensorLeft == SimSensorTransit::WHITE_TO_BLACK)
-				{
-					boost::shared_ptr<EvSensorFloorLeftIsBlack> ev(new EvSensorFloorLeftIsBlack());
-					FileLog::log_NOTICE("[SensorEventGenerator(Sim)] EvSensorFloorLeftIsBlack");
-					stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-
-					if(lastLineCrossSensor == FloorSensor::LEFT || lastLineCrossSensor == FloorSensor::INIT || lastLineCrossTimer.msecsElapsed() > 3000) // last line cross was triggered also by this sensor --> start new line cross
-					{
-						sensorSrv->getOdometry(lastLineCrossX, lastLineCrossY, lastLineCrossPhi);
-						lastLineCrossTimer.reset();
-						lastLineCrossTimer.start();
-						lastLineCrossSensor = FloorSensor::LEFT;
-					}
-					else // last line cross was triggered by the other floor sensor --> calculate distance
-					{
-						handleLineCross();
-					}
-				}
-				if(currSimData.brightnessSensorRight == SimSensorTransit::WHITE_TO_BLACK)
-				{
-					boost::shared_ptr<EvSensorFloorRightIsBlack> ev(new EvSensorFloorRightIsBlack());
-					FileLog::log_NOTICE("[SensorEventGenerator(Sim)] EvSensorFloorRightIsBlack");
-					stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-
-					if(lastLineCrossSensor == FloorSensor::RIGHT || lastLineCrossSensor == FloorSensor::INIT || lastLineCrossTimer.msecsElapsed() > 3000) // last line cross was triggered also by this sensor --> start new line cross
-					{
-						sensorSrv->getOdometry(lastLineCrossX, lastLineCrossY, lastLineCrossPhi);
-						lastLineCrossTimer.reset();
-						lastLineCrossTimer.start();
-						lastLineCrossSensor = FloorSensor::RIGHT;
-					}
-					else // last line cross was triggered by the other floor sensor --> calculate distance
-					{
-						handleLineCross();
-					}
-				}
-
-
-				if(error && error != boost::asio::error::eof)
-					throw boost::system::system_error(error);
-
-				// std::cout.write(buf.data(), len);
-			}
-			socket.close();
-		} catch (std::exception& e) {
-			std::cerr << e.what() << std::endl;
-		}
-		FileLog::log_NOTICE("Couldn't connect to host. Try in 1 sec again ... ");
-		boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
-	}
 }
 
 void SensorEventGenerator::addNodeIfNotFound(vector<Node*>* v, Node* n)

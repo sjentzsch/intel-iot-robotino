@@ -78,15 +78,15 @@ void ComDataObjectClient::sendComDataObject(){
 	std::stringstream* str = new std::stringstream("");
 
 	for(int j=0;j<3;j++){
-		*str<<(int)comDataObject->addresses[i][j];
+		*str<<(int)comDataObject->robot_address[j];
 		*str<<".";
 	}
-	*str<<(int)comDataObject->addresses[i][3];
+	*str<<(int)comDataObject->robot_address[3];
 	std::string tmpAddress(str->str().c_str());
 
 	boost::asio::ip::address tempAdd;
 	tempAdd = boost::asio::ip::address::from_string(tmpAddress.c_str()/*addressString.c_str()*/);
-	tcp::endpoint endpoint(tempAdd,comDataObject->client_ports[i]+100);
+	tcp::endpoint endpoint(tempAdd,comDataObject->client_ports+100);
 	delete str;
 	//std::cout << "[ComDataClient] Trying to connect to " << endpoint << "...\n";
 

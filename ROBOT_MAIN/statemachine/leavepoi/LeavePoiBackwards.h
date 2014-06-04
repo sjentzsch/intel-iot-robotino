@@ -39,10 +39,7 @@ struct LeavePoiBackwards : sc::state<LeavePoiBackwards,StateMachine1, lpbInit>
 		//stateBehavCtrl->getMotorCtrl()->terminate();
 
 		// only use this method if we have a job
-		if(context<StateMachine1>().poiTo != NULL)
-			stateBehavCtrl->getPathFinder()->findPathTo(grid->getAccessNode(poiFrom, POIAccessFrom::FRONT), grid->getAccessDirection(poiFrom, POIAccessFrom::FRONT), context<StateMachine1>().poiTo, context<StateMachine1>().accessDirectionTo, context<StateMachine1>().poiFrom, POIAccessFrom::FRONT);
-		else
-			stateBehavCtrl->getMotorCtrl()->moveToRelPos(-150,0,0,200);
+		stateBehavCtrl->getMotorCtrl()->moveToRelPos(-150,0,0,200);
 	}
 
 	void driveToNode(const EvPathFound &ev)

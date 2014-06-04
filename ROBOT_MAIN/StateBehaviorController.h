@@ -14,9 +14,7 @@
 #include "config.h"
 #include "ISensorControl.h"
 #include "AsyncStateMachine.h"
-#include "pathfinder/PathFinder.h"
 #include "JobPlanner/JobHandler.h"
-#include "AsyncWorldModelUpdater.h"
 
 
 class MotorController;
@@ -31,11 +29,9 @@ namespace sc = boost::statechart;
 class StateBehaviorController {
 private:
 	AsyncStateMachine* asyncStateMachine;
-	AsyncWorldModelUpdater* asyncWorldModelUpdater;
 	MotorController* motorCtrl;
 	ISensorControl* sensorCtrl;
 	SensorEventGenerator* sensorEvtGen;
-	PathFinder* pathfinder;
 	JobHandler *jobHandler;
 
 public:
@@ -44,9 +40,7 @@ public:
 	MotorController *getMotorCtrl();
 	AsyncStateMachine* getAsyncStateMachine();
 	ISensorControl* getSensorControl();
-	PathFinder* getPathFinder();
 	JobHandler* getJobHandler();
-	AsyncWorldModelUpdater * getAsyncWorldModelUpdater();
 
 	void initiate(); //very first start of the stateMachine
 

@@ -36,10 +36,6 @@ struct GrabPuckInputZone : sc::state<GrabPuckInputZone, StateMachine1, gpizInit>
 		accessNode = grid->getAccessNode(poiFrom, POIAccessFrom::FRONT);
 		grabLeft = (poiFrom->index == 27 || poiFrom->index == 29);
 		//YPosWasCalibrated = false;
-		if(grabLeft)
-			startYPos = context<StateMachine1>().getStateBehavController()->getPathFinder()->getInputZoneYLeftCoordinate();
-		else
-			startYPos = context<StateMachine1>().getStateBehavController()->getPathFinder()->getInputZoneYRightCoordinate();
 	} // entry
 
 	~GrabPuckInputZone() {
@@ -81,7 +77,7 @@ struct GrabPuckInputZone : sc::state<GrabPuckInputZone, StateMachine1, gpizInit>
 
 	void findPath() {
 		//Grid* grid = context<StateMachine1>().getGrid();
-		stateBehavCtrl->getPathFinder()->findPathTo(context<StateMachine1>().poiTo, context<StateMachine1>().accessDirectionTo, context<StateMachine1>().poiFrom, POIAccessFrom::FRONT);
+		//stateBehavCtrl->getPathFinder()->findPathTo(context<StateMachine1>().poiTo, context<StateMachine1>().accessDirectionTo, context<StateMachine1>().poiFrom, POIAccessFrom::FRONT);
 	}
 
 	void rotateToZero(const EvForward&) {
@@ -288,18 +284,14 @@ struct gpizRotatingToZero : sc::state<gpizRotatingToZero, GrabPuckInputZone>
 	sc::result react(const EvMotorCtrlReady &)
 	{
 		//context<StateMachine1>().getStateBehavController()->getPathFinder()->clearGrid();
-		context<StateMachine1>().getStateBehavController()->getPathFinder()->increaseInputZonePucksGrabbed();
+		//context<StateMachine1>().getStateBehavController()->getPathFinder()->increaseInputZonePucksGrabbed();
 		if(context<GrabPuckInputZone>().grabLeft)
 		{
 			float newStartYPos = context<StateMachine1>().getStateBehavController()->getSensorControl()->getRobotY() - 100;
-			if(newStartYPos > context<GrabPuckInputZone>().startYPos)
-				context<StateMachine1>().getStateBehavController()->getPathFinder()->setInputZoneYLeftCoordinate(newStartYPos);
 		}
 		else
 		{
 			float newStartYPos = context<StateMachine1>().getStateBehavController()->getSensorControl()->getRobotY() + 100;
-			if(newStartYPos < context<GrabPuckInputZone>().startYPos)
-				context<StateMachine1>().getStateBehavController()->getPathFinder()->setInputZoneYRightCoordinate(newStartYPos);
 		}
 		context<GrabPuckInputZone>().findPath();
 		return transit<gpizWaitingForPath>();

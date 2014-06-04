@@ -26,14 +26,7 @@ namespace communication{
 	void sendWorldModel();					// GUI: startContinueCommand, sendWMCommand | Robot: If Paused Command is received
 
 	void startComDataObjectServer();		// Robot: main
-	void startDynamicDataSender();			// Robot: main
-	void sendImage();						// Robot: DynamicDataSender
-	void sendLaserScanner();				// Robot: DynamicDataSender
-	void sendStateInformation();			// Robot: DynamicDataSender and StateMachine
 
-	void startImageDataServer();			// GUI: main
-	void startLaserScannerDataServer();		// GUI: main
-	void startStateInformationServer();		// GUI: main
 	void sendComDataObject();				// GUI: (several)
 }
 

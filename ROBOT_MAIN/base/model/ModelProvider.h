@@ -21,7 +21,6 @@
 
 using namespace std;
 
-class RefboxPeer;
 
 class ModelProvider {
 private:
@@ -32,11 +31,7 @@ private:
 	Observable* worldModelListener;
 	Observable* commandListener;
 
-	RefboxPeer* refboxPeer;
-
 	static ModelProvider* modelProvider;
-	ID::ID ID;
-	ID::ID HWID;
 
 public:
 	static ModelProvider* getInstance();
@@ -71,9 +66,6 @@ public:
 	// following mutex should only be used from WorldModelClient and WorldModelServer
 	boost::mutex wmMutex;
 
-	void setRefboxPeer(RefboxPeer* refboxPeer_);
-	RefboxPeer* getRefboxPeer();
-
 	void saveWorldModel(const char* path);
 	void loadWorldModel(const char* path);
 
@@ -83,15 +75,6 @@ public:
 	void addWorldModelChangeListener(Observable* observable);
 	Observable* getWorldModelChangeListener();
 	Observable* getCommandListener();
-
-	void kickRobot(ID::ID id);
-	void clearWorldModelFromRobot(ID::ID id);
-	void enableRobot(ID::ID id);
-
-	ID::ID getID();
-	void setID(ID::ID id);
-	ID::ID getHWID();
-	void setHWID(ID::ID id);
 
 protected:
 	ModelProvider();

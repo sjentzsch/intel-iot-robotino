@@ -240,13 +240,6 @@ struct dptpCheckOutOfOrder : sc::state< dptpCheckOutOfOrder, DeliverPuckToPoi>
 	~dptpCheckOutOfOrder() {
 	} // exit
 
-
-	sc::result react(const EvCameraRedLightDetected& evt)
-	{
-		context<DeliverPuckToPoi>().turnOffCameraDetection();
-		return transit<Dispatcher>(&StateMachine1::handleOutOfOrder,evt);
-	}
-
 	sc::result react(const EvCameraRedGreenLightDetected&)
 	{
 		context<DeliverPuckToPoi>().turnOffCameraDetection();
@@ -319,8 +312,7 @@ struct dptpCheckOutOfOrder : sc::state< dptpCheckOutOfOrder, DeliverPuckToPoi>
 		sc::custom_reaction<EvCameraRedYellowGreenLightDetected>,
 		sc::custom_reaction<EvCameraOfflineLightDetected>,
 		sc::custom_reaction<EvCameraGreenLightDetected>,
-		sc::custom_reaction<EvCameraYellowLightDetected>,
-		sc::custom_reaction<EvCameraRedLightDetected>
+		sc::custom_reaction<EvCameraYellowLightDetected>
 	> reactions;
 
 };
@@ -557,7 +549,6 @@ struct dptpWaitingDelivered : sc::state< dptpWaitingDelivered, DeliverPuckToPoi>
 			return transit<dptpDeliveredYellowGreen>();
 		}
 		else if(context<StateMachine1>().poiTo->type == POIType::T5 && ModelProvider::getInstance()->getWorldModel()->T5prodTime == 0){
-			context<StateMachine1>().getStateBehavController()->getJobHandler()->startMachineTiming();
 			return discard_event();
 		}
 		else return discard_event();
@@ -617,7 +608,6 @@ struct dptpDeliveredGreen : sc::state< dptpDeliveredGreen, DeliverPuckToPoi>
 {
 	dptpDeliveredGreen(my_context ctx) : my_base(ctx) {
 		context<StateMachine1>().logAndDisplayStateName("dptpDeliveredGreen");
-		context<StateMachine1>().getStateBehavController()->getJobHandler()->updatePoiType(CameraLightState::GREEN);
 		post_event(EvSuccess());
 	} // entry
 
@@ -629,7 +619,6 @@ struct dptpDeliveredYellow : sc::state< dptpDeliveredYellow, DeliverPuckToPoi>
 {
 	dptpDeliveredYellow(my_context ctx) : my_base(ctx) {
 		context<StateMachine1>().logAndDisplayStateName("dptpDeliveredYellow");
-		context<StateMachine1>().getStateBehavController()->getJobHandler()->updatePoiType(CameraLightState::YELLOW);
 		post_event(EvSuccess());
 	} // entry
 
@@ -641,7 +630,6 @@ struct dptpDeliveredYellowFlash : sc::state< dptpDeliveredYellowFlash, DeliverPu
 {
 	dptpDeliveredYellowFlash(my_context ctx) : my_base(ctx) {
 		context<StateMachine1>().logAndDisplayStateName("dptpDeliveredYellowFlash");
-		context<StateMachine1>().getStateBehavController()->getJobHandler()->updatePoiType(CameraLightState::YELLOW_FLASH);
 		post_event(EvSuccess());
 	} // entry
 
@@ -653,7 +641,6 @@ struct dptpDeliveredYellowGreen : sc::state< dptpDeliveredYellowGreen, DeliverPu
 {
 	dptpDeliveredYellowGreen(my_context ctx) : my_base(ctx) {
 		context<StateMachine1>().logAndDisplayStateName("dptpDeliveredYellowGreen");
-		context<StateMachine1>().getStateBehavController()->getJobHandler()->updatePoiType(CameraLightState::YELLOW_GREEN);
 		post_event(EvSuccess());
 	} // entry
 
@@ -665,7 +652,6 @@ struct dptpDeliveredRed : sc::state< dptpDeliveredRed, DeliverPuckToPoi>
 {
 	dptpDeliveredRed(my_context ctx) : my_base(ctx) {
 		context<StateMachine1>().logAndDisplayStateName("dptpDeliveredRed");
-		context<StateMachine1>().getStateBehavController()->getJobHandler()->updatePoiType(CameraLightState::RED);
 		post_event(EvSuccess());
 	} // entry
 
@@ -677,7 +663,6 @@ struct dptpDeliveredRedGreen : sc::state< dptpDeliveredRedGreen, DeliverPuckToPo
 {
 	dptpDeliveredRedGreen(my_context ctx) : my_base(ctx) {
 		context<StateMachine1>().logAndDisplayStateName("dptpDeliveredRedGreen");
-		context<StateMachine1>().getStateBehavController()->getJobHandler()->updatePoiType(CameraLightState::RED_GREEN);
 		post_event(EvSuccess());
 	} // entry
 
@@ -690,7 +675,6 @@ struct dptpDeliveredRedYellow : sc::state< dptpDeliveredRedYellow, DeliverPuckTo
 {
 	dptpDeliveredRedYellow(my_context ctx) : my_base(ctx) {
 		context<StateMachine1>().logAndDisplayStateName("dptpDeliveredRedYellow");
-		context<StateMachine1>().getStateBehavController()->getJobHandler()->updatePoiType(CameraLightState::RED_YELLOW);
 		post_event(EvSuccess());
 	} // entry
 
@@ -703,7 +687,6 @@ struct dptpDeliveredRedYellowGreen : sc::state< dptpDeliveredRedYellowGreen, Del
 {
 	dptpDeliveredRedYellowGreen(my_context ctx) : my_base(ctx) {
 		context<StateMachine1>().logAndDisplayStateName("dptpDeliveredRedYellowGreen");
-		context<StateMachine1>().getStateBehavController()->getJobHandler()->updatePoiType(CameraLightState::RED_YELLOW_GREEN);
 		post_event(EvSuccess());
 	} // entry
 
@@ -715,7 +698,6 @@ struct dptpDeliveredOffline : sc::state< dptpDeliveredOffline, DeliverPuckToPoi>
 {
 	dptpDeliveredOffline(my_context ctx) : my_base(ctx) {
 		context<StateMachine1>().logAndDisplayStateName("dptpDeliveredOffline");
-		context<StateMachine1>().getStateBehavController()->getJobHandler()->updatePoiType(CameraLightState::OFFLINE);
 		post_event(EvSuccess());
 	} // entry
 

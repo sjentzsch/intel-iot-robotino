@@ -35,7 +35,6 @@
 //TBU
 #include "config.h"
 #include "model/ModelProvider.h"
-#include "model/DynDataProvider.h"
 #include "model/ImageData.h"
 #include "utils/FileLogger.h"
 #include "../Api2Com.h"
@@ -69,7 +68,6 @@ protected:
 	void initCamera();
 	void loop();
 	bool queryImage();
-	void sendImage();
 
 	bool checkSignalStatus();
 	void pause();

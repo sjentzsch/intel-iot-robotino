@@ -34,22 +34,13 @@ void ComDataObjectServer::handleConnections_impl(){
 		    std::array<char, sizeof(ComDataObject)> recv_buf;
 			//printf("Connection to %s (ComDataObject)\n", inet_ntoa(cli.sin_addr));
 
-
-
 			//printf("ComDataObject (Command:%d)\n",ModelProvider::getInstance()->getComDataObject()->command);
 		    boost::system::error_code ignored_error;
 		    boost::asio::read(socket,boost::asio::buffer(recv_buf));
 
 		    memcpy(ModelProvider::getInstance()->getComDataObject(),recv_buf.data(),sizeof(ComDataObject));
 
-
 			printf("received ComDataObject (Command:%d)\n",ModelProvider::getInstance()->getComDataObject()->command);
-
-			if(ModelProvider::getInstance()->getComDataObject()->command == COMMAND::PAUSE)
-			{
-				communication::sendWorldModel();
-				printf("Sent WorldModel because of pause\n");
-			}
 
 			if(ModelProvider::getInstance()->getCommandListener()!=NULL){
 				ModelProvider::getInstance()->getCommandListener()->notify();

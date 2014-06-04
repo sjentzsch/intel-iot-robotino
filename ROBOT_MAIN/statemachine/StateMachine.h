@@ -23,7 +23,6 @@
 #include "utils/FileLogger.h"
 #include "../StateBehaviorController.h"
 #include "model/WorldModel.h"
-#include "model/DynDataProvider.h"
 
 namespace sc = boost::statechart;
 namespace mpl = boost::mpl;
@@ -105,13 +104,9 @@ struct StateMachine1 : sc::state_machine<StateMachine1, Init>
 
 	// TODO: need to add '\0' to the end or not?
 	void logAndDisplayStateName(const char* description){
-		strcpy(&DynDataProvider::getInstance()->getStateInformation(ModelProvider::getInstance()->getID())->description[0], description);
-		communication::sendStateInformation();
+		//strcpy(&DynDataProvider::getInstance()->getStateInformation(ModelProvider::getInstance()->getID())->description[0], description);
+		//communication::sendStateInformation();
 		FileLog::log_NOTICE("[StateMachine] Entered '", description, "'");
-	}
-
-	void handleOutOfOrder(const EvCameraRedLightDetected& evt){
-		stateBehavCtrl->getJobHandler()->handleOutOfOrder();
 	}
 
 	void nextTask(){

@@ -88,7 +88,7 @@ void WorldModelServer::handleWorldModelClients_impl()
 			{
 				IP_ADDRESS addr;
 				if(i<3)
-					memcpy(addr, ModelProvider::getInstance()->getComDataObject()->addresses[i], 4);
+					memcpy(addr, ModelProvider::getInstance()->getComDataObject()->robot_address, 4);
 				else
 					memcpy(addr, ModelProvider::getInstance()->getComDataObject()->server_address, 4);
 				std::stringstream* str = new std::stringstream("");

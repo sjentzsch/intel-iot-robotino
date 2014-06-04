@@ -38,35 +38,12 @@ struct LeavePoiWithPuck : sc::state<LeavePoiWithPuck,StateMachine1, lpwpInit>
 	} // exit
 
 	void init(const EvInit&){
-		stateBehavCtrl->getPathFinder()->findPathFromProductionMachine(poiFrom,accessDirectionFrom,poiTo,accessDirectionTo);
+		//stateBehavCtrl->getPathFinder()->findPathFromProductionMachine(poiFrom,accessDirectionFrom,poiTo,accessDirectionTo);
 	}
 
 	void pathFound(const EvPathFoundLeavePoi& event) {
 		leaveDir = event.leaveDir;
 		Grid* grid = context<StateMachine1>().getGrid();
-
-		if(poiTo->type != POIType::RECYCLE){
-					if(leaveDir == LeaveDirection::LEFT)
-						stateBehavCtrl->getPathFinder()->findPathTo(grid->getAccessNode(poiFrom, POIAccessFrom::LEFT), grid->getAccessDirection(poiFrom, POIAccessFrom::LEFT), poiTo, accessDirectionTo, poiFrom, accessDirectionFrom);
-					else
-						stateBehavCtrl->getPathFinder()->findPathTo(grid->getAccessNode(poiFrom, POIAccessFrom::RIGHT), grid->getAccessDirection(poiFrom, POIAccessFrom::RIGHT), poiTo, accessDirectionTo, poiFrom, accessDirectionFrom);
-				}
-		else{
-			if(accessDirectionFrom == POIAccessFrom::LEFT)
-			{
-				if(leaveDir == LeaveDirection::LEFT)
-					stateBehavCtrl->getPathFinder()->findPathTo(grid->getAccessNode(poiFrom, POIAccessFrom::BACK), grid->getAccessDirection(poiFrom, POIAccessFrom::FRONT), poiTo, accessDirectionTo, poiFrom, accessDirectionFrom);
-				else
-					stateBehavCtrl->getPathFinder()->findPathTo(grid->getAccessNode(poiFrom, POIAccessFrom::FRONT), grid->getAccessDirection(poiFrom, POIAccessFrom::FRONT), poiTo, accessDirectionTo, poiFrom, accessDirectionFrom);
-			}
-			else
-			{
-				if(leaveDir == LeaveDirection::LEFT)
-					stateBehavCtrl->getPathFinder()->findPathTo(grid->getAccessNode(poiFrom, POIAccessFrom::FRONT), grid->getAccessDirection(poiFrom, POIAccessFrom::FRONT), poiTo, accessDirectionTo, poiFrom, accessDirectionFrom);
-				else
-					stateBehavCtrl->getPathFinder()->findPathTo(grid->getAccessNode(poiFrom, POIAccessFrom::BACK), grid->getAccessDirection(poiFrom, POIAccessFrom::FRONT), poiTo, accessDirectionTo, poiFrom, accessDirectionFrom);
-			}
-		}
 	}
 
 	void leaveWithPuck(const EvPathFound& event) {

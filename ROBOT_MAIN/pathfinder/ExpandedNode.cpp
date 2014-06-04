@@ -23,7 +23,6 @@ list<ExpandedNode*> ExpandedNode::expand(){
 	Node* neighbor = node->getNeighbor(dir);
 	if(neighbor!=0 && !neighbor->isBlocked() &&
 		(
-		neighbor->getNodeRaw()->occupied == (int)ModelProvider::getInstance()->getID() ||
 		neighbor->getNodeRaw()->occupied == 0
 		)){
 		nodeList.push_back(new ExpandedNode(neighbor,dir,this));

@@ -54,7 +54,7 @@ struct GrabPuckSideOnFront : sc::state<GrabPuckSideOnFront,StateMachine1, gbsofI
 	}
 
 	void driveToLamp(const EvCameraLampDetected& ev) {
-		stateBehavCtrl->getMotorCtrl()->moveToAbsPos(ev.lampXPos, ev.lampYPos, stateBehavCtrl->getPathFinder()->getPhi(poiFrom->dir)-180, 100.0);
+		//stateBehavCtrl->getMotorCtrl()->moveToAbsPos(ev.lampXPos, ev.lampYPos, stateBehavCtrl->getPathFinder()->getPhi(poiFrom->dir)-180, 100.0);
 	}
 
 	void driveSidewardsPuck() {

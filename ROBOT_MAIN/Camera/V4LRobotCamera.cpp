@@ -14,28 +14,8 @@ V4LRobotCamera::V4LRobotCamera() {
 	for (int i = 0; i < CameraLightState::nCameraLightState; i++)
 		lightStateBuffer[i] = 0;
 
-	// TODO: set appropriate values
-	if(ModelProvider::getInstance()->getHWID() == ID::ROBO1)
-	{
-		CATCH_BOTTOM_LEFT = 75;
-		CATCH_BOTTOM_RIGHT = CAM_WIDTH - 76;
-	}
-	else if(ModelProvider::getInstance()->getHWID() == ID::ROBO2)
-	{
-		CATCH_BOTTOM_LEFT = 75;
-		CATCH_BOTTOM_RIGHT = CAM_WIDTH - 76;
-	}
-	else if(ModelProvider::getInstance()->getHWID() == ID::ROBO3)
-	{
-		CATCH_BOTTOM_LEFT = 76;
-		CATCH_BOTTOM_RIGHT = CAM_WIDTH - 75;
-	}
-	else
-	{
-		// else case not really needed, parameters here are for the simulator
-		CATCH_BOTTOM_LEFT = 73;
-		CATCH_BOTTOM_RIGHT = CAM_WIDTH - 78;
-	}
+	CATCH_BOTTOM_LEFT = 73;
+	CATCH_BOTTOM_RIGHT = CAM_WIDTH - 78;
 	GRABBER_MIDPOINT = CATCH_BOTTOM_LEFT + (CATCH_BOTTOM_RIGHT - CATCH_BOTTOM_LEFT) / 2;
 
 	//Set up timer for fps calculation

@@ -11,7 +11,6 @@
 #include <boost/thread.hpp>
 #include "JobPlanner.h"
 #include "config.h"
-#include "../pathfinder/PathFinder.h"
 #include "../StateBehaviorController.h"
 #include "../StateMachineEvents.h"
 #include "../AsyncStateMachine.h"
@@ -35,40 +34,14 @@ private:
 	JobPlanner* jobPlanner;
 	Job* currentJob;
 	Job* lastJob;
-	Job * lastJobInCaseOfRandomMovement;
 	boost::thread *nextTask_exec; //thread for finding the path
 	AsyncStateMachine* asyncStateMachine;
-	PathFinder* pathfinder;
 	Grid* grid;
-	POI* randomPOI;
-	Time TimeStampT5_1;
-	Time TimeStampT5_2;
-//	Time TimeStampT4_1;
-//	Time TimeStampT4_2;
-//	Time TimeStampT3_1;
-//	Time TimeStampT3_2;
-	bool foundT1ForRPC;
-//	bool T3timingActive;
-//	bool T4timingActive;
-	bool T5timingActive;
-	bool leaveLeft;
-
-	void updateProdMachineType( Job* dJob, CameraLightState::CameraLightState lamp);
-	void updateRecMachineType( Job* rJob, CameraLightState::CameraLightState lamp);
 
 	void nextTask_impl();
 
 	void handleJob(Job* djob);
 
-	void handleOutOfOrder_impl();
-//	void updatePoiRequired(POI* poi);
-
-	//leaves to poi depending on the job before
-	JobProgressStatus::JobProgressStatus leaveProductionMachine(Job* currentJob,Job* lastJob);
-	JobProgressStatus::JobProgressStatus prepareJob(Job* djob);
-
-	void removePuckFromProductionMachine(POI* poi);
-	void getOutOfMachine(Job* dJob, POI* targetPOI=NULL, POIAccessFrom::POIAccessFrom targetAccDir=POIAccessFrom::FRONT);
 	/*
 	 * Event Triggerings
 	 */

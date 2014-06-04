@@ -206,28 +206,6 @@ list<ExpandedNode>* Grid::getNormalizedPath(Node* startNode,POIDirection::POIDir
 	return normalizePath(getPath(startNode, startDirection, goalNode,goalDirection));
 }
 
-void Grid::clear(Node* currNode){
-	for (int i = 0; i < X_GRID; ++i) {
-		for (int j = 0; j < Y_GRID; ++j) {
-			if(i!=currNode->getX()||j!=currNode->getY()){
-				if(grid[i][j]->getNodeRaw()->occupied == ModelProvider::getInstance()->getID()){
-					grid[i][j]->getNodeRaw()->occupied = 0;
-				}
-			}
-		}
-	}
-}
-
-void Grid::clearAll(){
-	for (int i = 0; i < X_GRID; ++i) {
-		for (int j = 0; j < Y_GRID; ++j) {
-			if(grid[i][j]->getNodeRaw()->occupied == ModelProvider::getInstance()->getID()){
-				grid[i][j]->getNodeRaw()->occupied = 0;
-			}
-		}
-	}
-}
-
 //TODO: handle inaccessible nodes
 list<ExpandedNode>* Grid::getPath(Node* startNode,POIDirection::POIDirection startDirection, Node* goalNode, POIDirection::POIDirection goalDirection, const vector<Node*> blacklist){
 
@@ -286,7 +264,6 @@ list<ExpandedNode>* Grid::getPath(Node* startNode,POIDirection::POIDirection sta
 			list<ExpandedNode>* path = new list<ExpandedNode>();
 
 			while(parent!=0){
-				parent->getNode()->getNodeRaw()->occupied = ModelProvider::getInstance()->getID();
 				// TODO: set getNodeRaw()->timestamp ?!
 				path->push_front(*parent);
 				parent = parent->getParent();

@@ -262,7 +262,6 @@ struct gpmCheckingForGreenLightNoPuck : sc::state<gpmCheckingForGreenLightNoPuck
 
 	sc::result react(const EvCameraGreenLightDetected &)
 	{
-		context<StateMachine1>().getStateBehavController()->getJobHandler()->updatePoiType(CameraLightState::GREEN);
 		context<GrabPuckMachine>().prepareRegainPuck();
 		return transit<RegainPuck>();
 	}
@@ -285,7 +284,6 @@ struct gpmCheckingForGreenLightWithPuck : sc::state<gpmCheckingForGreenLightWith
 
 	sc::result react(const EvCameraGreenLightDetected &)
 	{
-		context<StateMachine1>().getStateBehavController()->getJobHandler()->updatePoiType(CameraLightState::GREEN);
 		return transit<gpmFinishedForwarder>();
 	}
 

@@ -31,22 +31,9 @@ WorldModelClient::WorldModelClient(ID::ID id,int milliseconds):clientHandle(io_s
 	index = int(id)-1;
 	IP_ADDRESS ownIPaddr = {127,0,0,1};
 
-	if(id==ID::SERVER){
 		port = comDataObject->server_port;
 		enabled = comDataObject->server_enabled;
-		if(id == ModelProvider::getInstance()->getHWID())
-			memcpy(addr,ownIPaddr,4);
-		else
 			memcpy(addr,comDataObject->server_address,4);
-	}else{
-		port = comDataObject->client_ports[index];
-		enabled = comDataObject->enabled[index];
-		if(id == ModelProvider::getInstance()->getHWID())
-			memcpy(addr,ownIPaddr,4);
-		else
-			memcpy(addr,comDataObject->addresses[index],4);
-	}
-
 
 
 	std::stringstream* str = new std::stringstream("");
@@ -142,19 +129,11 @@ void WorldModelClient::handleConnect(const boost::system::error_code& ec){
 	{
 		FileLog::log(log_Communication, "[WorldModelClient] Connect timed out");
 		FileLog::log_NOTICE("[WorldModelClient] Connect timed out");
-		if(index<3 && ModelProvider::getInstance()->getHWID() != (ID::ID)(index+1)){
-			ModelProvider::getInstance()->kickRobot((ID::ID)(index+1));
-			robotWasKicked = true;
-		}
 	}
 	else if(ec)
 	{
 		FileLog::log(log_Communication, "[WorldModelClient] Connect error: ", ec.message(), " ", FileLog::integer(ec.value()), " ", ec.category().name());
 		FileLog::log_NOTICE("[WorldModelClient] Connect error: ", ec.message(), " ", FileLog::integer(ec.value()), " ", ec.category().name());
-		if(index<3 && ModelProvider::getInstance()->getHWID() != (ID::ID)(index+1)) {
-			ModelProvider::getInstance()->kickRobot((ID::ID)(index+1));
-			robotWasKicked = true;
-		}
 		boost::system::error_code ec;
 		clientHandle.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
 		if(ec)
@@ -223,10 +202,6 @@ void WorldModelClient::handleConnect(const boost::system::error_code& ec){
 			FileLog::log(log_Communication, "[WorldModelClient] System error(2/2): ", ec.message(), " ", std::to_string(ec.value()), " ", ec.category().name());
 			FileLog::log_NOTICE("[WorldModelClient] System error(1/2): ", e.what());
 			FileLog::log_NOTICE("[WorldModelClient] System error(2/2): ", ec.message(), " ", std::to_string(ec.value()), " ", ec.category().name());
-			if(index<3 && ModelProvider::getInstance()->getHWID() != (ID::ID)(index+1)){
-				ModelProvider::getInstance()->kickRobot((ID::ID)(index+1));
-				robotWasKicked = true;
-			}
 			if(clientHandle.is_open())
 			{
 				clientHandle.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);

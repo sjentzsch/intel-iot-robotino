@@ -43,11 +43,11 @@ struct DriveToPoi : sc::state<DriveToPoi,StateMachine1, dtpInit>
 
 	void findPath(){
 		stateBehavCtrl->getMotorCtrl()->terminate();
-		stateBehavCtrl->getPathFinder()->findPathTo(poi,accessDirection);
+		//stateBehavCtrl->getPathFinder()->findPathTo(poi,accessDirection);
 	}
 
 	void findPathMotor(const EvMotorCtrlReady&){
-		context<StateMachine1>().getStateBehavController()->getAsyncWorldModelUpdater()->join();
+		//context<StateMachine1>().getStateBehavController()->getAsyncWorldModelUpdater()->join();
 		findPath();
 	}
 
@@ -64,7 +64,7 @@ struct DriveToPoi : sc::state<DriveToPoi,StateMachine1, dtpInit>
 
 		FileLog::log_NOTICE("[DriveToPoi] ",FileLog::real(event.x), ",", FileLog::real(event.y), ",", FileLog::real(event.rotation));
 
-		if(stateBehavCtrl->getPathFinder()->isNextRelevantInSameNodeMM(event.x,event.y) && context<StateMachine1>().driveWithPuck){
+		/*if(stateBehavCtrl->getPathFinder()->isNextRelevantInSameNodeMM(event.x,event.y) && context<StateMachine1>().driveWithPuck){
 			FileLog::log_NOTICE("[DriveToPoi] Rotating to drive direction:", FileLog::real(event.rotation));
 			stateBehavCtrl->getMotorCtrl()->rotateToAbsAngle(event.rotation);
 		}else{
@@ -77,7 +77,7 @@ struct DriveToPoi : sc::state<DriveToPoi,StateMachine1, dtpInit>
 			}
 			nodes = context<StateMachine1>().getStateBehavController()->getPathFinder()->convertViaPointsToNodes(vias);
 			stateBehavCtrl->getMotorCtrl()->driveLSPBTrajectory(context<DriveToPoi>().vias, maxSpeed,600,180,180);
-		}
+		}*/
 	}
 
 	vector<vec3D> vias;
@@ -111,7 +111,7 @@ struct dtpInit : sc::state< dtpInit, DriveToPoi>
 		{
 			FileLog::log_NOTICE("[DriveToPoi] Having Path already.");
 			context<DriveToPoi>().vias = context<StateMachine1>().pathToPOI->vias;
-			context<DriveToPoi>().nodes = context<StateMachine1>().getStateBehavController()->getPathFinder()->convertViaPointsToNodes(context<DriveToPoi>().vias);
+			//context<DriveToPoi>().nodes = context<StateMachine1>().getStateBehavController()->getPathFinder()->convertViaPointsToNodes(context<DriveToPoi>().vias);
 			context<DriveToPoi>().pathFound(context<StateMachine1>().pathToPOI->x, context<StateMachine1>().pathToPOI->y, context<StateMachine1>().pathToPOI->rotation, context<StateMachine1>().pathToPOI->vias,800);
 			return transit<dtpDriving>();
 		}
@@ -140,12 +140,12 @@ struct dtpWaiting : sc::state< dtpWaiting, DriveToPoi>
 
 	sc::result react(const EvPathFound& ev)
 	{
-		if(context<StateMachine1>().poiFrom != NULL && context<StateMachine1>().poiFrom->type == POIType::INPUT && context<StateMachine1>().poiFrom->occupied == ModelProvider::getInstance()->getID()){
+		/*if(context<StateMachine1>().poiFrom != NULL && context<StateMachine1>().poiFrom->type == POIType::INPUT && context<StateMachine1>().poiFrom->occupied == ModelProvider::getInstance()->getID()){
 			WorldModelClientHandler::getInstance()->lock();
 			cout << "Releasing input zone." << endl;
 			context<StateMachine1>().poiFrom->occupied = 0;
 			WorldModelClientHandler::getInstance()->unlock();
-		}
+		}*/
 		context<DriveToPoi>().vias = ev.vias;
 		context<DriveToPoi>().pathFound(ev.x, ev.y, ev.rotation, ev.vias, 800);
 		return transit<dtpDriving>();
@@ -186,10 +186,10 @@ struct dtpDriving : sc::state< dtpDriving, DriveToPoi>
 
 	sc::result react(const EvFinishedTrajSegment& ev)
 	{
-		if(context<StateMachine1>().getStateBehavController()->getAsyncWorldModelUpdater()->releasePathExcept(ev.upComingVias))
+		/*if(context<StateMachine1>().getStateBehavController()->getAsyncWorldModelUpdater()->releasePathExcept(ev.upComingVias))
 			FileLog::log_NOTICE("[EvFinishedTrajSegment] starting async path freeing...");
 		else
-			FileLog::log_NOTICE("[EvFinishedTrajSegment] AsyncWorldModelUpdate busy, discarding event...");
+			FileLog::log_NOTICE("[EvFinishedTrajSegment] AsyncWorldModelUpdate busy, discarding event...");*/
 		return discard_event();
 		//return discard_event();
 	}
@@ -248,7 +248,7 @@ struct dtpDriving : sc::state< dtpDriving, DriveToPoi>
 			cout << "[DriveToPOI] Replan ..." << endl;
 			FileLog::log_NOTICE("[DriveToPOI] Replan ...");
 			context<StateMachine1>().getStateBehavController()->getMotorCtrl()->terminate();
-			context<StateMachine1>().getStateBehavController()->getPathFinder()->findPathTo(context<StateMachine1>().poiTo, context<StateMachine1>().accessDirectionTo, NULL, POIAccessFrom::FRONT, ev.obstacleNodes);
+			//context<StateMachine1>().getStateBehavController()->getPathFinder()->findPathTo(context<StateMachine1>().poiTo, context<StateMachine1>().accessDirectionTo, NULL, POIAccessFrom::FRONT, ev.obstacleNodes);
 			return transit<dtpWaiting>();
 		}
 		else

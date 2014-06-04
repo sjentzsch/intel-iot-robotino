@@ -21,8 +21,8 @@ using boost::asio::deadline_timer;
 
 class ComDataObjectClient {
 private:
-	deadline_timer timer;
 	tcp::socket socket;
+	deadline_timer timer;
 	int i;
 	ComDataObject* comDataObject;
 	bool closed;

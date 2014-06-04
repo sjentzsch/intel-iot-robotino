@@ -7,11 +7,9 @@
 
 #include "LaserScanner.h"
 #include "../SensorServer.h"
-#include "model/DynDataProvider.h"
 #include <cmath>
 #include "BaseParameterProvider.h"
 #include "LaserScannerApi.h"
-#include "LaserScannerSim.h"
 
 LaserScanner::LaserScanner(SensorServer* sensorServer): execThread(NULL), signal(LaserScannerSignal::RUN)
 {
@@ -25,12 +23,8 @@ LaserScanner::LaserScanner(SensorServer* sensorServer): execThread(NULL), signal
 	T_laser2base[3] = sin(theta);	T_laser2base[4] = cos(theta);		T_laser2base[5] = offset_y;
 	T_laser2base[6] = 0.0;			T_laser2base[7] = 0.0;				T_laser2base[8] = 1.0;
 
-	if(BaseParameterProvider::getInstance()->getParams()->simulation_mode)
-	{
-		scannerDriver = new LaserScannerSim(sensorServer, offset_x, offset_y, theta);
-	} else {
-		scannerDriver = new LaserScannerApi();
-	}
+	scannerDriver = new LaserScannerApi();
+
 	this->sensorServer = sensorServer;
 
 
@@ -298,47 +292,6 @@ void LaserScanner::loop()
 				clustersMid.push_back(midpoint);
 		}
 
-
-
-
-		// Send Laser-Scanner-Data
-		ID::ID id = ModelProvider::getInstance()->getID();
-		DynDataProvider::getInstance()->getLaserScannerData(id)->id = (int)id;
-		DynDataProvider::getInstance()->getLaserScannerData(id)->my_x = my_x;
-		DynDataProvider::getInstance()->getLaserScannerData(id)->my_y = my_y;
-		DynDataProvider::getInstance()->getLaserScannerData(id)->my_phi = my_phi;
-		for(unsigned int i=0; i<LASERSCANNER_MAX_POINTS; i++)
-		{
-			if(i >= scan.positionsGlob.size())
-			{
-				DynDataProvider::getInstance()->getLaserScannerData(id)->laserScannerData[i][0] = 0;
-				DynDataProvider::getInstance()->getLaserScannerData(id)->laserScannerData[i][1] = 0;
-				DynDataProvider::getInstance()->getLaserScannerData(id)->isDynObstacle[i] = false;
-				DynDataProvider::getInstance()->getLaserScannerData(id)->isValid[i] = false;
-			}
-			else
-			{
-				DynDataProvider::getInstance()->getLaserScannerData(id)->laserScannerData[i][0] = (int)(scan.positionsGlob.at(i).at(0)*1000);
-				DynDataProvider::getInstance()->getLaserScannerData(id)->laserScannerData[i][1] = (int)(scan.positionsGlob.at(i).at(1)*1000);
-				DynDataProvider::getInstance()->getLaserScannerData(id)->isDynObstacle[i] = isDynObstacle.at(i);
-				DynDataProvider::getInstance()->getLaserScannerData(id)->isValid[i] = isValid.at(i);
-			}
-
-			//std::cout << i << ": " << DynDataProvider::getInstance()->getLaserScannerData(id)->laserScannerData[i][0] << "," << DynDataProvider::getInstance()->getLaserScannerData(id)->laserScannerData[i][1] << ::std::endl;
-		}
-		for(unsigned int i=0; i<LASERSCANNER_MAX_DYN_OBSTACLES; i++)
-		{
-			if(i >= clustersMid.size())
-			{
-				DynDataProvider::getInstance()->getLaserScannerData(id)->dynObstacles[i][0] = 0;
-				DynDataProvider::getInstance()->getLaserScannerData(id)->dynObstacles[i][1] = 0;
-			}
-			else
-			{
-				DynDataProvider::getInstance()->getLaserScannerData(id)->dynObstacles[i][0] = clustersMid.at(i).at(0);
-				DynDataProvider::getInstance()->getLaserScannerData(id)->dynObstacles[i][1] = clustersMid.at(i).at(1);
-			}
-		}
 
 		// set latestObstacleBuffer
 		{
