@@ -10,7 +10,7 @@
 #include "StateBehaviorController.h"
 #include "utils/FileLoggerConfig.h"
 #include "model/ModelProvider.h"
-#include "communication/Communication.h"
+#include "communication/CloudComm.h"
 #include "Api2Com.h"
 #include "BaseParameterProvider.h"
 
@@ -64,12 +64,9 @@ int main(int argc, char* argv[])
 		api2Com = new Api2Com();
 		initApi2(api2Com);
 
-		// wait some time to search for active stations -> setting the comData-enabled-flags appropriately
-		FileLog::log_NOTICE("[TBU_ACAPS] Searching for active stations ...");
-		if(BaseParameterProvider::getInstance()->getParams()->simulation_mode)
-			boost::this_thread::sleep(boost::posix_time::milliseconds(500));
-		else
-			boost::this_thread::sleep(boost::posix_time::milliseconds(5000));
+		// communication setup
+
+
 
 		SensorServer* sensorSrv = new SensorServer();
 		FileLog::log_NOTICE("Instantiated SensorServer");

@@ -12,7 +12,6 @@
 #include <limits.h>
 
 #include "../model/WorldModel.h"
-#include "Communication.h"
 #include "../utils/FileLogger.h"
 
 #include <boost/asio.hpp>

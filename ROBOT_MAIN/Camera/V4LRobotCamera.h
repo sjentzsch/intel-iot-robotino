@@ -18,7 +18,6 @@
 #include "model/ImageData.h"
 #include "model/RobotCameraEnums.h"
 #include "../pathfinder/Grid.h"
-#include "communication/Communication.h"
 #include "AbstractV4LCamera.h"
 
 using namespace cv;

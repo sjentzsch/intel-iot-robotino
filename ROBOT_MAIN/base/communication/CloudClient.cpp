@@ -14,8 +14,6 @@ CloudClient::CloudClient(boost::asio::io_service& io_service_, ::std::string hos
 {
 	this->host = host_;
 	this->port = port_;
-
-	closed = false;
 }
 
 CloudClient::~CloudClient()
@@ -31,7 +29,7 @@ void CloudClient::handleConnect(const boost::system::error_code& ec)
 	{
 		std::cout << "[CloudClient] Connect timed out" << std::endl;
 	}
-	else if (ec)
+	else if(ec)
 	{
 		std::cout << "[CloudClient] Connect error: " << ec.message() << std::endl;
 		socket.close();
@@ -50,14 +48,12 @@ void CloudClient::handleConnect(const boost::system::error_code& ec)
 
 		socket.close();
 	}
-
-	closed = true;
 }
 
 void CloudClient::checkDeadline()
 {
-	if(closed)
-		return;
+	//if(closed)
+	//	return;
 
 	// Check whether the deadline has passed. We compare the deadline against
 	// the current time since a new asynchronous operation may have moved the

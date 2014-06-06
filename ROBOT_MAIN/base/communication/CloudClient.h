@@ -36,8 +36,6 @@ private:
 
 	::std::string host;
 	int port;
-
-	bool closed;
 };
 
 #endif /* CLOUDCLIENT_H_ */
