@@ -24,15 +24,16 @@ public:
 	CloudClient(boost::asio::io_service& io_service_, ::std::string host_, int port_);
 	virtual ~CloudClient();
 
-	void sendTest();
+	bool sendTest();
 
 private:
 	void checkDeadline();
-	void handleConnect(const boost::system::error_code& ec);
 
 	boost::asio::io_service& io_service;
 	tcp::socket socket;
 	deadline_timer timer;
+
+	boost::mutex send_mutex;
 
 	::std::string host;
 	int port;

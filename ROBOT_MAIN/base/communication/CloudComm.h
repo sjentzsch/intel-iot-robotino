@@ -16,6 +16,7 @@ class CloudComm
 public:
 	static CloudComm* getInstance();
 
+	void init(CloudServer* cloudServer, CloudClient* cloudClient);
 	CloudServer* getCloudServer();
 	CloudClient* getCloudClient();
 

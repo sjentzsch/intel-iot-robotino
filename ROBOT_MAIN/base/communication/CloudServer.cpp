@@ -56,6 +56,7 @@ void CloudServer::handleConnections_impl()
 		    }
 
 		    // TODO: process result.str();
+		    std::cout << "[CloudServer] Received: " << result.str() << std::endl;
 
 			// TODO: should the socket be really closed ?! or is it already closed by the client ?!
 			socket.close();

@@ -61,12 +61,23 @@ int main(int argc, char* argv[])
 		BaseParameterProvider::setDirectory(execdir);
 		BaseParameterProvider::getInstance()->getParams()->print();
 
+		// communication setup
+		boost::asio::io_service io_service;
+		boost::asio::io_service::work work(io_service);
+		boost::thread* ioServiceThread = new boost::thread(boost::bind(&boost::asio::io_service::run, &io_service));
+		CloudComm::getInstance()->init(new CloudServer(8190), new CloudClient(io_service, "localhost", 8190));
+		CloudComm::getInstance()->getCloudServer()->handleConnections();
+
+		CloudComm::getInstance()->getCloudClient()->sendTest();
+		CloudComm::getInstance()->getCloudClient()->sendTest();
+
+		while(true)
+		{
+			rec::robotino::api2::msleep(10);
+		}
+
 		api2Com = new Api2Com();
 		initApi2(api2Com);
-
-		// communication setup
-
-
 
 		SensorServer* sensorSrv = new SensorServer();
 		FileLog::log_NOTICE("Instantiated SensorServer");

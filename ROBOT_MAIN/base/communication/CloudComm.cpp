@@ -12,17 +12,14 @@ CloudComm* CloudComm::cloudComm = NULL;
 
 CloudComm::CloudComm()
 {
-	this->cloudServer = new CloudServer(8190);
-
-	boost::asio::io_service io_service;
-	this->cloudClient = new CloudClient(io_service, "localhost", 8190);
-	// TODO: a bit nasty, but who cares ...
-	boost::thread bt(boost::bind(&boost::asio::io_service::run, &io_service));
+	this->cloudServer = NULL;
+	this->cloudClient = NULL;
 }
 
 CloudComm::~CloudComm()
 {
-
+	delete this->cloudServer;
+	delete this->cloudClient;
 }
 
 CloudComm* CloudComm::getInstance()
@@ -30,6 +27,12 @@ CloudComm* CloudComm::getInstance()
 	if(cloudComm == NULL)
 		cloudComm = new CloudComm();
 	return cloudComm;
+}
+
+void CloudComm::init(CloudServer* cloudServer, CloudClient* cloudClient)
+{
+	this->cloudServer = cloudServer;
+	this->cloudClient = cloudClient;
 }
 
 CloudServer* CloudComm::getCloudServer()
