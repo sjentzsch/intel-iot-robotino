@@ -65,8 +65,10 @@ int main(int argc, char* argv[])
 		boost::asio::io_service io_service;
 		boost::asio::io_service::work work(io_service);
 		boost::thread* ioServiceThread = new boost::thread(boost::bind(&boost::asio::io_service::run, &io_service));
-		CloudComm::getInstance()->init(new CloudServer(8190), new CloudClient(io_service, "localhost", 8190));
+		CloudComm::getInstance()->init(new CloudServer(8190), new CloudClient(io_service, "172.26.1.1", 8191));
 		CloudComm::getInstance()->getCloudServer()->handleConnections();
+
+		rec::robotino::api2::msleep(3000);
 
 		CloudComm::getInstance()->getCloudClient()->sendTest();
 		CloudComm::getInstance()->getCloudClient()->sendTest();

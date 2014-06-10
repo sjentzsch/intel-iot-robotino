@@ -81,7 +81,7 @@ bool CloudClient::sendTest()
 		//boost::array<char, sizeof(ComDataObject)> buf;
 		//buf.assign(static_cast<char*>(static_cast<void*>(ModelProvider::getInstance()->getComDataObject())));
 
-		std::string message = "blubba !!!";
+		std::string message = "Hier spricht der Laptop!";
 
 		boost::system::error_code ignored_error;
 		std::cout << "[CloudClient] Start writing to server ..." << std::endl;
