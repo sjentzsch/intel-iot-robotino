@@ -9,6 +9,9 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+
 CloudClient::CloudClient(boost::asio::io_service& io_service_, ::std::string host_, int port_)
 :io_service(io_service_),socket(io_service_),timer(io_service_)
 {
@@ -81,11 +84,16 @@ bool CloudClient::sendTest()
 		//boost::array<char, sizeof(ComDataObject)> buf;
 		//buf.assign(static_cast<char*>(static_cast<void*>(ModelProvider::getInstance()->getComDataObject())));
 
-		std::string message = "Hier spricht der Laptop!";
+		::std::stringstream jsonMsgStream;
+		boost::property_tree::ptree pt;
+		pt.put("message", "MessageDecoded_cool!");
+		pt.put("bla", "dfhdfjg");
+		pt.put("blub", "blufdg");
+		boost::property_tree::json_parser::write_json(jsonMsgStream, pt, true);
 
 		boost::system::error_code ignored_error;
 		std::cout << "[CloudClient] Start writing to server ..." << std::endl;
-		boost::asio::write(socket, boost::asio::buffer(message), boost::asio::transfer_all(), ignored_error);
+		boost::asio::write(socket, boost::asio::buffer(jsonMsgStream.str()), boost::asio::transfer_all(), ignored_error);
 		std::cout << "[CloudClient] Close socket ..." << std::endl;
 		socket.close();
 		return true;

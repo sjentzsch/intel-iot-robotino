@@ -15,6 +15,8 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 
+#include <DataProvider.h>
+
 using boost::asio::ip::tcp;
 
 class CloudServer
