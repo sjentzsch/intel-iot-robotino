@@ -71,8 +71,45 @@ int main(int argc, char* argv[])
 
 		//rec::robotino::api2::msleep(3000);
 
-		CloudComm::getInstance()->getCloudClient()->sendTest();
-		CloudComm::getInstance()->getCloudClient()->sendTest();
+		MsgEnvironment msgEnv(0, 0.0, 0.1, 0.0, 0.0, 0.0, 0.0, 0.2, 0.0);
+		CloudComm::getInstance()->getCloudClient()->send(msgEnv.save());
+
+		MsgRobotPos msgRobotPos1(0, 0.8, 0.9);
+		CloudComm::getInstance()->getCloudClient()->send(msgRobotPos1.save());
+
+		MsgCustomerOrder msgCustOrder1(0, 5, 22, "John");
+		CloudComm::getInstance()->getCloudClient()->send(msgCustOrder1.save());
+
+		MsgCustomerOrder msgCustOrder2(1, 6, 23, "Peter");
+		CloudComm::getInstance()->getCloudClient()->send(msgCustOrder2.save());
+
+		MsgCustomerOrder msgCustOrder3(2, 7, 22, "John");
+		CloudComm::getInstance()->getCloudClient()->send(msgCustOrder3.save());
+
+		MsgCustomerPos msgCustPos1(0, 22, "John", 1.1, 1.2);
+		CloudComm::getInstance()->getCloudClient()->send(msgCustPos1.save());
+
+		MsgCustomerPos msgCustPos2(0, 22, "John", 1.3, 1.4);
+		CloudComm::getInstance()->getCloudClient()->send(msgCustPos2.save());
+
+		MsgCustomerPos msgCustPos3(0, 23, "Peter", 2.1, 2.2);
+		CloudComm::getInstance()->getCloudClient()->send(msgCustPos3.save());
+
+		CloudComm::getInstance()->getCloudClient()->send("blalalalala!!");
+
+		MsgRobotPos msgRobotPos2(0, 8.8, 9.9);
+		CloudComm::getInstance()->getCloudClient()->send(msgRobotPos2.save());
+
+		rec::robotino::api2::msleep(5000);
+
+		DataProvider::getInstance()->getLatestMsgEnvironment().print();
+		DataProvider::getInstance()->getLatestMsgRobotPos().print();
+		vector< MsgCustomerOrder > vecMsgCustomerOrders = DataProvider::getInstance()->getMsgCustomerOrders();
+		for(unsigned int i=0; i<vecMsgCustomerOrders.size(); i++)
+			vecMsgCustomerOrders.at(i).print();
+		vector< MsgCustomerPos > vecMsgCustomerPoses = DataProvider::getInstance()->getMsgCustomerPoses();
+		for(unsigned int i=0; i<vecMsgCustomerPoses.size(); i++)
+			vecMsgCustomerPoses.at(i).print();
 
 		while(true)
 		{

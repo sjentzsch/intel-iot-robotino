@@ -12,18 +12,23 @@
 
 #define PARAM_PRINT(__var__) #__var__ << ": " << __var__ << std::endl
 
-MsgEnvironment::MsgEnvironment()
+MsgEnvironment::MsgEnvironment(unsigned long time_start_, double x_max_, double y_max_, double x_robot_, double y_robot_, double phi_robot_, double x_base_, double y_base_, double phi_base_)
 {
-	this->message = "msg_environment";
-	this->time_start = 0;
-	this->x_max = 4.1;
-	this->y_max = 8.7;
-	this->x_robot = 0.5;
-	this->y_robot = 2.4;
-	this->phi_robot = 0.0;
-	this->x_base = 3.5;
-	this->y_base = 3.4;
-	this->phi_base = 3.141;
+	this->message = MsgEnvironment::Message();
+	this->time_start = time_start_;
+	this->x_max = x_max_;
+	this->y_max = y_max_;
+	this->x_robot = x_robot_;
+	this->y_robot = y_robot_;
+	this->phi_robot = phi_robot_;
+	this->x_base = x_base_;
+	this->y_base = y_base_;
+	this->phi_base = phi_base_;
+}
+
+MsgEnvironment::MsgEnvironment(boost::property_tree::ptree& pt)
+{
+	this->load(pt);
 }
 
 MsgEnvironment::~MsgEnvironment()
@@ -31,23 +36,8 @@ MsgEnvironment::~MsgEnvironment()
 
 }
 
-void MsgEnvironment::load(::std::stringstream msg)
+void MsgEnvironment::load(boost::property_tree::ptree& pt)
 {
-	// Create an empty property tree object
-	using boost::property_tree::ptree;
-	ptree pt;
-
-	//  try
-	//  {
-	boost::property_tree::json_parser::read_json(msg, pt);
-	//  }
-	//  catch(boost::property_tree::json_parser_error &exc)
-	//  {
-	//    std::cerr << "[TBUBaseParameters]: " << exc.what() << ". Default parameters will be used" << std::endl;
-	//    setDefaultParameters();
-	//    return;
-	//  }
-
 	message = pt.get<string>("message");
 	time_start = pt.get<unsigned long>("time_start");
 	x_max = pt.get<double>("x_max");
@@ -58,17 +48,24 @@ void MsgEnvironment::load(::std::stringstream msg)
 	x_base = pt.get<double>("x_base");
 	y_base = pt.get<double>("y_base");
 	phi_base = pt.get<double>("phi_base");
+}
 
-	// example record parameters
-	// if(pt.get_child_optional("tbu_base.records"))
-	// {
-	//   BOOST_FOREACH(ptree::value_type &v, pt.get_child("tbu_base.records")){
-	//     Record record;
-	//     record.record_string = v.second.get<std::string>("record_string");
-	//     record.record_double = v.second.get<double>("record_double");
-	//     records.push_back(record);
-	//   }
-	// }
+::std::string MsgEnvironment::save()
+{
+	::std::stringstream jsonMsgStream;
+	boost::property_tree::ptree pt;
+	pt.put("message", message);
+	pt.put("time_start", time_start);
+	pt.put("x_max", x_max);
+	pt.put("y_max", y_max);
+	pt.put("x_robot", x_robot);
+	pt.put("y_robot", y_robot);
+	pt.put("phi_robot", phi_robot);
+	pt.put("x_base", x_base);
+	pt.put("y_base", y_base);
+	pt.put("phi_base", phi_base);
+	boost::property_tree::json_parser::write_json(jsonMsgStream, pt, false);
+	return jsonMsgStream.str();
 }
 
 void MsgEnvironment::print()
@@ -86,11 +83,4 @@ void MsgEnvironment::print()
 	std::cout << PARAM_PRINT(x_base);
 	std::cout << PARAM_PRINT(y_base);
 	std::cout << PARAM_PRINT(phi_base);
-
-	// std::cout << "Records:" << std::endl;
-	// BOOST_FOREACH(Record &record, records){
-	//   std::cout << "\t" << PARAM_PRINT(record.record_string);
-	//   std::cout << "\t" << PARAM_PRINT(record.record_double);
-	//   std::cout << "\t" << "---\n";
-	// }
 }

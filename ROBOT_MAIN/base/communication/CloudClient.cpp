@@ -47,7 +47,7 @@ void CloudClient::checkDeadline()
 	timer.async_wait(boost::bind(&CloudClient::checkDeadline, this));
 }
 
-bool CloudClient::sendTest()
+bool CloudClient::send(::std::string msg)
 {
 	boost::mutex::scoped_lock lock(send_mutex);
 
@@ -84,16 +84,9 @@ bool CloudClient::sendTest()
 		//boost::array<char, sizeof(ComDataObject)> buf;
 		//buf.assign(static_cast<char*>(static_cast<void*>(ModelProvider::getInstance()->getComDataObject())));
 
-		::std::stringstream jsonMsgStream;
-		boost::property_tree::ptree pt;
-		pt.put("message", "MessageDecoded_cool!");
-		pt.put("bla", "dfhdfjg");
-		pt.put("blub", "blufdg");
-		boost::property_tree::json_parser::write_json(jsonMsgStream, pt, true);
-
 		boost::system::error_code ignored_error;
 		std::cout << "[CloudClient] Start writing to server ..." << std::endl;
-		boost::asio::write(socket, boost::asio::buffer(jsonMsgStream.str()), boost::asio::transfer_all(), ignored_error);
+		boost::asio::write(socket, boost::asio::buffer(msg), boost::asio::transfer_all(), ignored_error);
 		std::cout << "[CloudClient] Close socket ..." << std::endl;
 		socket.close();
 		return true;

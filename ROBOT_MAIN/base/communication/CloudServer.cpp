@@ -32,7 +32,7 @@ void CloudServer::handleConnections_impl()
 		tcp::acceptor acceptor(io_service, tcp::endpoint(tcp::v4(), port));
 
 		// TODO: uncomment?
-		// acceptor.listen(1);
+		acceptor.listen(1);
 
 		while(true)
 		{

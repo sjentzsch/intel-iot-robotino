@@ -25,14 +25,23 @@ public:
 	// used by CloudServer to process new messages
 	void processMsg(::std::stringstream& msg);
 
-	// following block should be used from the readers/users
+	// used by readers/users
 	MsgEnvironment getLatestMsgEnvironment();
+	MsgRobotPos getLatestMsgRobotPos();
+	vector< MsgCustomerOrder > getMsgCustomerOrders();
+	vector< MsgCustomerPos > getMsgCustomerPoses();
 
 private:
 	static DataProvider *instance;
 
-	MsgEnvironment msgEnvironment;
+	MsgEnvironment* msgEnvironment;
+	MsgRobotPos* msgRobotPos;
+	vector< MsgCustomerOrder* > vecMsgCustomerOrder;
+	vector< MsgCustomerPos* > vecMsgCustomerPos;
 	boost::shared_mutex mutexMsgEnvironment;
+	boost::shared_mutex mutexMsgRobotPos;
+	boost::shared_mutex mutexVecMsgCustomerOrder;
+	boost::shared_mutex mutexVecMsgCustomerPos;
 
 protected:
 	DataProvider();

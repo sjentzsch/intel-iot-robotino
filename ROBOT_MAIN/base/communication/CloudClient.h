@@ -24,7 +24,7 @@ public:
 	CloudClient(boost::asio::io_service& io_service_, ::std::string host_, int port_);
 	virtual ~CloudClient();
 
-	bool sendTest();
+	bool send(::std::string msg);
 
 private:
 	void checkDeadline();
