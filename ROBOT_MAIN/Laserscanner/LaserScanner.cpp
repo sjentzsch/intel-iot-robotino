@@ -13,7 +13,6 @@
 
 LaserScanner::LaserScanner(SensorServer* sensorServer): execThread(NULL), signal(LaserScannerSignal::RUN)
 {
-
 	// setting up physical laser calibration
 	float offset_x = 0.218;
 	float offset_y = 0.0;
@@ -26,11 +25,6 @@ LaserScanner::LaserScanner(SensorServer* sensorServer): execThread(NULL), signal
 	scannerDriver = new LaserScannerApi();
 
 	this->sensorServer = sensorServer;
-
-
-
-
-	WorldModel* worldModel = ModelProvider::getInstance()->getWorldModel();
 
 	const int WALL_THICKNESS = 20;	// in cm
 	const int MACHINE_RADIUS = 25;	// in cm
@@ -45,32 +39,7 @@ LaserScanner::LaserScanner(SensorServer* sensorServer): execThread(NULL), signal
 	rectangle(laserscannerMap, Point(0,0), Point(1120,WALL_THICKNESS), Scalar(0), CV_FILLED, CV_AA, 0);
 	rectangle(laserscannerMap, Point(1120-WALL_THICKNESS,0), Point(1120,560), Scalar(0), CV_FILLED, CV_AA, 0);
 	rectangle(laserscannerMap, Point(0,560-WALL_THICKNESS), Point(1120,560), Scalar(0), CV_FILLED, CV_AA, 0);
-
-	// Production Machines + Recycling Machine (LEFT + RIGHT AREA)
-	for(unsigned int i=0; i<13; i++)
-	{
-		float currY = (worldModel->poi[i].y+1)*Y_GRID_WIDTH;
-		float currX = (worldModel->poi[i].x+1)*X_GRID_WIDTH;
-		circle(laserscannerMap, Point(currY/10, currX/10), MACHINE_RADIUS, Scalar(0), CV_FILLED, CV_AA, 0);
-	}
-	for(unsigned int i=16; i<29; i++)
-	{
-		float currY = (worldModel->poi[i].y+1)*Y_GRID_WIDTH;
-		float currX = (worldModel->poi[i].x+1)*X_GRID_WIDTH;
-		circle(laserscannerMap, Point(currY/10, currX/10), MACHINE_RADIUS, Scalar(0), CV_FILLED, CV_AA, 0);
-	}
-
-	// LEFT AREA: delivery gates
-	circle(laserscannerMap, Point(20, 245), MACHINE_RADIUS, Scalar(0), CV_FILLED, CV_AA, 0);
-	circle(laserscannerMap, Point(20, 280), MACHINE_RADIUS, Scalar(0), CV_FILLED, CV_AA, 0);
-	circle(laserscannerMap, Point(20, 315), MACHINE_RADIUS, Scalar(0), CV_FILLED, CV_AA, 0);
-
-	// RIGHT AREA: delivery gates
-	circle(laserscannerMap, Point(1100, 245), MACHINE_RADIUS, Scalar(0), CV_FILLED, CV_AA, 0);
-	circle(laserscannerMap, Point(1100, 280), MACHINE_RADIUS, Scalar(0), CV_FILLED, CV_AA, 0);
-	circle(laserscannerMap, Point(1100, 315), MACHINE_RADIUS, Scalar(0), CV_FILLED, CV_AA, 0);
-
-	//GaussianBlur(laserscannerMap, laserscannerMap, Size(31, 31), 0, 0);
+	//circle(laserscannerMap, Point(1100, 245), MACHINE_RADIUS, Scalar(0), CV_FILLED, CV_AA, 0);
 
 	/*namedWindow("laserscannerMap", CV_WINDOW_AUTOSIZE);
 	imshow("laserscannerMap", laserscannerMap);
@@ -93,15 +62,8 @@ void LaserScanner::loop()
 	{
 		checkSignalStatus();
 
-		/*if (puckDetection == CameraPuckDetection::OFF) {
-			boost::mutex::scoped_lock l(m_mutex);
-			puckState = CameraPuckState::OFF;
-			vPucksFinal.clear();
-			vPucksFinalProcessed = true;
-		} else
-			calcPuckDetection();*/
-
 		LaserScannerReadings scan = this->readings();
+
 		//cout << "*****************" << endl;
 		/*cout << "angle_min: " << scan.api_readings.angle_min << endl;
 		cout << "angle_max: " << scan.api_readings.angle_max << endl;
@@ -323,7 +285,6 @@ bool LaserScanner::checkSignalStatus()
 	return true;
 }
 
-
 void LaserScanner::pause()
 {
 	{
@@ -332,7 +293,6 @@ void LaserScanner::pause()
 		signal=LaserScannerSignal::PAUSE;
 	}
 }
-
 
 void LaserScanner::run()
 {

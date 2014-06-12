@@ -16,6 +16,7 @@
 #include <boost/thread.hpp>
 
 #include <DataProvider.h>
+#include "utils/FileLogger.h"
 
 using boost::asio::ip::tcp;
 

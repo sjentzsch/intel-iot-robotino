@@ -15,7 +15,6 @@ const unsigned int SensorServer::brightSensorFloorLeft(2);
 const unsigned int SensorServer::brightSensorFloorRight(3);
 const unsigned int SensorServer::brightSensorPuck(4);
 
-
 SensorServer::SensorServer() :havingPuck(false)
 {
 	brightSensorFrontLeftInput.setInputNumber(brightSensorFrontLeft);

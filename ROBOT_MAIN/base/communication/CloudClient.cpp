@@ -17,6 +17,10 @@ CloudClient::CloudClient(boost::asio::io_service& io_service_, ::std::string hos
 {
 	this->host = host_;
 	this->port = port_;
+
+	tcp::resolver resolver(io_service);
+	tcp::resolver::query query(this->host, boost::lexical_cast< std::string >(this->port));
+	this->endpoint_iterator = resolver.resolve(query);
 }
 
 CloudClient::~CloudClient()
@@ -51,44 +55,36 @@ bool CloudClient::send(::std::string msg)
 {
 	boost::mutex::scoped_lock lock(send_mutex);
 
-	tcp::resolver resolver(io_service);
-	tcp::resolver::query query(this->host, boost::lexical_cast< std::string >(this->port));
-	auto endpoint_iterator = resolver.resolve(query);
-
 	//timer.expires_from_now(boost::posix_time::seconds(2));
 
-	std::cout << "[CloudClient] Trying to connect to " << endpoint_iterator->endpoint() << " ..." << std::endl;
+	FileLog::log(log_Communication, "[CloudClient] Trying to connect to " , endpoint_iterator->endpoint().address().to_string(), ":", std::to_string(endpoint_iterator->endpoint().port()), " ...");
 
 	//timer.async_wait(boost::bind(&CloudClient::checkDeadline, this));
 
 	boost::system::error_code ec;
-	socket.connect(endpoint_iterator->endpoint(), ec);
+	socket.connect(this->endpoint_iterator->endpoint(), ec);
 
 	//timer.cancel();
 
 	if(!socket.is_open())
 	{
-		std::cout << "[CloudClient] Connect timed out" << std::endl;
+		FileLog::log(log_Communication, "[CloudClient] Connect timed out");
 		return false;
 	}
 	else if(ec)
 	{
-		std::cout << "[CloudClient] Connect error: " << ec.message() << std::endl;
+		FileLog::log(log_Communication, "[CloudClient] Connect error: ", ec.message());
 		socket.close();
 		return false;
 	}
 	else
 	{
-		std::cout << "[CloudClient] Connected" << std::endl;
-
-		//boost::array<char, sizeof(ComDataObject)> buf;
-		//buf.assign(static_cast<char*>(static_cast<void*>(ModelProvider::getInstance()->getComDataObject())));
-
+		FileLog::log(log_Communication, "[CloudClient] Connected. Start writing to server ...");
 		boost::system::error_code ignored_error;
-		std::cout << "[CloudClient] Start writing to server ..." << std::endl;
 		boost::asio::write(socket, boost::asio::buffer(msg), boost::asio::transfer_all(), ignored_error);
-		std::cout << "[CloudClient] Close socket ..." << std::endl;
+		FileLog::log(log_Communication, "[CloudClient] Close socket ...");
 		socket.close();
+		FileLog::log(log_Communication, "[CloudClient] Socket closed.");
 		return true;
 	}
 }

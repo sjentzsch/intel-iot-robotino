@@ -31,18 +31,17 @@ void CloudServer::handleConnections_impl()
 
 		tcp::acceptor acceptor(io_service, tcp::endpoint(tcp::v4(), port));
 
-		// TODO: uncomment?
-		acceptor.listen(1);
+		acceptor.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
 
 		while(true)
 		{
 			tcp::socket socket(io_service);
 
-			std::cout << "[CloudServer] Waiting for client ..." << std::endl;
+			FileLog::log(log_Communication, "[CloudServer] Waiting for client ...");
 
 			acceptor.accept(socket);
 
-			std::cout << "[CloudServer] Client connected." << std::endl;
+			FileLog::log(log_Communication, "[CloudServer] Client connected.");
 
 			::std::stringstream result;
 			boost::asio::streambuf response;
@@ -55,17 +54,16 @@ void CloudServer::handleConnections_impl()
 		    	result << &response;
 		    }
 
-		    std::cout << "[CloudServer] Received: " << result.str() << std::endl;
+		    FileLog::log(log_Communication, "[CloudServer] Received: ", result.str());
 
 		    DataProvider::getInstance()->processMsg(result);
 
-			// TODO: should the socket be really closed ?! or is it already closed by the client ?!
-			socket.close();
-			std::cout << "[CloudServer] Closed client." << std::endl;
+			//socket.close();
+		    FileLog::log(log_Communication, "[CloudServer] Finished.");
 		}
 	}
 	catch (std::exception& e)
 	{
-		std::cerr << "[CloudServer] "<< e.what() << std::endl;
+		FileLog::log(log_Communication, "[CloudServer] ", e.what());
 	}
 }

@@ -15,6 +15,8 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 
+#include "utils/FileLogger.h"
+
 using boost::asio::ip::tcp;
 using boost::asio::deadline_timer;
 
@@ -32,6 +34,7 @@ private:
 	boost::asio::io_service& io_service;
 	tcp::socket socket;
 	deadline_timer timer;
+	tcp::resolver::iterator endpoint_iterator;
 
 	boost::mutex send_mutex;
 
