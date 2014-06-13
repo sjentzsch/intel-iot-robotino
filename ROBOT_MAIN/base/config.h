@@ -8,6 +8,8 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
+#define SIMULATION_MODE 1
+
 #define BASE_PARAMETER_FILENAME "base_parameters.json"
 
 /* USEFUL PREPROCESSOR DIRECTIVES */

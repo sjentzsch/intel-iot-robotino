@@ -1,6 +1,10 @@
 #include "V4LRobotCamera.h"
 
 V4LRobotCamera::V4LRobotCamera() {
+#if SIMULATION_MODE == 0
+	open_device();
+#endif
+
 	isStreaming = false;
 	lampPosition = new float[6];
 	puckDetection = CameraPuckDetection::OFF;

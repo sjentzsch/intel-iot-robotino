@@ -15,6 +15,7 @@
 #include <boost/thread/mutex.hpp>
 #include "Camera/V4LRobotCamera.h"
 #include "Api2Com.h"
+#include "Simulation/OdometrySimulation.h"
 #include "Laserscanner/LaserScanner.h"
 
 //#include <rec/robotino/api2/all.h>
@@ -48,6 +49,7 @@ private:
 	rec::robotino::api2::DigitalInput brightSensorFloorRightInput;
 	rec::robotino::api2::DigitalInput brightSensorPuckInput;
 
+	OdometrySimulation odometry_sim;
 	rec::robotino::api2::Odometry odometry;
 	rec::robotino::api2::OmniDrive omniDrive;
 	rec::robotino::api2::DistanceSensorArray distanceSensorArray;
@@ -64,7 +66,11 @@ private:
 
 	void getOdometryReadings(double &x, double &y, double &phi)
 	{
+#if SIMULATION_MODE == 1
+		odometry_sim.readings(&x, &y, &phi);
+#else
 		odometry.readings(&x, &y, &phi);
+#endif
 	}
 
 public:

@@ -14,13 +14,13 @@
 #include "config.h"
 #include "ISensorControl.h"
 #include "AsyncStateMachine.h"
-#include "JobPlanner/JobHandler.h"
+#include "TaskGuide.h"
 
 
 class MotorController;
 class SensorServer;
 class SensorEventGenerator;
-class JobHandler;
+class TaskGuide;
 
 using namespace std;
 namespace sc = boost::statechart;
@@ -32,7 +32,7 @@ private:
 	MotorController* motorCtrl;
 	ISensorControl* sensorCtrl;
 	SensorEventGenerator* sensorEvtGen;
-	JobHandler *jobHandler;
+	TaskGuide *taskGuide;
 
 public:
 	StateBehaviorController(MotorController *motorCtrl_, SensorServer *sensorSrv_, SensorEventGenerator* sensorEvtGen_);
@@ -40,10 +40,9 @@ public:
 	MotorController *getMotorCtrl();
 	AsyncStateMachine* getAsyncStateMachine();
 	ISensorControl* getSensorControl();
-	JobHandler* getJobHandler();
+	TaskGuide* getTaskGuide();
 
 	void initiate(); //very first start of the stateMachine
-
 };
 
 #endif /* STATEBEHAVIORCONTROLLER_H_ */

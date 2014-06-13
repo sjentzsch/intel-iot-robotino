@@ -18,8 +18,7 @@
 
 AsyncStateMachine::AsyncStateMachine(StateBehaviorController* stateBehavCtrl):sema_queue_stored(0){
 	//sema_queue_stored = boost::interprocess::interprocess_semaphore(0);
-	Grid *grid = new Grid();
-	stateMachine = new StateMachine1(stateBehavCtrl, grid);
+	stateMachine = new StateMachine1(stateBehavCtrl);
 }
 
 AsyncStateMachine::~AsyncStateMachine() {

@@ -199,15 +199,15 @@ void SensorEventGenerator::monitorSensors()
 		//check if robot has the puck by checking the puck light-sensor
 		if(oldSensorState->sensorPuckBlack == true && newSensorState->sensorPuckBlack == false)
 		{
-			boost::shared_ptr<EvSensorLostPuck> ev(new EvSensorLostPuck());
+			/*boost::shared_ptr<EvSensorLostPuck> ev(new EvSensorLostPuck());
 			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorLostPuck");
-			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
+			stateCtrl->getAsyncStateMachine()->queueEvent(ev);*/
 		}
 		else if(oldSensorState->sensorPuckBlack == false && newSensorState->sensorPuckBlack == true)
 		{
-			boost::shared_ptr<EvSensorHasPuck> ev(new EvSensorHasPuck());
+			/*boost::shared_ptr<EvSensorHasPuck> ev(new EvSensorHasPuck());
 			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorHasPuck");
-			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
+			stateCtrl->getAsyncStateMachine()->queueEvent(ev);*/
 		}
 
 
@@ -345,9 +345,9 @@ void SensorEventGenerator::monitorSensors()
 
 		if(newSensorState->cameraPuckState == CameraPuckState::PUCK_IN_SIGHT && newSensorState->gotCameraPuckPos && (oldSensorState->cameraPuckState != CameraPuckState::PUCK_IN_SIGHT || (cameraPuckPosWasJustSent && (BaseParameterProvider::getInstance()->getParams()->simulation_mode || abs(newSensorState->cameraPuckPos.phi - lastSentCameraPuckPos.phi) > 40) && lastPuckSendTimer.msecsElapsed() > 1000)))
 		{
-			boost::shared_ptr<EvCameraPuckDetected> ev(new EvCameraPuckDetected(newSensorState->cameraPuckPos.x, newSensorState->cameraPuckPos.y));
-			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvCameraPuckDetected (", FileLog::real(newSensorState->cameraPuckPos.x), ", ", FileLog::real(newSensorState->cameraPuckPos.y), ")");
-			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
+//			boost::shared_ptr<EvCameraPuckDetected> ev(new EvCameraPuckDetected(newSensorState->cameraPuckPos.x, newSensorState->cameraPuckPos.y));
+//			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvCameraPuckDetected (", FileLog::real(newSensorState->cameraPuckPos.x), ", ", FileLog::real(newSensorState->cameraPuckPos.y), ")");
+//			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
 
 			lastSentCameraPuckPos.x = newSensorState->cameraPuckPos.x;
 			lastSentCameraPuckPos.y = newSensorState->cameraPuckPos.y;
@@ -357,68 +357,7 @@ void SensorEventGenerator::monitorSensors()
 			lastPuckSendTimer.reset();
 			lastPuckSendTimer.start();
 		}
-		else if(newSensorState->cameraPuckState == CameraPuckState::NO_PUCK && (oldSensorState->cameraPuckState != CameraPuckState::NO_PUCK && oldSensorState->cameraPuckState != CameraPuckState::OFF))
-		{
-			boost::shared_ptr<EvCameraLostPuckVision> ev(new EvCameraLostPuckVision());
-			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvCameraLostPuckVision");
-			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
 
-			cameraPuckPosWasJustSent = false;
-		}
-		else if(newSensorState->cameraPuckState == CameraPuckState::NO_PUCK && oldSensorState->cameraPuckState == CameraPuckState::OFF)
-		{
-			boost::shared_ptr<EvCameraInitialNoPuck> ev(new EvCameraInitialNoPuck());
-			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvCameraInitialNoPuck");
-			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-
-			cameraPuckPosWasJustSent = false;
-		}
-		else if(newSensorState->cameraPuckState == CameraPuckState::CATCH_PUCK_LEFT && oldSensorState->cameraPuckState != CameraPuckState::CATCH_PUCK_LEFT)
-		{
-			boost::shared_ptr<EvCameraCatchPuckLeft> ev(new EvCameraCatchPuckLeft());
-			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvCameraCatchPuckLeft");
-			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-		}
-		else if(newSensorState->cameraPuckState == CameraPuckState::CATCH_PUCK_RIGHT && oldSensorState->cameraPuckState != CameraPuckState::CATCH_PUCK_RIGHT)
-		{
-			boost::shared_ptr<EvCameraCatchPuckRight> ev(new EvCameraCatchPuckRight());
-			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvCameraCatchPuckRight");
-			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-		}
-		else if(newSensorState->cameraPuckState == CameraPuckState::CATCH_PUCK_STRAIGHT && oldSensorState->cameraPuckState != CameraPuckState::CATCH_PUCK_STRAIGHT)
-		{
-			boost::shared_ptr<EvCameraCatchPuckStraight> ev(new EvCameraCatchPuckStraight());
-			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvCameraCatchPuckStraight");
-			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-		}
-
-
-		// camera lamp detection
-		if(newSensorState->cameraLampState == CameraLampState::LAMP_IN_SIGHT && newSensorState->gotCameraLampPos && (oldSensorState->cameraLampState != CameraLampState::LAMP_IN_SIGHT || (cameraLampPosWasJustSent && lastLampSendTimer.msecsElapsed() > 300 && (BaseParameterProvider::getInstance()->getParams()->simulation_mode || abs(newSensorState->cameraLampPos.phi - lastSentCameraLampPos.phi) > 150))))
-		//if(newSensorState->cameraLampState == CameraLampState::LAMP_IN_SIGHT && oldSensorState->cameraLampState != CameraLampState::LAMP_IN_SIGHT )
-		{
-			boost::shared_ptr<EvCameraLampDetected> ev(new EvCameraLampDetected(newSensorState->cameraLampPos.x, newSensorState->cameraLampPos.y));
-			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvCameraLampDetected (", FileLog::real(newSensorState->cameraLampPos.x), ", ", FileLog::real(newSensorState->cameraLampPos.y), ")");
-			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-
-			// cout << "xxxxxxxxxxxxxxxxxxxxxxx EventGenerator has thrown Event xxxxxxxxx" << endl;
-
-			lastSentCameraLampPos.x = newSensorState->cameraLampPos.x;
-			lastSentCameraLampPos.y = newSensorState->cameraLampPos.y;
-			lastSentCameraLampPos.phi = newSensorState->cameraLampPos.phi;
-
-			cameraLampPosWasJustSent = true;
-			lastLampSendTimer.reset();
-			lastLampSendTimer.start();
-		}
-		else if(newSensorState->cameraLampState == CameraLampState::NO_LAMP && (oldSensorState->cameraLampState != CameraLampState::NO_LAMP))
-		{
-			boost::shared_ptr<EvCameraLostLampVision> ev(new EvCameraLostLampVision());
-			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvCameraLostLampVision");
-			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-
-			cameraLampPosWasJustSent = false;
-		}
 
 
 		// camera light detection
@@ -427,97 +366,6 @@ void SensorEventGenerator::monitorSensors()
 		{
 			cameraLightWasJustSent = false;
 			lastLightSendTimer.reset();
-		}
-
-		if(((BaseParameterProvider::getInstance()->getParams()->simulation_mode && cameraLightWasJustSent && lastLightSendTimer.msecsElapsed() > 1000) || oldSensorState->cameraLightState != CameraLightState::UNKNOWN) && newSensorState->cameraLightState == CameraLightState::UNKNOWN)
-		{
-			boost::shared_ptr<EvCameraUnknownLightDetected> ev(new EvCameraUnknownLightDetected());
-			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvCameraUnknownLightDetected");
-			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-			cameraLightWasJustSent = true;
-			lastLightSendTimer.reset();
-			lastLightSendTimer.start();
-		}
-		else if(((BaseParameterProvider::getInstance()->getParams()->simulation_mode && cameraLightWasJustSent && lastLightSendTimer.msecsElapsed() > 1000) || oldSensorState->cameraLightState != CameraLightState::OFFLINE) && newSensorState->cameraLightState == CameraLightState::OFFLINE)
-		{
-			boost::shared_ptr<EvCameraOfflineLightDetected> ev(new EvCameraOfflineLightDetected());
-			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvCameraOfflineLightDetected");
-			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-			cameraLightWasJustSent = true;
-			lastLightSendTimer.reset();
-			lastLightSendTimer.start();
-		}
-		else if(((BaseParameterProvider::getInstance()->getParams()->simulation_mode && cameraLightWasJustSent && lastLightSendTimer.msecsElapsed() > 1000) || oldSensorState->cameraLightState != CameraLightState::RED) && newSensorState->cameraLightState == CameraLightState::RED)
-		{
-			boost::shared_ptr<EvCameraRedLightDetected> ev(new EvCameraRedLightDetected());
-			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvCameraRedLightDetected");
-			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-			cameraLightWasJustSent = true;
-			lastLightSendTimer.reset();
-			lastLightSendTimer.start();
-		}
-		else if(((BaseParameterProvider::getInstance()->getParams()->simulation_mode && cameraLightWasJustSent && lastLightSendTimer.msecsElapsed() > 1000) || oldSensorState->cameraLightState != CameraLightState::YELLOW) && newSensorState->cameraLightState == CameraLightState::YELLOW)
-		{
-			boost::shared_ptr<EvCameraYellowLightDetected> ev(new EvCameraYellowLightDetected());
-			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvCameraYellowLightDetected");
-			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-			cameraLightWasJustSent = true;
-			lastLightSendTimer.reset();
-			lastLightSendTimer.start();
-		}
-		else if(((BaseParameterProvider::getInstance()->getParams()->simulation_mode && cameraLightWasJustSent && lastLightSendTimer.msecsElapsed() > 1000) || oldSensorState->cameraLightState != CameraLightState::YELLOW_FLASH) && newSensorState->cameraLightState == CameraLightState::YELLOW_FLASH)
-		{
-			boost::shared_ptr<EvCameraYellowFlashLightDetected> ev(new EvCameraYellowFlashLightDetected());
-			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvCameraYellowFlashLightDetected");
-			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-			cameraLightWasJustSent = true;
-			lastLightSendTimer.reset();
-			lastLightSendTimer.start();
-		}
-		else if(((BaseParameterProvider::getInstance()->getParams()->simulation_mode && cameraLightWasJustSent && lastLightSendTimer.msecsElapsed() > 1000) || oldSensorState->cameraLightState != CameraLightState::GREEN) && newSensorState->cameraLightState == CameraLightState::GREEN)
-		{
-			boost::shared_ptr<EvCameraGreenLightDetected> ev(new EvCameraGreenLightDetected());
-			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvCameraGreenLightDetected");
-			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-			cameraLightWasJustSent = true;
-			lastLightSendTimer.reset();
-			lastLightSendTimer.start();
-		}
-		else if(((BaseParameterProvider::getInstance()->getParams()->simulation_mode && cameraLightWasJustSent && lastLightSendTimer.msecsElapsed() > 1000) || oldSensorState->cameraLightState != CameraLightState::RED_YELLOW) && newSensorState->cameraLightState == CameraLightState::RED_YELLOW)
-		{
-			boost::shared_ptr<EvCameraRedYellowLightDetected> ev(new EvCameraRedYellowLightDetected());
-			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvCameraRedYellowLightDetected");
-			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-			cameraLightWasJustSent = true;
-			lastLightSendTimer.reset();
-			lastLightSendTimer.start();
-		}
-		else if(((BaseParameterProvider::getInstance()->getParams()->simulation_mode && cameraLightWasJustSent && lastLightSendTimer.msecsElapsed() > 1000) || oldSensorState->cameraLightState != CameraLightState::RED_GREEN) && newSensorState->cameraLightState == CameraLightState::RED_GREEN)
-		{
-			boost::shared_ptr<EvCameraRedGreenLightDetected> ev(new EvCameraRedGreenLightDetected());
-			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvCameraRedGreenLightDetected");
-			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-			cameraLightWasJustSent = true;
-			lastLightSendTimer.reset();
-			lastLightSendTimer.start();
-		}
-		else if(((BaseParameterProvider::getInstance()->getParams()->simulation_mode && cameraLightWasJustSent && lastLightSendTimer.msecsElapsed() > 1000) || oldSensorState->cameraLightState != CameraLightState::YELLOW_GREEN) && newSensorState->cameraLightState == CameraLightState::YELLOW_GREEN)
-		{
-			boost::shared_ptr<EvCameraYellowGreenLightDetected> ev(new EvCameraYellowGreenLightDetected());
-			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvCameraYellowGreenLightDetected");
-			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-			cameraLightWasJustSent = true;
-			lastLightSendTimer.reset();
-			lastLightSendTimer.start();
-		}
-		else if(((BaseParameterProvider::getInstance()->getParams()->simulation_mode && cameraLightWasJustSent && lastLightSendTimer.msecsElapsed() > 1000) || oldSensorState->cameraLightState != CameraLightState::RED_YELLOW_GREEN) && newSensorState->cameraLightState == CameraLightState::RED_YELLOW_GREEN)
-		{
-			boost::shared_ptr<EvCameraRedYellowGreenLightDetected> ev(new EvCameraRedYellowGreenLightDetected());
-			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvCameraRedYellowGreenLightDetected");
-			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-			cameraLightWasJustSent = true;
-			lastLightSendTimer.reset();
-			lastLightSendTimer.start();
 		}
 
 

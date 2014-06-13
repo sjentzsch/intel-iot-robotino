@@ -75,7 +75,9 @@ SensorServer::SensorServer() :havingPuck(false)
 //		com_->waitForUpdate();
 //	}
 	robotCamera = new V4LRobotCamera();
+#if SIMULATION_MODE == 0
 	robotCamera->startThread();
+#endif
 
 	laserScanner = new LaserScanner(this);
 	laserScanner->startThread();
@@ -260,7 +262,11 @@ bool SensorServer::getLampAbsPos(float* xWorldPos, float* yWorldPos, float myX, 
  */
 void SensorServer::setOdometry(float x, float y, float phi)
 {
+#if SIMULATION_MODE == 1
+	odometry_sim.set(x/1000.0, y/1000.0, DEGTORAD(phi));
+#else
 	odometry.set(x/1000.0, y/1000.0, DEGTORAD(phi));
+#endif
 
 
 	vec3D newPose;
@@ -506,7 +512,11 @@ float SensorServer::getRobotPhi()
  */
 void SensorServer::setVelocity(float vx, float vy, float vphi)
 {
+#if SIMULATION_MODE == 1
+	odometry_sim.setVelocity(vx/1000.0,vy/1000.0, DEGTORAD(vphi));
+#else
 	omniDrive.setVelocity(vx/1000.0,vy/1000.0, DEGTORAD(vphi));
+#endif
 }
 
 void SensorServer::getNewSensorValues(SensorEventGeneratorBuffer* buf, SensorEventGeneratorBuffer* oldSensorState)

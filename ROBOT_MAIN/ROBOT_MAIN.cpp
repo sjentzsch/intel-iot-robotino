@@ -11,6 +11,7 @@
 #include "utils/FileLoggerConfig.h"
 #include "model/ModelProvider.h"
 #include "communication/CloudComm.h"
+#include "Simulation/SimApi2Com.h"
 #include "Api2Com.h"
 #include "BaseParameterProvider.h"
 
@@ -111,13 +112,17 @@ int main(int argc, char* argv[])
 		for(unsigned int i=0; i<vecMsgCustomerPoses.size(); i++)
 			vecMsgCustomerPoses.at(i).print();
 
-		while(true)
+		/*while(true)
 		{
 			rec::robotino::api2::msleep(10);
-		}
+		}*/
 
+#if SIMULATION_MODE == 1
+		api2Com = new SimApi2Com();
+#else
 		api2Com = new Api2Com();
 		initApi2(api2Com);
+#endif
 
 		SensorServer* sensorSrv = new SensorServer();
 		FileLog::log_NOTICE("Instantiated SensorServer");
@@ -131,8 +136,12 @@ int main(int argc, char* argv[])
 
 		while(true)
 		{
+#if SIMULATION_MODE == 1
+			boost::this_thread::sleep(boost::posix_time::milliseconds(10));
+#else
 			api2Com->processEvents();
 			rec::robotino::api2::msleep(10);
+#endif
 		}
 	}
 	catch( const std::exception& e )
@@ -145,23 +154,24 @@ int main(int argc, char* argv[])
 
 void initLog()
 {
-	FileLog::log_NOTICE("#################################################");
-	FileLog::log_NOTICE("                                                 ");
-	FileLog::log_NOTICE("....###.....######.....###....########...######..");
-	FileLog::log_NOTICE("...##.##...##....##...##.##...##.....##.##....##.");
-	FileLog::log_NOTICE("..##...##..##........##...##..##.....##.##.......");
-	FileLog::log_NOTICE(".##.....##.##.......##.....##.########...######..");
-	FileLog::log_NOTICE(".#########.##.......#########.##..............##.");
-	FileLog::log_NOTICE(".##.....##.##....##.##.....##.##........##....##.");
-	FileLog::log_NOTICE(".##.....##..######..##.....##.##.........######..");
-	FileLog::log_NOTICE("_________________________________________________");
-	FileLog::log_NOTICE("#################################################");
+	// http://patorjk.com/software/taag/#p=display&f=Banner4&t=INTEL
+	FileLog::log_NOTICE("#########################################");
+	FileLog::log_NOTICE("                                         ");
+	FileLog::log_NOTICE(".####.##....##.########.########.##......");
+	FileLog::log_NOTICE("..##..###...##....##....##.......##......");
+	FileLog::log_NOTICE("..##..####..##....##....##.......##......");
+	FileLog::log_NOTICE("..##..##.##.##....##....######...##......");
+	FileLog::log_NOTICE("..##..##..####....##....##.......##......");
+	FileLog::log_NOTICE("..##..##...###....##....##.......##......");
+	FileLog::log_NOTICE(".####.##....##....##....########.########");
+	FileLog::log_NOTICE("_________________________________________");
+	FileLog::log_NOTICE("#########################################");
 	#ifdef DEBUG
-	FileLog::log_NOTICE("##     DEBUG BUILD     ##########################");
-	FileLog::log_NOTICE("#################################################");
+	FileLog::log_NOTICE("##     DEBUG BUILD     ##################");
+	FileLog::log_NOTICE("#########################################");
 	#else
-	FileLog::log_NOTICE("##     RELEASE BUILD   ##########################");
-	FileLog::log_NOTICE("#################################################");
+	FileLog::log_NOTICE("##     RELEASE BUILD   ##################");
+	FileLog::log_NOTICE("#########################################");
 	#endif
 }
 
