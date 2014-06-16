@@ -10,7 +10,6 @@
 
 #include "GameData.h"
 #include "../config.h"
-#include "../BaseParameterProvider.h"
 
 #define X_GRID 9 //Felder in X-Richtung
 #define Y_GRID 19 //Felder in Y-Richtung
@@ -203,28 +202,6 @@ struct WorldModel {
 		// Deliver Zone
 		poi[31].init(32,4,18,false,POIDirection::WEST,POIType::DELIVER);
 		poi[31].isVisibleForLaser = false;
-
-
-		if(BaseParameterProvider::getInstance()->getParams()->garching_environment)
-		{
-			//TODO
-			poi[2].status = POIStatus::OFFLINE;
-			poi[2].isVisibleForLaser = false;
-			poi[3].status = POIStatus::OFFLINE;
-			poi[3].isVisibleForLaser = false;
-			poi[7].status = POIStatus::OFFLINE;
-			poi[7].isVisibleForLaser = false;
-			poi[8].status = POIStatus::OFFLINE;
-			poi[8].isVisibleForLaser = false;
-			poi[9].status = POIStatus::OFFLINE;
-			poi[9].isVisibleForLaser = false;
-			poi[10].status = POIStatus::OFFLINE;
-			poi[10].isVisibleForLaser = false;
-			poi[11].status = POIStatus::OFFLINE;
-			poi[11].isVisibleForLaser = false;
-
-
-		}
 	}
 };
 

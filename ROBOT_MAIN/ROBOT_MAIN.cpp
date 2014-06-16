@@ -13,7 +13,6 @@
 #include "communication/CloudComm.h"
 #include "Simulation/SimApi2Com.h"
 #include "Api2Com.h"
-#include "BaseParameterProvider.h"
 
 using namespace std;
 using namespace boost;
@@ -54,13 +53,6 @@ int main(int argc, char* argv[])
 	{
 		// initialize the logging class
 		pantheios_init();
-
-		// init base parameters
-		std::string executable = argv[0];
-		size_t idx = executable.find_last_of('/');
-		std::string execdir = executable.substr(0,idx);
-		BaseParameterProvider::setDirectory(execdir);
-		BaseParameterProvider::getInstance()->getParams()->print();
 
 		// communication setup
 		boost::asio::io_service io_service;

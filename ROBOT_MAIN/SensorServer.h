@@ -28,7 +28,6 @@
 
 #include "SensorEventGeneratorBuffer.hpp"
 #include "LSPBTrajectory/pose.h"
-#include "BaseParameterProvider.h"
 
 
 using namespace std;

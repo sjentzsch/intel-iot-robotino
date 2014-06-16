@@ -120,8 +120,9 @@ bool AbstractV4LCamera::queryImage()
 
 bool AbstractV4LCamera::switchToLightDetection()
 {
-	if(BaseParameterProvider::getInstance()->getParams()->simulation_mode)
-		return true;
+#if SIMULATION_MODE == 1
+	return true;
+#endif
 
 	bool result = true;
 	pause();
@@ -162,8 +163,9 @@ bool AbstractV4LCamera::switchToLightDetection()
 
 bool AbstractV4LCamera::switchToPuckDetection()
 {
-	if(BaseParameterProvider::getInstance()->getParams()->simulation_mode)
-		return true;
+#if SIMULATION_MODE == 1
+	return true;
+#endif
 
 	bool result = true;
 	pause();
@@ -197,8 +199,9 @@ bool AbstractV4LCamera::switchToPuckDetection()
 
 bool AbstractV4LCamera::switchToDeliveryGateDetection()
 {
-	if(BaseParameterProvider::getInstance()->getParams()->simulation_mode)
-		return true;
+#if SIMULATION_MODE == 1
+	return true;
+#endif
 
 	bool result = true;
 	pause();

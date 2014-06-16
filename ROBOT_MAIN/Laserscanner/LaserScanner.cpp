@@ -8,7 +8,6 @@
 #include "LaserScanner.h"
 #include "../SensorServer.h"
 #include <cmath>
-#include "BaseParameterProvider.h"
 #include "LaserScannerApi.h"
 
 LaserScanner::LaserScanner(SensorServer* sensorServer): execThread(NULL), signal(LaserScannerSignal::RUN)

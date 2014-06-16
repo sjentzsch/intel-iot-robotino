@@ -14,7 +14,7 @@ StateBehaviorController::StateBehaviorController(MotorController *motorCtrl_, Se
 	asyncStateMachine = new AsyncStateMachine(this);
 	motorCtrl->setStateBehaviorController(this);
 	sensorEvtGen->setStateBehaviorController(this);
-	taskGuide = new TaskGuide(this,sensorSrv_);
+	taskManager = new TaskManager(this,sensorSrv_);
 }
 
 
@@ -44,6 +44,6 @@ ISensorControl* StateBehaviorController::getSensorControl()
 	return sensorCtrl;
 }
 
-TaskGuide* StateBehaviorController::getTaskGuide(){
-	return taskGuide;
+TaskManager* StateBehaviorController::getTaskManager(){
+	return taskManager;
 }

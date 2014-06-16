@@ -9,7 +9,6 @@
 #include "SensorEventGenerator.h"
 #include "SensorServer.h"
 #include "StateBehaviorController.h"
-#include "BaseParameterProvider.h"
 
 const float SensorEventGenerator::FLOOR_SENSOR_DISTANCE(92.5);
 
@@ -95,7 +94,7 @@ void SensorEventGenerator::checkSignalStatus()
 void SensorEventGenerator::monitorSensors()
 {
 	bool firstRun = false;
-	if(BaseParameterProvider::getInstance()->getParams()->send_ir_sensor_events){
+	if(true){
 		firstRun = true;
 	}
 
@@ -124,77 +123,74 @@ void SensorEventGenerator::monitorSensors()
 
 		getNewSensorValues();
 
-		if(!BaseParameterProvider::getInstance()->getParams()->simulation_mode)
+		// brightness sensor front left
+		if(!oldSensorState->sensorFrontLeftObstacle && newSensorState->sensorFrontLeftObstacle)
 		{
-			// brightness sensor front left
-			if(!oldSensorState->sensorFrontLeftObstacle && newSensorState->sensorFrontLeftObstacle)
-			{
-				boost::shared_ptr<EvSensorFrontLeftFoundObstacle> ev(new EvSensorFrontLeftFoundObstacle());
-				FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorFrontLeftFoundObstacle");
-				stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-			}
-			else if(oldSensorState->sensorFrontLeftObstacle && !newSensorState->sensorFrontLeftObstacle)
-			{
-				boost::shared_ptr<EvSensorFrontLeftIsFree> ev(new EvSensorFrontLeftIsFree());
-				FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorFrontLeftIsFree");
-				stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-			}
+			boost::shared_ptr<EvSensorFrontLeftFoundObstacle> ev(new EvSensorFrontLeftFoundObstacle());
+			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorFrontLeftFoundObstacle");
+			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
+		}
+		else if(oldSensorState->sensorFrontLeftObstacle && !newSensorState->sensorFrontLeftObstacle)
+		{
+			boost::shared_ptr<EvSensorFrontLeftIsFree> ev(new EvSensorFrontLeftIsFree());
+			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorFrontLeftIsFree");
+			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
+		}
 
 
-			// brightness sensor front right
-			if(!oldSensorState->sensorFrontRightObstacle && newSensorState->sensorFrontRightObstacle)
-			{
-				boost::shared_ptr<EvSensorFrontRightFoundObstacle> ev(new EvSensorFrontRightFoundObstacle());
-				FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorFrontRightFoundObstacle");
-				stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-			}
-			else if(oldSensorState->sensorFrontRightObstacle && !newSensorState->sensorFrontRightObstacle)
-			{
-				boost::shared_ptr<EvSensorFrontRightIsFree> ev(new EvSensorFrontRightIsFree());
-				FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorFrontRightIsFree");
-				stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-			}
+		// brightness sensor front right
+		if(!oldSensorState->sensorFrontRightObstacle && newSensorState->sensorFrontRightObstacle)
+		{
+			boost::shared_ptr<EvSensorFrontRightFoundObstacle> ev(new EvSensorFrontRightFoundObstacle());
+			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorFrontRightFoundObstacle");
+			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
+		}
+		else if(oldSensorState->sensorFrontRightObstacle && !newSensorState->sensorFrontRightObstacle)
+		{
+			boost::shared_ptr<EvSensorFrontRightIsFree> ev(new EvSensorFrontRightIsFree());
+			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorFrontRightIsFree");
+			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
+		}
 
-			// floor sensors
-			//important: the floor sensors always find obstacles when the robot is driving
-			//when the robot cross a line the sensor value returns false = 0
-			if(!oldSensorState->sensorFloorLeftBlack && newSensorState->sensorFloorLeftBlack)
-			{
-				boost::shared_ptr<EvSensorFloorLeftIsBlack> ev(new EvSensorFloorLeftIsBlack());
-				FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorFloorLeftIsBlack");
-				stateCtrl->getAsyncStateMachine()->queueEvent(ev);
+		// floor sensors
+		//important: the floor sensors always find obstacles when the robot is driving
+		//when the robot cross a line the sensor value returns false = 0
+		if(!oldSensorState->sensorFloorLeftBlack && newSensorState->sensorFloorLeftBlack)
+		{
+			boost::shared_ptr<EvSensorFloorLeftIsBlack> ev(new EvSensorFloorLeftIsBlack());
+			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorFloorLeftIsBlack");
+			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
 
-				if(lastLineCrossSensor == FloorSensor::LEFT || lastLineCrossSensor == FloorSensor::INIT || lastLineCrossTimer.msecsElapsed() > 3000) // last line cross was triggered also by this sensor --> start new line cross
-				{
-					sensorSrv->getOdometry(lastLineCrossX, lastLineCrossY, lastLineCrossPhi);
-					lastLineCrossTimer.reset();
-					lastLineCrossTimer.start();
-					lastLineCrossSensor = FloorSensor::LEFT;
-				}
-				else // last line cross was triggered by the other floor sensor --> calculate distance
-				{
-					handleLineCross();
-				}
-			}
-			if(!oldSensorState->sensorFloorRightBlack && newSensorState->sensorFloorRightBlack)
+			if(lastLineCrossSensor == FloorSensor::LEFT || lastLineCrossSensor == FloorSensor::INIT || lastLineCrossTimer.msecsElapsed() > 3000) // last line cross was triggered also by this sensor --> start new line cross
 			{
-				boost::shared_ptr<EvSensorFloorRightIsBlack> ev(new EvSensorFloorRightIsBlack());
-				FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorFloorRightIsBlack");
-				stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-
-				if(lastLineCrossSensor == FloorSensor::RIGHT || lastLineCrossSensor == FloorSensor::INIT || lastLineCrossTimer.msecsElapsed() > 3000) // last line cross was triggered also by this sensor --> start new line cross
-				{
-					sensorSrv->getOdometry(lastLineCrossX, lastLineCrossY, lastLineCrossPhi);
-					lastLineCrossTimer.reset();
-					lastLineCrossTimer.start();
-					lastLineCrossSensor = FloorSensor::RIGHT;
-				}
-				else // last line cross was triggered by the other floor sensor --> calculate distance
-				{
-					handleLineCross();
-				}
+				sensorSrv->getOdometry(lastLineCrossX, lastLineCrossY, lastLineCrossPhi);
+				lastLineCrossTimer.reset();
+				lastLineCrossTimer.start();
+				lastLineCrossSensor = FloorSensor::LEFT;
 			}
-		} // end !simulation_mode
+			else // last line cross was triggered by the other floor sensor --> calculate distance
+			{
+				handleLineCross();
+			}
+		}
+		if(!oldSensorState->sensorFloorRightBlack && newSensorState->sensorFloorRightBlack)
+		{
+			boost::shared_ptr<EvSensorFloorRightIsBlack> ev(new EvSensorFloorRightIsBlack());
+			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorFloorRightIsBlack");
+			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
+
+			if(lastLineCrossSensor == FloorSensor::RIGHT || lastLineCrossSensor == FloorSensor::INIT || lastLineCrossTimer.msecsElapsed() > 3000) // last line cross was triggered also by this sensor --> start new line cross
+			{
+				sensorSrv->getOdometry(lastLineCrossX, lastLineCrossY, lastLineCrossPhi);
+				lastLineCrossTimer.reset();
+				lastLineCrossTimer.start();
+				lastLineCrossSensor = FloorSensor::RIGHT;
+			}
+			else // last line cross was triggered by the other floor sensor --> calculate distance
+			{
+				handleLineCross();
+			}
+		}
 
 		//check if robot has the puck by checking the puck light-sensor
 		if(oldSensorState->sensorPuckBlack == true && newSensorState->sensorPuckBlack == false)
@@ -211,8 +207,6 @@ void SensorEventGenerator::monitorSensors()
 		}
 
 
-		if(BaseParameterProvider::getInstance()->getParams()->send_ir_sensor_events)
-		{
 			// IR-Sensors
 			if((firstRun || oldSensorState->sensorDistance[0] >= SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[0] < SensorPuckBiasConstants::BLOCKED)
 			{
@@ -322,7 +316,6 @@ void SensorEventGenerator::monitorSensors()
 				FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance9Blocked");
 				stateCtrl->getAsyncStateMachine()->queueEvent(ev);
 			}
-		}
 
 
 		// securing puck
@@ -343,7 +336,7 @@ void SensorEventGenerator::monitorSensors()
 			lastPuckSendTimer.reset();
 		}
 
-		if(newSensorState->cameraPuckState == CameraPuckState::PUCK_IN_SIGHT && newSensorState->gotCameraPuckPos && (oldSensorState->cameraPuckState != CameraPuckState::PUCK_IN_SIGHT || (cameraPuckPosWasJustSent && (BaseParameterProvider::getInstance()->getParams()->simulation_mode || abs(newSensorState->cameraPuckPos.phi - lastSentCameraPuckPos.phi) > 40) && lastPuckSendTimer.msecsElapsed() > 1000)))
+		if(false)//newSensorState->cameraPuckState == CameraPuckState::PUCK_IN_SIGHT && newSensorState->gotCameraPuckPos && (oldSensorState->cameraPuckState != CameraPuckState::PUCK_IN_SIGHT || (cameraPuckPosWasJustSent && (BaseParameterProvider::getInstance()->getParams()->simulation_mode || abs(newSensorState->cameraPuckPos.phi - lastSentCameraPuckPos.phi) > 40) && lastPuckSendTimer.msecsElapsed() > 1000)))
 		{
 //			boost::shared_ptr<EvCameraPuckDetected> ev(new EvCameraPuckDetected(newSensorState->cameraPuckPos.x, newSensorState->cameraPuckPos.y));
 //			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvCameraPuckDetected (", FileLog::real(newSensorState->cameraPuckPos.x), ", ", FileLog::real(newSensorState->cameraPuckPos.y), ")");
@@ -372,7 +365,7 @@ void SensorEventGenerator::monitorSensors()
 		float myX, myY, myPhi;
 		this->sensorSrv->getOdometry(myX, myY, myPhi);
 		// Laserscanner Events: Only in non-simulation mode and if angle did not change too much between calculation and evaluation
-		if(!BaseParameterProvider::getInstance()->getParams()->simulation_mode && abs(newSensorState->obstacleBuffer.my_phi - myPhi) < 1)
+		if(abs(newSensorState->obstacleBuffer.my_phi - myPhi) < 1)
 		{
 			// EvObstacleIsClose
 			/*float minDist = std::numeric_limits<float>::max();
@@ -478,7 +471,7 @@ void SensorEventGenerator::monitorSensors()
 			delete oldSensorState;
 		oldSensorState = newSensorState;
 
-		if(BaseParameterProvider::getInstance()->getParams()->send_ir_sensor_events){
+		if(true){
 			firstRun = false;
 		}
 

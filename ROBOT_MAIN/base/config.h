@@ -10,8 +10,6 @@
 
 #define SIMULATION_MODE 1
 
-#define BASE_PARAMETER_FILENAME "base_parameters.json"
-
 /* USEFUL PREPROCESSOR DIRECTIVES */
 #define PRINT(x) std::cout << x << std::endl
 #define SQUARE(x) ((x) * (x))

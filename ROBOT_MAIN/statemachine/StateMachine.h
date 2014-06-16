@@ -58,11 +58,11 @@ struct StateMachine1 : sc::state_machine<StateMachine1, Init>
 	}
 
 	void nextTask(const EvInit&){
-		stateBehavCtrl->getTaskGuide()->nextTask();
+		stateBehavCtrl->getTaskManager()->nextTask();
 	}
 
 	void nextTask(const EvSuccess&){
-		stateBehavCtrl->getTaskGuide()->nextTask();
+		stateBehavCtrl->getTaskManager()->nextTask();
 	}
 
 private:

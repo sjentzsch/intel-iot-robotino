@@ -1,12 +1,12 @@
 /*
- * TaskGuide.h
+ * TaskManager.h
  *
  *  Created on: Jun 13, 2014
  *      Author: root
  */
 
-#ifndef TASKGUIDE_H_
-#define TASKGUIDE_H_
+#ifndef TaskManager_H_
+#define TaskManager_H_
 
 #include <boost/thread.hpp>
 #include "config.h"
@@ -15,12 +15,12 @@
 #include "AsyncStateMachine.h"
 #include "SensorServer.h"
 
-class TaskGuide
+class TaskManager
 {
 public:
-	TaskGuide(StateBehaviorController* stateBhvContrl, SensorServer *sensorSrv_);
-	virtual ~TaskGuide();
-	void nextTask(); //creates a new thread which triggers a new event dependent on the current job situation
+	TaskManager(StateBehaviorController* stateBhvContrl, SensorServer *sensorSrv_);
+	virtual ~TaskManager();
+	void nextTask(); //creates a new thread which triggers a new event
 	void updatePoiType(CameraLightState::CameraLightState lamp); //provides an interface for updating the POI-TYPE dependent on the seen lamp status
 	void handleOutOfOrder();
 	void startMachineTiming();
@@ -37,4 +37,4 @@ private:
 	//void triggerEventDeliverPuckToGate(Node* accessNode);
 };
 
-#endif /* TASKGUIDE_H_ */
+#endif /* TaskManager_H_ */
