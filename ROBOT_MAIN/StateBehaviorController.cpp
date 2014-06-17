@@ -26,7 +26,9 @@ void StateBehaviorController::initiate()
 	sensorCtrl->setOdometry(240.0,1120.0,0);
 
 	asyncStateMachine->initiate();
+#if SIMULATION_MODE == 0
 	sensorEvtGen->initiate();
+#endif
 }
 
 MotorController *StateBehaviorController::getMotorCtrl()

@@ -14,6 +14,7 @@
 #include "StateMachineEvents.h"
 #include "AsyncStateMachine.h"
 #include "SensorServer.h"
+#include "DataProvider.h"
 
 class TaskManager
 {
@@ -21,20 +22,19 @@ public:
 	TaskManager(StateBehaviorController* stateBhvContrl, SensorServer *sensorSrv_);
 	virtual ~TaskManager();
 	void nextTask(); //creates a new thread which triggers a new event
-	void updatePoiType(CameraLightState::CameraLightState lamp); //provides an interface for updating the POI-TYPE dependent on the seen lamp status
-	void handleOutOfOrder();
-	void startMachineTiming();
-	void endMachineTiming(POIType::POIType type);
+	void serveDrink();
+	void refillDrinks();
+	MsgCustomerOrder getCurrCustomerOrder();
 
 private:
-	boost::thread *nextTask_exec; //thread for finding the path
-	AsyncStateMachine* asyncStateMachine;
-
 	void nextTask_impl();
 
-	void handleJob();
+	unsigned long drinks_available;
+	MsgCustomerOrder* currCustomerOrder;
+	vector< MsgRobotServed > vecMsgRobotServed;
 
-	//void triggerEventDeliverPuckToGate(Node* accessNode);
+	boost::thread* nextTask_exec;
+	AsyncStateMachine* asyncStateMachine;
 };
 
 #endif /* TaskManager_H_ */

@@ -12,7 +12,7 @@
 
 // States
 struct serveInit;
-struct serveDriving;
+struct serveDrivingToCustomer;
 struct serveFinished;
 
 /////////////////////////////////////////////////////////
@@ -31,9 +31,21 @@ struct ServeCustomer : sc::state<ServeCustomer, StateMachine1, serveInit>
 	virtual ~ServeCustomer() {
 	} // exit
 
-	void driveToRandPos() {
-		// stateBehavCtrl->getMotorCtrl()->rotateToAbsAngle(0, ForceRotationDirection::LEFT, 50.0f);
-		stateBehavCtrl->getMotorCtrl()->moveToAbsPos(/*accessNode->getXPos()-*/370, /*startYPos*/0, 180, 300.0);
+	void driveToCustomer() {
+		unsigned long curr_customer_id = stateBehavCtrl->getTaskManager()->getCurrCustomerOrder().customer_id;
+		vector< MsgCustomerPos > vecMsgCustomerPoses = DataProvider::getInstance()->getMsgCustomerPoses();
+		for(unsigned int i=0; i<vecMsgCustomerPoses.size(); i++)
+		{
+			if(curr_customer_id == vecMsgCustomerPoses.at(i).customer_id)
+			{
+				stateBehavCtrl->getMotorCtrl()->moveToAbsPos(vecMsgCustomerPoses.at(i).x, vecMsgCustomerPoses.at(i).y, 0, 300.0);
+				break;
+			}
+		}
+	}
+
+	void serveDrink() {
+		stateBehavCtrl->getTaskManager()->serveDrink();
 	}
 
 	//Reactions
@@ -57,8 +69,8 @@ struct serveInit : sc::state<serveInit, ServeCustomer>
 
 	sc::result react(const EvInit&)
 	{
-		context<ServeCustomer>().driveToRandPos();
-		return transit<serveDriving>();
+		context<ServeCustomer>().driveToCustomer();
+		return transit<serveDrivingToCustomer>();
 	}
 
 	//Reactions
@@ -67,17 +79,18 @@ struct serveInit : sc::state<serveInit, ServeCustomer>
 	> reactions;
 };
 
-struct serveDriving : sc::state<serveDriving, ServeCustomer>
+struct serveDrivingToCustomer : sc::state<serveDrivingToCustomer, ServeCustomer>
 {
-	serveDriving(my_context ctx) : my_base(ctx) {
-		context<StateMachine1>().logAndDisplayStateName("serveDriving");
+	serveDrivingToCustomer(my_context ctx) : my_base(ctx) {
+		context<StateMachine1>().logAndDisplayStateName("serveDrivingToCustomer");
 	} // entry
 
-	virtual ~serveDriving() {
+	virtual ~serveDrivingToCustomer() {
 	} // exit
 
 	sc::result react(const EvMotorCtrlReady&)
 	{
+		context<ServeCustomer>().serveDrink();
 		return transit<serveFinished>();
 	}
 

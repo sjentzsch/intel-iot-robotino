@@ -12,7 +12,7 @@
 
 // States
 struct refillInit;
-struct refillDriving;
+struct refillDrivingToBaseStart;
 struct refillFinished;
 
 /////////////////////////////////////////////////////////
@@ -31,9 +31,13 @@ struct RefillDrinks : sc::state<RefillDrinks, StateMachine1, refillInit>
 	virtual ~RefillDrinks() {
 	} // exit
 
-	void driveToRandPos() {
-		// stateBehavCtrl->getMotorCtrl()->rotateToAbsAngle(0, ForceRotationDirection::LEFT, 50.0f);
-		stateBehavCtrl->getMotorCtrl()->moveToAbsPos(/*accessNode->getXPos()-*/370, /*startYPos*/0, 180, 300.0);
+	void driveToBaseStart() {
+		MsgEnvironment msgEnvironment = DataProvider::getInstance()->getLatestMsgEnvironment();
+		stateBehavCtrl->getMotorCtrl()->moveToAbsPos(msgEnvironment.x_base, msgEnvironment.y_base, msgEnvironment.phi_base, 100.0);
+	}
+
+	void refillDrinks() {
+		stateBehavCtrl->getTaskManager()->refillDrinks();
 	}
 
 	//Reactions
@@ -57,8 +61,8 @@ struct refillInit : sc::state<refillInit, RefillDrinks>
 
 	sc::result react(const EvInit&)
 	{
-		context<RefillDrinks>().driveToRandPos();
-		return transit<refillDriving>();
+		context<RefillDrinks>().driveToBaseStart();
+		return transit<refillDrivingToBaseStart>();
 	}
 
 	//Reactions
@@ -67,17 +71,18 @@ struct refillInit : sc::state<refillInit, RefillDrinks>
 	> reactions;
 };
 
-struct refillDriving : sc::state<refillDriving, RefillDrinks>
+struct refillDrivingToBaseStart : sc::state<refillDrivingToBaseStart, RefillDrinks>
 {
-	refillDriving(my_context ctx) : my_base(ctx) {
-		context<StateMachine1>().logAndDisplayStateName("refillDriving");
+	refillDrivingToBaseStart(my_context ctx) : my_base(ctx) {
+		context<StateMachine1>().logAndDisplayStateName("refillDrivingToBaseStart");
 	} // entry
 
-	virtual ~refillDriving() {
+	virtual ~refillDrivingToBaseStart() {
 	} // exit
 
 	sc::result react(const EvMotorCtrlReady&)
 	{
+		context<RefillDrinks>().refillDrinks();
 		return transit<refillFinished>();
 	}
 

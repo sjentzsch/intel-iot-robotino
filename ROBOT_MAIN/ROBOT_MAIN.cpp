@@ -48,7 +48,6 @@ void initApi2(rec::robotino::api2::Com *api2Com) {
 
 int main(int argc, char* argv[])
 {
-	rec::robotino::api2::Com *api2Com;
 	try
 	{
 		// initialize the logging class
@@ -73,10 +72,10 @@ int main(int argc, char* argv[])
 		MsgCustomerOrder msgCustOrder1(0, 5, 22, "John");
 		CloudComm::getInstance()->getCloudClient()->send(msgCustOrder1.save());
 
-		MsgCustomerOrder msgCustOrder2(1, 6, 23, "Peter");
+		MsgCustomerOrder msgCustOrder2(2, 6, 23, "Peter");
 		CloudComm::getInstance()->getCloudClient()->send(msgCustOrder2.save());
 
-		MsgCustomerOrder msgCustOrder3(2, 7, 22, "John");
+		MsgCustomerOrder msgCustOrder3(1, 7, 22, "John");
 		CloudComm::getInstance()->getCloudClient()->send(msgCustOrder3.save());
 
 		MsgCustomerPos msgCustPos1(0, 22, "John", 1.1, 1.2);
@@ -93,8 +92,12 @@ int main(int argc, char* argv[])
 		MsgRobotPos msgRobotPos2(0, 8.8, 9.9);
 		CloudComm::getInstance()->getCloudClient()->send(msgRobotPos2.save());
 
-		rec::robotino::api2::msleep(5000);
+		// wait for MsgEnvironment to arrive from the CloudServer ...
+		while(!DataProvider::getInstance()->isValidMsgEnvironment())
+			boost::this_thread::sleep(boost::posix_time::milliseconds(10));
 
+		// Debug stuff: print the messages ...
+		/*boost::this_thread::sleep(boost::posix_time::milliseconds(5000));
 		DataProvider::getInstance()->getLatestMsgEnvironment().print();
 		DataProvider::getInstance()->getLatestMsgRobotPos().print();
 		vector< MsgCustomerOrder > vecMsgCustomerOrders = DataProvider::getInstance()->getMsgCustomerOrders();
@@ -102,17 +105,12 @@ int main(int argc, char* argv[])
 			vecMsgCustomerOrders.at(i).print();
 		vector< MsgCustomerPos > vecMsgCustomerPoses = DataProvider::getInstance()->getMsgCustomerPoses();
 		for(unsigned int i=0; i<vecMsgCustomerPoses.size(); i++)
-			vecMsgCustomerPoses.at(i).print();
-
-		/*while(true)
-		{
-			rec::robotino::api2::msleep(10);
-		}*/
+			vecMsgCustomerPoses.at(i).print();*/
 
 #if SIMULATION_MODE == 1
-		api2Com = new SimApi2Com();
+		rec::robotino::api2::Com* api2Com = new SimApi2Com();
 #else
-		api2Com = new Api2Com();
+		rec::robotino::api2::Com* api2Com = new Api2Com();
 		initApi2(api2Com);
 #endif
 

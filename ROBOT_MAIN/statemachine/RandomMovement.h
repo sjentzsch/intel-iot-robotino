@@ -32,8 +32,8 @@ struct RandomMovement : sc::state<RandomMovement, StateMachine1, randInit>
 	} // exit
 
 	void driveToRandPos() {
-		// stateBehavCtrl->getMotorCtrl()->rotateToAbsAngle(0, ForceRotationDirection::LEFT, 50.0f);
-		stateBehavCtrl->getMotorCtrl()->moveToAbsPos(/*accessNode->getXPos()-*/370, /*startYPos*/0, 180, 300.0);
+		boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
+		stateBehavCtrl->getMotorCtrl()->moveToAbsPos(200, 200, 90, 300.0);
 	}
 
 	//Reactions

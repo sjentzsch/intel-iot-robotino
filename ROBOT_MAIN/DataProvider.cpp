@@ -103,6 +103,16 @@ void DataProvider::processMsg(::std::stringstream& msg)
 	}
 }
 
+bool DataProvider::isValidMsgEnvironment()
+{
+	return this->msgEnvironment != NULL;
+}
+
+bool DataProvider::isValidMsgRobotPos()
+{
+	return this->msgRobotPos != NULL;
+}
+
 MsgEnvironment DataProvider::getLatestMsgEnvironment()
 {
 	boost::shared_lock<boost::shared_mutex> r_lock(mutexMsgEnvironment);

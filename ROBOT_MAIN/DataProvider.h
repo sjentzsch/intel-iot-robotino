@@ -26,6 +26,8 @@ public:
 	void processMsg(::std::stringstream& msg);
 
 	// used by readers/users
+	bool isValidMsgEnvironment();
+	bool isValidMsgRobotPos();
 	MsgEnvironment getLatestMsgEnvironment();
 	MsgRobotPos getLatestMsgRobotPos();
 	vector< MsgCustomerOrder > getMsgCustomerOrders();
