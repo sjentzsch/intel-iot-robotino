@@ -274,7 +274,7 @@ void SensorServer::setOdometry(float x, float y, float phi)
 
 	int counter = 0;
 
-	while(counter < 50 && (abs(newPose.x-x) > 0.1 || abs(newPose.y-y) > 0.1 || abs(newPose.phi-phi) > 0.3))
+	while(counter < 50 && (abs(newPose.x-x) > 0.1 || abs(newPose.y-y) > 0.1 || abs(fmod((double)newPose.phi-phi, 360.0)) > 0.3))
 	{
 		cout << "set odometry wait ... " << newPose.x << " to " << x << ", " << newPose.y << " to " << y << ", " << newPose.phi << " to " << phi << endl;
 		boost::this_thread::sleep(boost::posix_time::milliseconds(5));

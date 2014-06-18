@@ -38,7 +38,7 @@ struct ServeCustomer : sc::state<ServeCustomer, StateMachine1, serveInit>
 		{
 			if(curr_customer_id == vecMsgCustomerPoses.at(i).customer_id)
 			{
-				stateBehavCtrl->getMotorCtrl()->moveToAbsPos(vecMsgCustomerPoses.at(i).x, vecMsgCustomerPoses.at(i).y, 0, 300.0);
+				stateBehavCtrl->getMotorCtrl()->moveToAbsPos(vecMsgCustomerPoses.at(i).x*1000, vecMsgCustomerPoses.at(i).y*1000, 0, 300.0);
 				break;
 			}
 		}

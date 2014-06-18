@@ -33,7 +33,7 @@ struct RefillDrinks : sc::state<RefillDrinks, StateMachine1, refillInit>
 
 	void driveToBaseStart() {
 		MsgEnvironment msgEnvironment = DataProvider::getInstance()->getLatestMsgEnvironment();
-		stateBehavCtrl->getMotorCtrl()->moveToAbsPos(msgEnvironment.x_base, msgEnvironment.y_base, msgEnvironment.phi_base, 100.0);
+		stateBehavCtrl->getMotorCtrl()->moveToAbsPos(msgEnvironment.x_base*1000, msgEnvironment.y_base*1000, msgEnvironment.phi_base, 100.0);
 	}
 
 	void refillDrinks() {

@@ -63,7 +63,7 @@ int main(int argc, char* argv[])
 
 		//rec::robotino::api2::msleep(3000);
 
-		MsgEnvironment msgEnv(0, 0.0, 0.1, 0.0, 0.0, 0.0, 0.0, 0.2, 0.0);
+		MsgEnvironment msgEnv(0, 2.0, 3.0, 0.23, 0.23, 180.0, 1.0, 2.0, 90.0);
 		CloudComm::getInstance()->getCloudClient()->send(msgEnv.save());
 
 		MsgRobotPos msgRobotPos1(0, 0.8, 0.9);
@@ -78,13 +78,13 @@ int main(int argc, char* argv[])
 		MsgCustomerOrder msgCustOrder3(1, 7, 22, "John");
 		CloudComm::getInstance()->getCloudClient()->send(msgCustOrder3.save());
 
-		MsgCustomerPos msgCustPos1(0, 22, "John", 1.1, 1.2);
+		MsgCustomerPos msgCustPos1(0, 22, "John", 1.0, 0.5);
 		CloudComm::getInstance()->getCloudClient()->send(msgCustPos1.save());
 
-		MsgCustomerPos msgCustPos2(0, 22, "John", 1.3, 1.4);
+		MsgCustomerPos msgCustPos2(0, 22, "John", 0.5, 1.5);
 		CloudComm::getInstance()->getCloudClient()->send(msgCustPos2.save());
 
-		MsgCustomerPos msgCustPos3(0, 23, "Peter", 2.1, 2.2);
+		MsgCustomerPos msgCustPos3(0, 23, "Peter", 1.5, 0.5);
 		CloudComm::getInstance()->getCloudClient()->send(msgCustPos3.save());
 
 		CloudComm::getInstance()->getCloudClient()->send("blalalalala!!");
