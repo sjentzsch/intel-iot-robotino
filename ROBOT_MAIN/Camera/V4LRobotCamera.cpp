@@ -1,7 +1,7 @@
 #include "V4LRobotCamera.h"
 
 V4LRobotCamera::V4LRobotCamera() {
-#if SIMULATION_MODE == 0
+#if USE_CAMERA == 1
 	open_device();
 #endif
 

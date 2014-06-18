@@ -75,7 +75,7 @@ SensorServer::SensorServer() :havingPuck(false)
 //		com_->waitForUpdate();
 //	}
 	robotCamera = new V4LRobotCamera();
-#if SIMULATION_MODE == 0
+#if USE_CAMERA == 1
 	robotCamera->startThread();
 #endif
 

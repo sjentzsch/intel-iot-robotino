@@ -8,7 +8,8 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
-#define SIMULATION_MODE 1
+#define SIMULATION_MODE 0
+#define USE_CAMERA 0
 
 #define DRINKS_AVAILABLE_START 2
 

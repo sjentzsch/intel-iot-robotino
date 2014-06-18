@@ -120,7 +120,7 @@ bool AbstractV4LCamera::queryImage()
 
 bool AbstractV4LCamera::switchToLightDetection()
 {
-#if SIMULATION_MODE == 1
+#if USE_CAMERA == 0
 	return true;
 #endif
 
@@ -163,7 +163,7 @@ bool AbstractV4LCamera::switchToLightDetection()
 
 bool AbstractV4LCamera::switchToPuckDetection()
 {
-#if SIMULATION_MODE == 1
+#if USE_CAMERA == 0
 	return true;
 #endif
 
@@ -199,7 +199,7 @@ bool AbstractV4LCamera::switchToPuckDetection()
 
 bool AbstractV4LCamera::switchToDeliveryGateDetection()
 {
-#if SIMULATION_MODE == 1
+#if USE_CAMERA == 0
 	return true;
 #endif
 

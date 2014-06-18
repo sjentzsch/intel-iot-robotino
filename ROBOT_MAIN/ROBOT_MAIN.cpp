@@ -63,7 +63,7 @@ int main(int argc, char* argv[])
 
 		//rec::robotino::api2::msleep(3000);
 
-		MsgEnvironment msgEnv(0, 2.0, 3.0, 0.23, 0.23, 180.0, 1.0, 2.0, 90.0);
+		MsgEnvironment msgEnv(0, 2.0, 3.0, 0.23, 0.23, 0.0, 1.0, 2.0, 90.0);
 		CloudComm::getInstance()->getCloudClient()->send(msgEnv.save());
 
 		MsgRobotPos msgRobotPos1(0, 0.8, 0.9);

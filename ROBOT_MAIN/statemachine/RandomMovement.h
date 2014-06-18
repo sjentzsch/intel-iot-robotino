@@ -33,7 +33,8 @@ struct RandomMovement : sc::state<RandomMovement, StateMachine1, randInit>
 
 	void driveToRandPos() {
 		boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
-		stateBehavCtrl->getMotorCtrl()->moveToAbsPos(1000, 1500, 180, 150.0);
+		MsgEnvironment msgEnvironment = DataProvider::getInstance()->getLatestMsgEnvironment();
+		stateBehavCtrl->getMotorCtrl()->moveToAbsPos(msgEnvironment.x_robot*1000, msgEnvironment.y_robot*1000, msgEnvironment.phi_robot, 150.0);
 	}
 
 	//Reactions

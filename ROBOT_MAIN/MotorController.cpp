@@ -196,7 +196,7 @@ void MotorController::moveToAbsPos2_impl(vector<vec3D> vPoints, float myMaxSpeed
 			MIN_DEGREE_DISTANCE_curr = 3;
 		}
 
-		//cout << "moveToAbsPos_impl: " << destX << " - " << destY << " - " << destPhi << " and mine: " << sensorSrv->getX() << " " << sensorSrv->getY() << " " << sensorSrv->getPhi() << endl;
+		cout << "moveToAbsPos_impl: " << destX << " - " << destY << " - " << destPhi << " and mine: " << sensorSrv->getX() << " " << sensorSrv->getY() << " " << sensorSrv->getPhi() << endl;
 
 		do
 		{
