@@ -100,16 +100,12 @@ void SensorEventGenerator::monitorSensors()
 
 	while(true)
 	{
-		//cout << "monitorSensors 1" << endl;
-
 		if(ModelProvider::getInstance()->gameStateIsPaused())
 		{
 			boost::this_thread::sleep(boost::posix_time::milliseconds(500));
 			//cout << "monitorSensors() paused" << endl;
 			continue;
 		}
-
-		//cout << "monitorSensors 2" << endl;
 
 		//Make FPS calculation
 //		dtToLastImageInMs = (int)timer.msecsElapsed();
@@ -122,6 +118,46 @@ void SensorEventGenerator::monitorSensors()
 		checkSignalStatus(); // blocks if thread is signaled to pause
 
 		getNewSensorValues();
+
+		/*cout << "**********************" << endl;
+		cout << "Analog Value Drink 1: " << sensorSrv->valueDrink1() << endl;
+		cout << "Analog Value Drink 2: " << sensorSrv->valueDrink2() << endl;
+		cout << "**********************" << endl;*/
+
+		// force sensors (EvSensorDrinkTaken and EvSensorDrinkRefilled)
+		// sensor for drink 1
+		if(oldSensorState->sensorHasDrink1 && !newSensorState->sensorHasDrink1)
+		{
+			boost::shared_ptr<EvSensorDrinkTaken> ev(new EvSensorDrinkTaken(1));
+			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDrinkTaken 1");
+			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
+		}
+		else if(!oldSensorState->sensorHasDrink1 && newSensorState->sensorHasDrink1)
+		{
+			boost::shared_ptr<EvSensorDrinkRefilled> ev(new EvSensorDrinkRefilled(1));
+			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDrinkRefilled 1");
+			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
+		}
+		// sensor for drink 2
+		if(oldSensorState->sensorHasDrink2 && !newSensorState->sensorHasDrink2)
+		{
+			boost::shared_ptr<EvSensorDrinkTaken> ev(new EvSensorDrinkTaken(2));
+			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDrinkTaken 2");
+			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
+		}
+		else if(!oldSensorState->sensorHasDrink2 && newSensorState->sensorHasDrink2)
+		{
+			boost::shared_ptr<EvSensorDrinkRefilled> ev(new EvSensorDrinkRefilled(2));
+			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDrinkRefilled 2");
+			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
+		}
+		// combined force sensor events
+		if((!oldSensorState->sensorHasDrink1 || !oldSensorState->sensorHasDrink2) && (newSensorState->sensorHasDrink1 && newSensorState->sensorHasDrink2))
+		{
+			boost::shared_ptr<EvSensorAllDrinksRefilled> ev(new EvSensorAllDrinksRefilled());
+			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorAllDrinksRefilled");
+			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
+		}
 
 		// brightness sensor front left
 		if(!oldSensorState->sensorFrontLeftObstacle && newSensorState->sensorFrontLeftObstacle)
@@ -136,7 +172,6 @@ void SensorEventGenerator::monitorSensors()
 			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorFrontLeftIsFree");
 			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
 		}
-
 
 		// brightness sensor front right
 		if(!oldSensorState->sensorFrontRightObstacle && newSensorState->sensorFrontRightObstacle)
@@ -192,143 +227,117 @@ void SensorEventGenerator::monitorSensors()
 			}
 		}
 
-		//check if robot has the puck by checking the puck light-sensor
-		if(oldSensorState->sensorPuckBlack == true && newSensorState->sensorPuckBlack == false)
+
+		// IR-Sensors
+		if((firstRun || oldSensorState->sensorDistance[0] >= SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[0] < SensorPuckBiasConstants::BLOCKED)
 		{
-			/*boost::shared_ptr<EvSensorLostPuck> ev(new EvSensorLostPuck());
-			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorLostPuck");
-			stateCtrl->getAsyncStateMachine()->queueEvent(ev);*/
+			boost::shared_ptr<EvSensorDistance1Free> ev(new EvSensorDistance1Free());
+			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance1Free");
+			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
 		}
-		else if(oldSensorState->sensorPuckBlack == false && newSensorState->sensorPuckBlack == true)
+		else if((firstRun || oldSensorState->sensorDistance[0] < SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[0] >= SensorPuckBiasConstants::BLOCKED)
 		{
-			/*boost::shared_ptr<EvSensorHasPuck> ev(new EvSensorHasPuck());
-			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorHasPuck");
-			stateCtrl->getAsyncStateMachine()->queueEvent(ev);*/
+			boost::shared_ptr<EvSensorDistance1Blocked> ev(new EvSensorDistance1Blocked());
+			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance1Blocked");
+			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
+		}
+		if((firstRun || oldSensorState->sensorDistance[1] >= SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[1] < SensorPuckBiasConstants::BLOCKED)
+		{
+			boost::shared_ptr<EvSensorDistance2Free> ev(new EvSensorDistance2Free());
+			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance2Free");
+			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
+		}
+		else if((firstRun || oldSensorState->sensorDistance[1] < SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[1] >= SensorPuckBiasConstants::BLOCKED)
+		{
+			boost::shared_ptr<EvSensorDistance2Blocked> ev(new EvSensorDistance2Blocked());
+			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance2Blocked");
+			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
+		}
+		if((firstRun || oldSensorState->sensorDistance[2] >= SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[2] < SensorPuckBiasConstants::BLOCKED)
+		{
+			boost::shared_ptr<EvSensorDistance3Free> ev(new EvSensorDistance3Free());
+			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance3Free");
+			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
+		}
+		else if((firstRun || oldSensorState->sensorDistance[2] < SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[2] >= SensorPuckBiasConstants::BLOCKED)
+		{
+			boost::shared_ptr<EvSensorDistance3Blocked> ev(new EvSensorDistance3Blocked());
+			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance3Blocked");
+			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
+		}
+		if((firstRun || oldSensorState->sensorDistance[3] >= SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[3] < SensorPuckBiasConstants::BLOCKED)
+		{
+			boost::shared_ptr<EvSensorDistance4Free> ev(new EvSensorDistance4Free());
+			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance4Free");
+			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
+		}
+		else if((firstRun || oldSensorState->sensorDistance[3] < SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[3] >= SensorPuckBiasConstants::BLOCKED)
+		{
+			boost::shared_ptr<EvSensorDistance4Blocked> ev(new EvSensorDistance4Blocked());
+			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance4Blocked");
+			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
+		}
+		if((firstRun || oldSensorState->sensorDistance[4] >= SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[4] < SensorPuckBiasConstants::BLOCKED)
+		{
+			boost::shared_ptr<EvSensorDistance5Free> ev(new EvSensorDistance5Free());
+			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance5Free");
+			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
+		}
+		else if((firstRun || oldSensorState->sensorDistance[4] < SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[4] >= SensorPuckBiasConstants::BLOCKED)
+		{
+			boost::shared_ptr<EvSensorDistance5Blocked> ev(new EvSensorDistance5Blocked());
+			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance5Blocked");
+			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
+		}
+		if((firstRun || oldSensorState->sensorDistance[5] >= SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[5] < SensorPuckBiasConstants::BLOCKED)
+		{
+			boost::shared_ptr<EvSensorDistance6Free> ev(new EvSensorDistance6Free());
+			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance6Free");
+			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
+		}
+		else if((firstRun || oldSensorState->sensorDistance[5] < SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[5] >= SensorPuckBiasConstants::BLOCKED)
+		{
+			boost::shared_ptr<EvSensorDistance6Blocked> ev(new EvSensorDistance6Blocked());
+			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance6Blocked");
+			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
+		}
+		if((firstRun || oldSensorState->sensorDistance[6] >= SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[6] < SensorPuckBiasConstants::BLOCKED)
+		{
+			boost::shared_ptr<EvSensorDistance7Free> ev(new EvSensorDistance7Free());
+			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance7Free");
+			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
+		}
+		else if((firstRun || oldSensorState->sensorDistance[6] < SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[6] >= SensorPuckBiasConstants::BLOCKED)
+		{
+			boost::shared_ptr<EvSensorDistance7Blocked> ev(new EvSensorDistance7Blocked());
+			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance7Blocked");
+			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
+		}
+		if((firstRun || oldSensorState->sensorDistance[7] >= SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[7] < SensorPuckBiasConstants::BLOCKED)
+		{
+			boost::shared_ptr<EvSensorDistance8Free> ev(new EvSensorDistance8Free());
+			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance8Free");
+			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
+		}
+		else if((firstRun || oldSensorState->sensorDistance[7] < SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[7] >= SensorPuckBiasConstants::BLOCKED)
+		{
+			boost::shared_ptr<EvSensorDistance8Blocked> ev(new EvSensorDistance8Blocked());
+			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance8Blocked");
+			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
+		}
+		if((firstRun || oldSensorState->sensorDistance[8] >= SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[8] < SensorPuckBiasConstants::BLOCKED)
+		{
+			boost::shared_ptr<EvSensorDistance9Free> ev(new EvSensorDistance9Free());
+			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance9Free");
+			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
+		}
+		else if((firstRun || oldSensorState->sensorDistance[8] < SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[8] >= SensorPuckBiasConstants::BLOCKED)
+		{
+			boost::shared_ptr<EvSensorDistance9Blocked> ev(new EvSensorDistance9Blocked());
+			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance9Blocked");
+			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
 		}
 
-
-			// IR-Sensors
-			if((firstRun || oldSensorState->sensorDistance[0] >= SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[0] < SensorPuckBiasConstants::BLOCKED)
-			{
-				boost::shared_ptr<EvSensorDistance1Free> ev(new EvSensorDistance1Free());
-				FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance1Free");
-				stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-			}
-			else if((firstRun || oldSensorState->sensorDistance[0] < SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[0] >= SensorPuckBiasConstants::BLOCKED)
-			{
-				boost::shared_ptr<EvSensorDistance1Blocked> ev(new EvSensorDistance1Blocked());
-				FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance1Blocked");
-				stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-			}
-			if((firstRun || oldSensorState->sensorDistance[1] >= SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[1] < SensorPuckBiasConstants::BLOCKED)
-			{
-				boost::shared_ptr<EvSensorDistance2Free> ev(new EvSensorDistance2Free());
-				FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance2Free");
-				stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-			}
-			else if((firstRun || oldSensorState->sensorDistance[1] < SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[1] >= SensorPuckBiasConstants::BLOCKED)
-			{
-				boost::shared_ptr<EvSensorDistance2Blocked> ev(new EvSensorDistance2Blocked());
-				FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance2Blocked");
-				stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-			}
-			if((firstRun || oldSensorState->sensorDistance[2] >= SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[2] < SensorPuckBiasConstants::BLOCKED)
-			{
-				boost::shared_ptr<EvSensorDistance3Free> ev(new EvSensorDistance3Free());
-				FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance3Free");
-				stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-			}
-			else if((firstRun || oldSensorState->sensorDistance[2] < SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[2] >= SensorPuckBiasConstants::BLOCKED)
-			{
-				boost::shared_ptr<EvSensorDistance3Blocked> ev(new EvSensorDistance3Blocked());
-				FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance3Blocked");
-				stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-			}
-			if((firstRun || oldSensorState->sensorDistance[3] >= SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[3] < SensorPuckBiasConstants::BLOCKED)
-			{
-				boost::shared_ptr<EvSensorDistance4Free> ev(new EvSensorDistance4Free());
-				FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance4Free");
-				stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-			}
-			else if((firstRun || oldSensorState->sensorDistance[3] < SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[3] >= SensorPuckBiasConstants::BLOCKED)
-			{
-				boost::shared_ptr<EvSensorDistance4Blocked> ev(new EvSensorDistance4Blocked());
-				FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance4Blocked");
-				stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-			}
-			if((firstRun || oldSensorState->sensorDistance[4] >= SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[4] < SensorPuckBiasConstants::BLOCKED)
-			{
-				boost::shared_ptr<EvSensorDistance5Free> ev(new EvSensorDistance5Free());
-				FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance5Free");
-				stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-			}
-			else if((firstRun || oldSensorState->sensorDistance[4] < SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[4] >= SensorPuckBiasConstants::BLOCKED)
-			{
-				boost::shared_ptr<EvSensorDistance5Blocked> ev(new EvSensorDistance5Blocked());
-				FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance5Blocked");
-				stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-			}
-			if((firstRun || oldSensorState->sensorDistance[5] >= SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[5] < SensorPuckBiasConstants::BLOCKED)
-			{
-				boost::shared_ptr<EvSensorDistance6Free> ev(new EvSensorDistance6Free());
-				FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance6Free");
-				stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-			}
-			else if((firstRun || oldSensorState->sensorDistance[5] < SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[5] >= SensorPuckBiasConstants::BLOCKED)
-			{
-				boost::shared_ptr<EvSensorDistance6Blocked> ev(new EvSensorDistance6Blocked());
-				FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance6Blocked");
-				stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-			}
-			if((firstRun || oldSensorState->sensorDistance[6] >= SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[6] < SensorPuckBiasConstants::BLOCKED)
-			{
-				boost::shared_ptr<EvSensorDistance7Free> ev(new EvSensorDistance7Free());
-				FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance7Free");
-				stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-			}
-			else if((firstRun || oldSensorState->sensorDistance[6] < SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[6] >= SensorPuckBiasConstants::BLOCKED)
-			{
-				boost::shared_ptr<EvSensorDistance7Blocked> ev(new EvSensorDistance7Blocked());
-				FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance7Blocked");
-				stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-			}
-			if((firstRun || oldSensorState->sensorDistance[7] >= SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[7] < SensorPuckBiasConstants::BLOCKED)
-			{
-				boost::shared_ptr<EvSensorDistance8Free> ev(new EvSensorDistance8Free());
-				FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance8Free");
-				stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-			}
-			else if((firstRun || oldSensorState->sensorDistance[7] < SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[7] >= SensorPuckBiasConstants::BLOCKED)
-			{
-				boost::shared_ptr<EvSensorDistance8Blocked> ev(new EvSensorDistance8Blocked());
-				FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance8Blocked");
-				stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-			}
-			if((firstRun || oldSensorState->sensorDistance[8] >= SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[8] < SensorPuckBiasConstants::BLOCKED)
-			{
-				boost::shared_ptr<EvSensorDistance9Free> ev(new EvSensorDistance9Free());
-				FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance9Free");
-				stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-			}
-			else if((firstRun || oldSensorState->sensorDistance[8] < SensorPuckBiasConstants::BLOCKED) && newSensorState->sensorDistance[8] >= SensorPuckBiasConstants::BLOCKED)
-			{
-				boost::shared_ptr<EvSensorDistance9Blocked> ev(new EvSensorDistance9Blocked());
-				FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDistance9Blocked");
-				stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-			}
-
-
-		// securing puck
-		// TODO: apply: camera->getNearestPuck(&puckXPos, &puckYPos, &puckDist) && (puckXPos > camera->CATCH_BOTTOM_LEFT-20) && (puckXPos < camera->CATCH_BOTTOM_RIGHT+20) && (puckYPos > 7*camera->CAM_HEIGHT/8));
-//		if(newSensorState->havingPuck && newSensorState->sensorPuckBias < SensorPuckBiasConstants::LOST && newSensorState->cameraPuckState == CameraPuckState::PUCK_IN_SIGHT && (!oldSensorState->havingPuck || oldSensorState->sensorPuckBias >= SensorPuckBiasConstants::LOST || oldSensorState->cameraPuckState != CameraPuckState::PUCK_IN_SIGHT))
-//		{
-//			boost::shared_ptr<EvRobotLostPuck> ev(new EvRobotLostPuck());
-//			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvRobotLostPuck");
-//			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-//		}
-
-		// cout << CameraPuckState::cCameraPuckState[newSensorState->cameraPuckState] << endl;
-		// camera puck detection
 
 		if(newSensorState->cameraPuckState == CameraPuckState::OFF)
 		{
@@ -362,32 +371,32 @@ void SensorEventGenerator::monitorSensors()
 		}
 
 
-		float myX, myY, myPhi;
+		/*float myX, myY, myPhi;
 		this->sensorSrv->getOdometry(myX, myY, myPhi);
 		// Laserscanner Events: Only in non-simulation mode and if angle did not change too much between calculation and evaluation
 		if(abs(newSensorState->obstacleBuffer.my_phi - myPhi) < 1)
 		{
 			// EvObstacleIsClose
-			/*float minDist = std::numeric_limits<float>::max();
-			unsigned int minClusterIndex = 0;
-			for(unsigned int c=0; c<newSensorState->obstacleBuffer.obstacles.size(); c++)
-			{
-				float currDist = sqrt(SQUARE(newSensorState->obstacleBuffer.obstacles.at(c).at(0)-myX)+SQUARE(newSensorState->obstacleBuffer.obstacles.at(c).at(1)-myY));
-				if(currDist < minDist)
-				{
-					minDist = currDist;
-					minClusterIndex = c;
-				}
-			}
-			if(minDist < 500 && !evObstacleIsCloseThrown)
-			{
-				boost::shared_ptr<EvObstacleIsClose> ev(new EvObstacleIsClose(newSensorState->obstacleBuffer.obstacles.at(minClusterIndex).at(0), newSensorState->obstacleBuffer.obstacles.at(minClusterIndex).at(1)));
-				FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvObstacleIsClose");
-				stateCtrl->getAsyncStateMachine()->queueEvent(ev);
-				evObstacleIsCloseThrown = true;
-			}
-			else
-				evObstacleIsCloseThrown = false;*/
+//			float minDist = std::numeric_limits<float>::max();
+//			unsigned int minClusterIndex = 0;
+//			for(unsigned int c=0; c<newSensorState->obstacleBuffer.obstacles.size(); c++)
+//			{
+//				float currDist = sqrt(SQUARE(newSensorState->obstacleBuffer.obstacles.at(c).at(0)-myX)+SQUARE(newSensorState->obstacleBuffer.obstacles.at(c).at(1)-myY));
+//				if(currDist < minDist)
+//				{
+//					minDist = currDist;
+//					minClusterIndex = c;
+//				}
+//			}
+//			if(minDist < 500 && !evObstacleIsCloseThrown)
+//			{
+//				boost::shared_ptr<EvObstacleIsClose> ev(new EvObstacleIsClose(newSensorState->obstacleBuffer.obstacles.at(minClusterIndex).at(0), newSensorState->obstacleBuffer.obstacles.at(minClusterIndex).at(1)));
+//				FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvObstacleIsClose");
+//				stateCtrl->getAsyncStateMachine()->queueEvent(ev);
+//				evObstacleIsCloseThrown = true;
+//			}
+//			else
+//				evObstacleIsCloseThrown = false;
 
 			// EvObstacleMap
 			const float OBSTACLE_RADIUS_GRID_SEARCH = 185.0f;
@@ -457,15 +466,15 @@ void SensorEventGenerator::monitorSensors()
 				FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvObstacleMap");
 				stateCtrl->getAsyncStateMachine()->queueEvent(ev);
 
-				/*cout << "EvObstacleMap contains: " << endl;
-				for(unsigned int i=0; i<currObstacleNodesInRange->size(); i++)
-					cout << "- Node (x,y): " << currObstacleNodesInRange->at(i)->getX() << ", " << currObstacleNodesInRange->at(i)->getY() << endl;
-				*/
+				//cout << "EvObstacleMap contains: " << endl;
+				//for(unsigned int i=0; i<currObstacleNodesInRange->size(); i++)
+				//	cout << "- Node (x,y): " << currObstacleNodesInRange->at(i)->getX() << ", " << currObstacleNodesInRange->at(i)->getY() << endl;
+
 			}
 
 			delete lastObstacleNodesInRange;
 			lastObstacleNodesInRange = currObstacleNodesInRange;
-		}
+		}*/
 
 		if(oldSensorState != NULL)
 			delete oldSensorState;

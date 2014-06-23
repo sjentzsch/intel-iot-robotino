@@ -13,6 +13,7 @@
 // States
 struct refillInit;
 struct refillDrivingToBaseStart;
+struct refillWaitForRefill;
 struct refillFinished;
 
 /////////////////////////////////////////////////////////
@@ -34,10 +35,6 @@ struct RefillDrinks : sc::state<RefillDrinks, StateMachine1, refillInit>
 	void driveToBaseStart() {
 		MsgEnvironment msgEnvironment = DataProvider::getInstance()->getLatestMsgEnvironment();
 		stateBehavCtrl->getMotorCtrl()->moveToAbsPos(msgEnvironment.x_base*1000, msgEnvironment.y_base*1000, msgEnvironment.phi_base, 100.0);
-	}
-
-	void refillDrinks() {
-		stateBehavCtrl->getTaskManager()->refillDrinks();
 	}
 
 	//Reactions
@@ -82,13 +79,32 @@ struct refillDrivingToBaseStart : sc::state<refillDrivingToBaseStart, RefillDrin
 
 	sc::result react(const EvMotorCtrlReady&)
 	{
-		context<RefillDrinks>().refillDrinks();
-		return transit<refillFinished>();
+		return transit<refillWaitForRefill>();
 	}
 
 	//Reactions
 	typedef mpl::list<
 		sc::custom_reaction<EvMotorCtrlReady>
+	> reactions;
+};
+
+struct refillWaitForRefill : sc::state<refillWaitForRefill, RefillDrinks>
+{
+	refillWaitForRefill(my_context ctx) : my_base(ctx) {
+		context<StateMachine1>().logAndDisplayStateName("refillWaitForRefill");
+	} // entry
+
+	virtual ~refillWaitForRefill() {
+	} // exit
+
+	sc::result react(const EvSensorAllDrinksRefilled&)
+	{
+		return transit<refillFinished>();
+	}
+
+	//Reactions
+	typedef mpl::list<
+		sc::custom_reaction<EvSensorAllDrinksRefilled>
 	> reactions;
 };
 

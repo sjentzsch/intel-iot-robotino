@@ -14,6 +14,8 @@ const unsigned int SensorServer::brightSensorFrontRight(1);
 const unsigned int SensorServer::brightSensorFloorLeft(2);
 const unsigned int SensorServer::brightSensorFloorRight(3);
 const unsigned int SensorServer::brightSensorPuck(4);
+const unsigned int SensorServer::analogSensorDrink1(1);
+const unsigned int SensorServer::analogSensorDrink2(2);
 
 SensorServer::SensorServer() :havingPuck(false)
 {
@@ -22,7 +24,8 @@ SensorServer::SensorServer() :havingPuck(false)
 	brightSensorFloorLeftInput.setInputNumber(brightSensorFloorLeft);
 	brightSensorFloorRightInput.setInputNumber(brightSensorFloorRight);
 	brightSensorPuckInput.setInputNumber(brightSensorPuck);
-
+	analogSensorDrinkInput1.setInputNumber(analogSensorDrink1);
+	analogSensorDrinkInput2.setInputNumber(analogSensorDrink2);
 
 //	for(int i=0; i<9; i++)
 //	{
@@ -528,6 +531,9 @@ void SensorServer::getNewSensorValues(SensorEventGeneratorBuffer* buf, SensorEve
 	buf->sensorFloorLeftBlack = floorLeftBlack();
 	buf->sensorFloorRightBlack = floorRightBlack();
 	buf->sensorPuckBlack = puckBlack();
+
+	buf->sensorHasDrink1 = hasDrink1();
+	buf->sensorHasDrink2 = hasDrink2();
 
 	distanceSensorArray.distances(buf->sensorDistance);
 

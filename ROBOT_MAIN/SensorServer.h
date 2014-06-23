@@ -20,6 +20,7 @@
 
 //#include <rec/robotino/api2/all.h>
 #include <rec/robotino/api2/Com.h>
+#include <rec/robotino/api2/AnalogInput.h>
 #include <rec/robotino/api2/DigitalInput.h>
 #include <rec/robotino/api2/DistanceSensorArray.h>
 #include <rec/robotino/api2/Odometry.h>
@@ -41,12 +42,18 @@ private:
 	static const unsigned int brightSensorFloorRight;
 	static const unsigned int brightSensorPuck;
 
+	static const unsigned int analogSensorDrink1;
+	static const unsigned int analogSensorDrink2;
+
 
 	rec::robotino::api2::DigitalInput brightSensorFrontLeftInput;
 	rec::robotino::api2::DigitalInput brightSensorFrontRightInput;
 	rec::robotino::api2::DigitalInput brightSensorFloorLeftInput;
 	rec::robotino::api2::DigitalInput brightSensorFloorRightInput;
 	rec::robotino::api2::DigitalInput brightSensorPuckInput;
+
+	rec::robotino::api2::AnalogInput analogSensorDrinkInput1;
+	rec::robotino::api2::AnalogInput analogSensorDrinkInput2;
 
 	OdometrySimulation odometry_sim;
 	rec::robotino::api2::Odometry odometry;
@@ -90,6 +97,29 @@ public:
 	}
 	bool puckBlack() {
 		return brightSensorPuckInput.value();
+	}
+
+	float valueDrink1() {
+		return analogSensorDrinkInput1.value();
+	}
+	bool hasDrink1() {
+		return analogSensorDrinkInput1.value() > 4.0f;
+	}
+
+	float valueDrink2() {
+		return analogSensorDrinkInput2.value();
+	}
+	bool hasDrink2() {
+		return analogSensorDrinkInput2.value() > 4.0f;
+	}
+
+	unsigned long numDrinks() {
+		unsigned long i = 0;
+		if(hasDrink1())
+			i++;
+		if(hasDrink2())
+			i++;
+		return i;
 	}
 
 	float getX() {

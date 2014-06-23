@@ -14,6 +14,8 @@
 #include "Simulation/SimApi2Com.h"
 #include "Api2Com.h"
 
+#include <rec/robotino/api2/all.h>
+
 using namespace std;
 using namespace boost;
 using boost::lexical_cast;
@@ -61,8 +63,6 @@ int main(int argc, char* argv[])
 		CloudComm::getInstance()->init(new CloudServer(8198), new CloudClient(io_service, "localhost", 8198));
 		CloudComm::getInstance()->getCloudServer()->handleConnections();
 
-		//rec::robotino::api2::msleep(3000);
-
 		MsgEnvironment msgEnv(0, 2.0, 3.0, 0.23, 0.23, 0.0, 1.0, 2.0, 90.0);
 		CloudComm::getInstance()->getCloudClient()->send(msgEnv.save());
 
@@ -78,14 +78,20 @@ int main(int argc, char* argv[])
 		MsgCustomerOrder msgCustOrder3(1, 7, 22, "John");
 		CloudComm::getInstance()->getCloudClient()->send(msgCustOrder3.save());
 
+		MsgCustomerOrder msgCustOrder4(2, 8, 24, "Klaus");
+		CloudComm::getInstance()->getCloudClient()->send(msgCustOrder4.save());
+
 		MsgCustomerPos msgCustPos1(0, 22, "John", 1.0, 0.5);
 		CloudComm::getInstance()->getCloudClient()->send(msgCustPos1.save());
 
 		MsgCustomerPos msgCustPos2(0, 22, "John", 0.5, 1.5);
 		CloudComm::getInstance()->getCloudClient()->send(msgCustPos2.save());
 
-		MsgCustomerPos msgCustPos3(0, 23, "Peter", 1.5, 0.5);
-		CloudComm::getInstance()->getCloudClient()->send(msgCustPos3.save());
+		MsgCustomerPos msgCustPos4(0, 23, "Peter", 1.5, 0.0);
+		CloudComm::getInstance()->getCloudClient()->send(msgCustPos4.save());
+
+		MsgCustomerPos msgCustPos5(0, 24, "Klaus", 1.0, 2.0);
+		CloudComm::getInstance()->getCloudClient()->send(msgCustPos5.save());
 
 		CloudComm::getInstance()->getCloudClient()->send("blalalalala!!");
 

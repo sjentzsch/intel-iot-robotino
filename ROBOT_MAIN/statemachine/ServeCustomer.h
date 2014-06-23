@@ -13,6 +13,7 @@
 // States
 struct serveInit;
 struct serveDrivingToCustomer;
+struct serveWaitForPickup;
 struct serveFinished;
 
 /////////////////////////////////////////////////////////
@@ -90,13 +91,33 @@ struct serveDrivingToCustomer : sc::state<serveDrivingToCustomer, ServeCustomer>
 
 	sc::result react(const EvMotorCtrlReady&)
 	{
+		return transit<serveWaitForPickup>();
+	}
+
+	//Reactions
+	typedef mpl::list<
+		sc::custom_reaction<EvMotorCtrlReady>
+	> reactions;
+};
+
+struct serveWaitForPickup : sc::state<serveWaitForPickup, ServeCustomer>
+{
+	serveWaitForPickup(my_context ctx) : my_base(ctx) {
+		context<StateMachine1>().logAndDisplayStateName("serveWaitForPickup");
+	} // entry
+
+	virtual ~serveWaitForPickup() {
+	} // exit
+
+	sc::result react(const EvSensorDrinkTaken &ev)
+	{
 		context<ServeCustomer>().serveDrink();
 		return transit<serveFinished>();
 	}
 
 	//Reactions
 	typedef mpl::list<
-		sc::custom_reaction<EvMotorCtrlReady>
+		sc::custom_reaction<EvSensorDrinkTaken>
 	> reactions;
 };
 

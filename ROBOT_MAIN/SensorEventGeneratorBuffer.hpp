@@ -23,7 +23,9 @@ public:
 	bool sensorFloorLeftBlack;
 	bool sensorFloorRightBlack;
 	bool sensorPuckBlack;
-	//float sensorPuckBias;
+
+	bool sensorHasDrink1;
+	bool sensorHasDrink2;
 
 	float sensorDistance[9];
 

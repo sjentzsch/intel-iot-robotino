@@ -13,7 +13,7 @@
 LaserScanner::LaserScanner(SensorServer* sensorServer): execThread(NULL), signal(LaserScannerSignal::RUN)
 {
 	// setting up physical laser calibration
-	float offset_x = 0.218;
+	float offset_x = 0.107;
 	float offset_y = 0.0;
 	float theta = 0.0;
 
@@ -70,8 +70,8 @@ void LaserScanner::loop()
 		cout << "time_increment: " << scan.api_readings.time_increment << endl;
 		cout << "scan_time: " << scan.api_readings.scan_time << endl;
 		cout << "range_min: " << scan.api_readings.range_min << endl;
-		cout << "range_max: " << scan.api_readings.range_max << endl;*/
-		/*for(unsigned int i=0; i<scan.positions.size(); i+=50)
+		cout << "range_max: " << scan.api_readings.range_max << endl;
+		for(unsigned int i=0; i<scan.positions.size(); i+=50)
 		{
 			cout << i << ": " << scan.ranges[i] << endl;
 		}

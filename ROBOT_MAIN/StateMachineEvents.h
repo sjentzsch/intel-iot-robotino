@@ -52,6 +52,18 @@ struct EvSensorFrontRightIsFree : sc::event<EvSensorFrontRightIsFree> {};
 struct EvSensorFloorLeftIsBlack : sc::event<EvSensorFloorLeftIsBlack> {};
 struct EvSensorFloorRightIsBlack : sc::event<EvSensorFloorRightIsBlack> {};
 
+struct EvSensorDrinkTaken : sc::event<EvSensorDrinkTaken> {
+	unsigned int number;
+	EvSensorDrinkTaken(unsigned int number_):number(number_){};
+	~EvSensorDrinkTaken(){};
+};
+struct EvSensorDrinkRefilled : sc::event<EvSensorDrinkRefilled> {
+	unsigned int number;
+	EvSensorDrinkRefilled(unsigned int number_):number(number_){};
+	~EvSensorDrinkRefilled(){};
+};
+struct EvSensorAllDrinksRefilled : sc::event<EvSensorAllDrinksRefilled> {};
+
 struct EvSensorDistance1Blocked : sc::event<EvSensorDistance1Blocked> {};
 struct EvSensorDistance1Free : sc::event<EvSensorDistance1Free> {};
 struct EvSensorDistance2Blocked : sc::event<EvSensorDistance2Blocked> {};

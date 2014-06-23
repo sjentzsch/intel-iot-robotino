@@ -7,9 +7,9 @@
 
 #include "TaskManager.h"
 
-TaskManager::TaskManager(StateBehaviorController* stateBhvContrl,SensorServer *sensorSrv_):asyncStateMachine(stateBhvContrl->getAsyncStateMachine())
+TaskManager::TaskManager(StateBehaviorController* stateBhvContrl,SensorServer *sensorSrv_):asyncStateMachine(stateBhvContrl->getAsyncStateMachine()),sensorServer(sensorSrv_)
 {
-	drinks_available = DRINKS_AVAILABLE_START;
+	FileLog::log_NOTICE("[TaskManager] Initial Drinks available: ", std::to_string(this->sensorServer->numDrinks()));
 	currCustomerOrder = NULL;
 	nextTask_exec = NULL;
 }
@@ -41,7 +41,7 @@ void TaskManager::nextTask_impl()
 {
 	FileLog::log_NOTICE("[TaskManager] nextTask started");
 
-	if(this->drinks_available < 1)
+	if(this->sensorServer->numDrinks() < 1)
 	{
 		FileLog::log_NOTICE("[TaskManager] EvRefillDrinks");
 		boost::shared_ptr<EvRefillDrinks> ev(new EvRefillDrinks());
@@ -115,18 +115,11 @@ void TaskManager::serveDrink()
 {
 	if(this->currCustomerOrder != NULL)
 	{
-		this->drinks_available--;
 		this->vecMsgRobotServed.push_back(MsgRobotServed(42, this->currCustomerOrder->order_id));
 
 		delete this->currCustomerOrder;
 		this->currCustomerOrder = NULL;
 	}
-}
-
-
-void TaskManager::refillDrinks()
-{
-	this->drinks_available = DRINKS_AVAILABLE_START;
 }
 
 MsgCustomerOrder TaskManager::getCurrCustomerOrder()
