@@ -16,10 +16,6 @@
 
 #include "SensorServer.h"
 #include "utils/FileLogger.h"
-#include "LSPBTrajectory/pose.h"
-
-// < trajectory />
-#include "LSPBTrajectory/LSPBTrajectory2.h"
 
 class StateBehaviorController;
 
@@ -50,12 +46,11 @@ private:
 
 	Timer slowStartTimer;
 
-//	OmniDrive drive;
+	// OmniDrive drive;
 	SensorServer *sensorSrv;
 	StateBehaviorController *stateCtrl;
 
-
-	//Variables for the motor control thread
+	// Variables for the motor control thread
 	boost::thread *execThread; //thread of execution, controls motors
 	MotorCtrlerSignal::MotorCtrlerSignal signal; //represents the current control signal
 	boost::mutex signal_mutex; //mutex for access control
@@ -68,9 +63,8 @@ private:
 	bool checkSignalStatus();
 	void sendReadyEvent();
 	void setVelocity(float vx, float vy, float vphi);
-	//void moveToAbsPos_impl(float destX, float destY, float destPhi, float myMaxSpeed, float myMaxRotSpeed, bool onlyRotate, ForceRotationDirection::ForceRotationDirection forcedDir);
-	vec2D rotateGlobalVectoLocal(vec2D global, double phi);
-	void moveToAbsPos2_impl(vector<vec3D> vPoints, float myMaxSpeed, float myMaxRotSpeed, bool onlyRotate, ForceRotationDirection::ForceRotationDirection forcedDir);
+	void moveToAbsPos_impl(vector<vec3D> vPoints, float myMaxSpeed, float myMaxRotSpeed, bool onlyRotate, ForceRotationDirection::ForceRotationDirection forcedDir);
+
 public:
 	MotorController(SensorServer *sensorSrv_);
 	virtual ~MotorController();
@@ -81,6 +75,7 @@ public:
 	float getPositiveDegree(float phi) const;
 	float getDistDegree(float phi1, float phi2) const;
 	vec3D relToAbs(vec3D vPoint);
+
 	void moveToAbsPos(vector<vec3D> vPoints, float myMaxSpeed=MAX_SPEED, float myMaxRotSpeed=MAX_ROT_SPEED, bool onlyRotate=false, ForceRotationDirection::ForceRotationDirection forcedDir=ForceRotationDirection::SHORTEST);
 	void moveToAbsPos(float destX, float destY, float destPhi, float myMaxSpeed=MAX_SPEED, float myMaxRotSpeed=MAX_ROT_SPEED, bool onlyRotate=false, ForceRotationDirection::ForceRotationDirection forcedDir=ForceRotationDirection::SHORTEST); // orignal default values: float myMaxSpeed=300.0f, float myMaxRotSpeed=20.0f
 	void moveToAbsPosOnly(float destX, float destY, float myMaxSpeed=MAX_SPEED);
@@ -89,8 +84,6 @@ public:
 	void moveToAbsXPosRelYPos(float destX, float destY, float destPhi, float myMaxSpeed=MAX_SPEED);
 	void rotateToAbsAngle(float destPhi, ForceRotationDirection::ForceRotationDirection forcedDir=ForceRotationDirection::SHORTEST, float myMaxRotSpeed=MAX_ROT_SPEED);
 	void rotateToRelAngle(float destPhi, ForceRotationDirection::ForceRotationDirection forcedDir=ForceRotationDirection::SHORTEST, float myMaxRotSpeed=MAX_ROT_SPEED);
-	void driveLSPBTrajectory(vector<struct vec3D> viaPoints, double maxLinVel=300 , double maxLinAcc=300, double maxAngVel=70 , double maxAngAcc=45);
-	void driveLSPBTrajectory_impl(vector<struct vec3D> viaPoints, double maxLinVel=300 , double maxLinAcc=300, double maxAngVel=70 , double maxAngAcc=45);
 };
 
 #endif /* MOTORCONTROLLER_H_ */

@@ -26,6 +26,7 @@ public:
 
 	bool sensorHasDrink1;
 	bool sensorHasDrink2;
+	bool sensorHasDrink3;
 
 	float sensorDistance[9];
 

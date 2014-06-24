@@ -12,7 +12,9 @@
 
 // States
 struct refillInit;
+struct refillRotatingToBaseStart;
 struct refillDrivingToBaseStart;
+struct refillRotatingToBase;
 struct refillWaitForRefill;
 struct refillFinished;
 
@@ -27,14 +29,23 @@ struct RefillDrinks : sc::state<RefillDrinks, StateMachine1, refillInit>
 	RefillDrinks(my_context ctx) : my_base(ctx) {
 		context<StateMachine1>().logAndDisplayStateName("RefillDrinks");
 		stateBehavCtrl = context<StateMachine1>().getStateBehavController();
+		msgEnvironment = new MsgEnvironment(DataProvider::getInstance()->getLatestMsgEnvironment());
 	} // entry
 
 	virtual ~RefillDrinks() {
+		delete msgEnvironment;
 	} // exit
 
+	void rotateToBaseStart() {
+		stateBehavCtrl->getMotorCtrl()->rotateToAbsAngle(RADTODEG(atan2(msgEnvironment->y_base*1000 - stateBehavCtrl->getSensorControl()->getRobotY(), msgEnvironment->x_base*1000 - stateBehavCtrl->getSensorControl()->getRobotX())));
+	}
+
 	void driveToBaseStart() {
-		MsgEnvironment msgEnvironment = DataProvider::getInstance()->getLatestMsgEnvironment();
-		stateBehavCtrl->getMotorCtrl()->moveToAbsPos(msgEnvironment.x_base*1000, msgEnvironment.y_base*1000, msgEnvironment.phi_base, 100.0);
+		stateBehavCtrl->getMotorCtrl()->moveToAbsPosOnly(msgEnvironment->x_base*1000, msgEnvironment->y_base*1000);
+	}
+
+	void rotateToBase() {
+		stateBehavCtrl->getMotorCtrl()->rotateToAbsAngle(msgEnvironment->phi_base);
 	}
 
 	//Reactions
@@ -44,6 +55,7 @@ struct RefillDrinks : sc::state<RefillDrinks, StateMachine1, refillInit>
 
 private:
 	StateBehaviorController* stateBehavCtrl;
+	MsgEnvironment* msgEnvironment;
 };
 
 struct refillInit : sc::state<refillInit, RefillDrinks>
@@ -58,13 +70,34 @@ struct refillInit : sc::state<refillInit, RefillDrinks>
 
 	sc::result react(const EvInit&)
 	{
+		context<RefillDrinks>().rotateToBaseStart();
+		return transit<refillRotatingToBaseStart>();
+	}
+
+	//Reactions
+	typedef mpl::list<
+		sc::custom_reaction<EvInit>
+	> reactions;
+};
+
+struct refillRotatingToBaseStart : sc::state<refillRotatingToBaseStart, RefillDrinks>
+{
+	refillRotatingToBaseStart(my_context ctx) : my_base(ctx) {
+		context<StateMachine1>().logAndDisplayStateName("refillRotatingToBaseStart");
+	} // entry
+
+	virtual ~refillRotatingToBaseStart() {
+	} // exit
+
+	sc::result react(const EvMotorCtrlReady&)
+	{
 		context<RefillDrinks>().driveToBaseStart();
 		return transit<refillDrivingToBaseStart>();
 	}
 
 	//Reactions
 	typedef mpl::list<
-		sc::custom_reaction<EvInit>
+		sc::custom_reaction<EvMotorCtrlReady>
 	> reactions;
 };
 
@@ -75,6 +108,27 @@ struct refillDrivingToBaseStart : sc::state<refillDrivingToBaseStart, RefillDrin
 	} // entry
 
 	virtual ~refillDrivingToBaseStart() {
+	} // exit
+
+	sc::result react(const EvMotorCtrlReady&)
+	{
+		context<RefillDrinks>().rotateToBase();
+		return transit<refillRotatingToBase>();
+	}
+
+	//Reactions
+	typedef mpl::list<
+		sc::custom_reaction<EvMotorCtrlReady>
+	> reactions;
+};
+
+struct refillRotatingToBase : sc::state<refillRotatingToBase, RefillDrinks>
+{
+	refillRotatingToBase(my_context ctx) : my_base(ctx) {
+		context<StateMachine1>().logAndDisplayStateName("refillRotatingToBase");
+	} // entry
+
+	virtual ~refillRotatingToBase() {
 	} // exit
 
 	sc::result react(const EvMotorCtrlReady&)

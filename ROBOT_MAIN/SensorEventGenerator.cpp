@@ -122,6 +122,7 @@ void SensorEventGenerator::monitorSensors()
 		/*cout << "**********************" << endl;
 		cout << "Analog Value Drink 1: " << sensorSrv->valueDrink1() << endl;
 		cout << "Analog Value Drink 2: " << sensorSrv->valueDrink2() << endl;
+		cout << "Analog Value Drink 3: " << sensorSrv->valueDrink3() << endl;
 		cout << "**********************" << endl;*/
 
 		// force sensors (EvSensorDrinkTaken and EvSensorDrinkRefilled)
@@ -151,8 +152,21 @@ void SensorEventGenerator::monitorSensors()
 			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDrinkRefilled 2");
 			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
 		}
+		// sensor for drink 3
+		if(oldSensorState->sensorHasDrink3 && !newSensorState->sensorHasDrink3)
+		{
+			boost::shared_ptr<EvSensorDrinkTaken> ev(new EvSensorDrinkTaken(3));
+			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDrinkTaken 3");
+			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
+		}
+		else if(!oldSensorState->sensorHasDrink3 && newSensorState->sensorHasDrink3)
+		{
+			boost::shared_ptr<EvSensorDrinkRefilled> ev(new EvSensorDrinkRefilled(3));
+			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorDrinkRefilled 3");
+			stateCtrl->getAsyncStateMachine()->queueEvent(ev);
+		}
 		// combined force sensor events
-		if((!oldSensorState->sensorHasDrink1 || !oldSensorState->sensorHasDrink2) && (newSensorState->sensorHasDrink1 && newSensorState->sensorHasDrink2))
+		if((!oldSensorState->sensorHasDrink1 || !oldSensorState->sensorHasDrink2 || !oldSensorState->sensorHasDrink3) && (newSensorState->sensorHasDrink1 && newSensorState->sensorHasDrink2 && newSensorState->sensorHasDrink3))
 		{
 			boost::shared_ptr<EvSensorAllDrinksRefilled> ev(new EvSensorAllDrinksRefilled());
 			FileLog::log(log_SensorEventGenerator, "[SensorEventGenerator] EvSensorAllDrinksRefilled");

@@ -11,8 +11,6 @@
 #define SIMULATION_MODE 0
 #define USE_CAMERA 0
 
-#define DRINKS_AVAILABLE_START 2
-
 /* USEFUL PREPROCESSOR DIRECTIVES */
 #define PRINT(x) std::cout << x << std::endl
 #define SQUARE(x) ((x) * (x))

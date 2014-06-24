@@ -44,7 +44,7 @@ private:
 
 	static const unsigned int analogSensorDrink1;
 	static const unsigned int analogSensorDrink2;
-
+	static const unsigned int analogSensorDrink3;
 
 	rec::robotino::api2::DigitalInput brightSensorFrontLeftInput;
 	rec::robotino::api2::DigitalInput brightSensorFrontRightInput;
@@ -54,6 +54,7 @@ private:
 
 	rec::robotino::api2::AnalogInput analogSensorDrinkInput1;
 	rec::robotino::api2::AnalogInput analogSensorDrinkInput2;
+	rec::robotino::api2::AnalogInput analogSensorDrinkInput3;
 
 	OdometrySimulation odometry_sim;
 	rec::robotino::api2::Odometry odometry;
@@ -113,11 +114,20 @@ public:
 		return analogSensorDrinkInput2.value() > 4.0f;
 	}
 
+	float valueDrink3() {
+		return analogSensorDrinkInput3.value();
+	}
+	bool hasDrink3() {
+		return analogSensorDrinkInput3.value() > 4.0f;
+	}
+
 	unsigned long numDrinks() {
 		unsigned long i = 0;
 		if(hasDrink1())
 			i++;
 		if(hasDrink2())
+			i++;
+		if(hasDrink3())
 			i++;
 		return i;
 	}

@@ -1,4 +1,6 @@
 #include <iostream>
+#include <cstdlib>
+#include <ctime>
 #include <queue>
 #include "config.h"
 #include <boost/thread.hpp>
@@ -52,6 +54,9 @@ int main(int argc, char* argv[])
 {
 	try
 	{
+		// initialize random seed
+		srand (static_cast <unsigned> (time(0)));
+
 		// initialize the logging class
 		pantheios_init();
 

@@ -12,6 +12,7 @@
 
 // States
 struct serveInit;
+struct serveRotatingToCustomer;
 struct serveDrivingToCustomer;
 struct serveWaitForPickup;
 struct serveFinished;
@@ -27,22 +28,28 @@ struct ServeCustomer : sc::state<ServeCustomer, StateMachine1, serveInit>
 	ServeCustomer(my_context ctx) : my_base(ctx) {
 		context<StateMachine1>().logAndDisplayStateName("ServeCustomer");
 		stateBehavCtrl = context<StateMachine1>().getStateBehavController();
-	} // entry
 
-	virtual ~ServeCustomer() {
-	} // exit
-
-	void driveToCustomer() {
-		unsigned long curr_customer_id = stateBehavCtrl->getTaskManager()->getCurrCustomerOrder().customer_id;
+		curr_customer_id = stateBehavCtrl->getTaskManager()->getCurrCustomerOrder().customer_id;
 		vector< MsgCustomerPos > vecMsgCustomerPoses = DataProvider::getInstance()->getMsgCustomerPoses();
 		for(unsigned int i=0; i<vecMsgCustomerPoses.size(); i++)
 		{
 			if(curr_customer_id == vecMsgCustomerPoses.at(i).customer_id)
 			{
-				stateBehavCtrl->getMotorCtrl()->moveToAbsPos(vecMsgCustomerPoses.at(i).x*1000, vecMsgCustomerPoses.at(i).y*1000, 0, 300.0);
+				msgCustomerPos = new MsgCustomerPos(vecMsgCustomerPoses.at(i));
 				break;
 			}
 		}
+	} // entry
+
+	virtual ~ServeCustomer() {
+	} // exit
+
+	void rotateToCustomer() {
+		stateBehavCtrl->getMotorCtrl()->rotateToAbsAngle(RADTODEG(atan2(msgCustomerPos->y*1000 - stateBehavCtrl->getSensorControl()->getRobotY(), msgCustomerPos->x*1000 - stateBehavCtrl->getSensorControl()->getRobotX())));
+	}
+
+	void driveToCustomer() {
+		stateBehavCtrl->getMotorCtrl()->moveToAbsPosOnly(msgCustomerPos->x*1000, msgCustomerPos->y*1000);
 	}
 
 	void serveDrink() {
@@ -56,6 +63,9 @@ struct ServeCustomer : sc::state<ServeCustomer, StateMachine1, serveInit>
 
 private:
 	StateBehaviorController* stateBehavCtrl;
+
+	unsigned long curr_customer_id;
+	MsgCustomerPos* msgCustomerPos;
 };
 
 struct serveInit : sc::state<serveInit, ServeCustomer>
@@ -70,13 +80,34 @@ struct serveInit : sc::state<serveInit, ServeCustomer>
 
 	sc::result react(const EvInit&)
 	{
+		context<ServeCustomer>().rotateToCustomer();
+		return transit<serveRotatingToCustomer>();
+	}
+
+	//Reactions
+	typedef mpl::list<
+		sc::custom_reaction<EvInit>
+	> reactions;
+};
+
+struct serveRotatingToCustomer : sc::state<serveRotatingToCustomer, ServeCustomer>
+{
+	serveRotatingToCustomer(my_context ctx) : my_base(ctx) {
+		context<StateMachine1>().logAndDisplayStateName("serveRotatingToCustomer");
+	} // entry
+
+	virtual ~serveRotatingToCustomer() {
+	} // exit
+
+	sc::result react(const EvMotorCtrlReady&)
+	{
 		context<ServeCustomer>().driveToCustomer();
 		return transit<serveDrivingToCustomer>();
 	}
 
 	//Reactions
 	typedef mpl::list<
-		sc::custom_reaction<EvInit>
+		sc::custom_reaction<EvMotorCtrlReady>
 	> reactions;
 };
 

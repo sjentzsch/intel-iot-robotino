@@ -12,7 +12,8 @@
 
 // States
 struct randInit;
-struct randDriving;
+struct randRotatingToRandPos;
+struct randDrivingToRandPos;
 struct randFinished;
 
 /////////////////////////////////////////////////////////
@@ -26,15 +27,33 @@ struct RandomMovement : sc::state<RandomMovement, StateMachine1, randInit>
 	RandomMovement(my_context ctx) : my_base(ctx) {
 		context<StateMachine1>().logAndDisplayStateName("RandomMovement");
 		stateBehavCtrl = context<StateMachine1>().getStateBehavController();
+
+		// TODO: not nice here ...
+		boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
+
+		msgEnvironment = new MsgEnvironment(DataProvider::getInstance()->getLatestMsgEnvironment());
+
+		float xMin = msgEnvironment->x_max / 3;
+		float xMax = msgEnvironment->x_max - xMin;
+		randX = xMin + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(xMax-xMin)));
+
+		float yMin = msgEnvironment->y_max / 3;
+		float yMax = msgEnvironment->y_max - yMin;
+		randY = yMin + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(yMax-yMin)));
+
+		FileLog::log_NOTICE("[StateMachine | RandomMovement] Random Point: ", std::to_string(randX), ", ", std::to_string(randY));
+
 	} // entry
 
 	virtual ~RandomMovement() {
 	} // exit
 
+	void rotateToRandPos() {
+		stateBehavCtrl->getMotorCtrl()->rotateToAbsAngle(RADTODEG(atan2(randY*1000 - stateBehavCtrl->getSensorControl()->getRobotY(), randX*1000 - stateBehavCtrl->getSensorControl()->getRobotX())));
+	}
+
 	void driveToRandPos() {
-		boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
-		MsgEnvironment msgEnvironment = DataProvider::getInstance()->getLatestMsgEnvironment();
-		stateBehavCtrl->getMotorCtrl()->moveToAbsPos(msgEnvironment.x_robot*1000, msgEnvironment.y_robot*1000, msgEnvironment.phi_robot, 150.0);
+		stateBehavCtrl->getMotorCtrl()->moveToAbsPosOnly(randX*1000, randY*1000);
 	}
 
 	//Reactions
@@ -44,6 +63,10 @@ struct RandomMovement : sc::state<RandomMovement, StateMachine1, randInit>
 
 private:
 	StateBehaviorController* stateBehavCtrl;
+
+	MsgEnvironment* msgEnvironment;
+	float randX;
+	float randY;
 };
 
 struct randInit : sc::state<randInit, RandomMovement>
@@ -58,8 +81,8 @@ struct randInit : sc::state<randInit, RandomMovement>
 
 	sc::result react(const EvInit&)
 	{
-		context<RandomMovement>().driveToRandPos();
-		return transit<randDriving>();
+		context<RandomMovement>().rotateToRandPos();
+		return transit<randRotatingToRandPos>();
 	}
 
 	//Reactions
@@ -68,13 +91,34 @@ struct randInit : sc::state<randInit, RandomMovement>
 	> reactions;
 };
 
-struct randDriving : sc::state<randDriving, RandomMovement>
+struct randRotatingToRandPos : sc::state<randRotatingToRandPos, RandomMovement>
 {
-	randDriving(my_context ctx) : my_base(ctx) {
-		context<StateMachine1>().logAndDisplayStateName("randDriving");
+	randRotatingToRandPos(my_context ctx) : my_base(ctx) {
+		context<StateMachine1>().logAndDisplayStateName("randRotatingToRandPos");
 	} // entry
 
-	virtual ~randDriving() {
+	virtual ~randRotatingToRandPos() {
+	} // exit
+
+	sc::result react(const EvMotorCtrlReady&)
+	{
+		context<RandomMovement>().driveToRandPos();
+		return transit<randDrivingToRandPos>();
+	}
+
+	//Reactions
+	typedef mpl::list<
+		sc::custom_reaction<EvMotorCtrlReady>
+	> reactions;
+};
+
+struct randDrivingToRandPos : sc::state<randDrivingToRandPos, RandomMovement>
+{
+	randDrivingToRandPos(my_context ctx) : my_base(ctx) {
+		context<StateMachine1>().logAndDisplayStateName("randDrivingToRandPos");
+	} // entry
+
+	virtual ~randDrivingToRandPos() {
 	} // exit
 
 	sc::result react(const EvMotorCtrlReady&)

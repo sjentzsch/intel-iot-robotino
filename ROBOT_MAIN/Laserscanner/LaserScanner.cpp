@@ -82,6 +82,58 @@ void LaserScanner::loop()
 
 		float my_x, my_y, my_phi;
 		this->sensorServer->getOdometry(my_x, my_y, my_phi);
+		std::vector<bool> isValid(scan.positions.size());
+		for(unsigned int i=0; i<scan.positions.size(); i++)
+		{
+			this->sensorServer->transformBase2World(scan.positions.at(i)[0], scan.positions.at(i)[1], my_x, my_y, my_phi, scan.positionsGlob.at(i)[0], scan.positionsGlob.at(i)[1]);
+
+			// if point is outside the field dimensions OR point range is outside the valid range of the laserscanner
+			if(!scannerDriver->coordInsideField(scan.positionsGlob.at(i)[0], scan.positionsGlob.at(i)[1]) || !scan.inRange.at(i))
+				isValid.at(i) = false;
+			else
+				isValid.at(i) = true;
+		}
+		//cout << "obstacle ratio: " << numDynObstacles << "/" << scan.positions.size() << endl;
+
+
+		// set latestObstacleBuffer
+		{
+			boost::mutex::scoped_lock l(m_mutex);
+			this->latestObstacleBuffer.my_x = my_x;
+			this->latestObstacleBuffer.my_y = my_y;
+			this->latestObstacleBuffer.my_phi = my_phi;
+			//this->latestObstacleBuffer.obstacles = clustersMid;
+		}
+	}
+}
+
+/*void LaserScanner::loop()
+{
+	while(true)
+	{
+		checkSignalStatus();
+
+		LaserScannerReadings scan = this->readings();
+
+		//cout << "*****************" << endl;
+//		cout << "angle_min: " << scan.api_readings.angle_min << endl;
+//		cout << "angle_max: " << scan.api_readings.angle_max << endl;
+//		cout << "angle_increment: " << scan.api_readings.angle_increment << endl;
+//		cout << "time_increment: " << scan.api_readings.time_increment << endl;
+//		cout << "scan_time: " << scan.api_readings.scan_time << endl;
+//		cout << "range_min: " << scan.api_readings.range_min << endl;
+//		cout << "range_max: " << scan.api_readings.range_max << endl;
+//		for(unsigned int i=0; i<scan.positions.size(); i+=50)
+//		{
+//			cout << i << ": " << scan.ranges[i] << endl;
+//		}
+//		if(scan.positions.size() > 0)
+//		{
+//			cout << "middle: " << scan.ranges[scan.positions.size()/2] << endl;
+//		}
+
+		float my_x, my_y, my_phi;
+		this->sensorServer->getOdometry(my_x, my_y, my_phi);
 		std::vector<bool> isDynObstacle(scan.positions.size());
 		std::vector<bool> isValid(scan.positions.size());
 		int numDynObstacles = 0;
@@ -155,8 +207,8 @@ void LaserScanner::loop()
 		if(currInsideCluster)
 			clusters.back().at(1) = clusterSum.size()-1;
 
-		/*for(unsigned int i=0; i<clusters.size(); i++)
-			::std::cout << "Cluster " << i << ": " << clusters.at(i).at(0) << "," << clusters.at(i).at(1) << ::std::endl;*/
+		//for(unsigned int i=0; i<clusters.size(); i++)
+		//	::std::cout << "Cluster " << i << ": " << clusters.at(i).at(0) << "," << clusters.at(i).at(1) << ::std::endl;
 
 		kernel_border_offset = (KERNEL_MEDIAN_WIDTH-1)/2;
 		unsigned int clusterCount = clusters.size();
@@ -237,8 +289,8 @@ void LaserScanner::loop()
 
 				//::std::cout << "- " << scan.positionsGlob.at(j).at(0) << ", " << scan.positionsGlob.at(j).at(1) << ::std::endl;
 
-				/*if(sqrt(dist.at(j-clusters.at(c).at(0))) > OUTLIER_STD_MULTIPLIER*std)
-					continue;*/
+				//if(sqrt(dist.at(j-clusters.at(c).at(0))) > OUTLIER_STD_MULTIPLIER*std)
+				//	continue;
 
 				midpoint.at(0) += scan.positionsGlob.at(j).at(0);
 				midpoint.at(1) += scan.positionsGlob.at(j).at(1);
@@ -263,7 +315,7 @@ void LaserScanner::loop()
 			this->latestObstacleBuffer.obstacles = clustersMid;
 		}
 	}
-}
+}*/
 
 bool LaserScanner::checkSignalStatus()
 {
