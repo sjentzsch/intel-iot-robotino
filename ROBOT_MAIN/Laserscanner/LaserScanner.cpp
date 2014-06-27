@@ -66,7 +66,7 @@ void LaserScanner::loop()
 		LaserScannerReadings scan = this->readings();
 
 		//cout << "*****************" << endl;
-		cout << "angle_min: " << scan.api_readings.angle_min << endl;
+		/*cout << "angle_min: " << scan.api_readings.angle_min << endl;
 		cout << "angle_max: " << scan.api_readings.angle_max << endl;
 		cout << "angle_increment: " << scan.api_readings.angle_increment << endl;
 		cout << "time_increment: " << scan.api_readings.time_increment << endl;
@@ -80,7 +80,7 @@ void LaserScanner::loop()
 		if(scan.positions.size() > 0)
 		{
 			cout << "middle: " << scan.ranges[scan.positions.size()/2] << endl;
-		}
+		}*/
 
 		float my_x, my_y, my_phi;
 		this->sensorServer->getOdometry(my_x, my_y, my_phi);

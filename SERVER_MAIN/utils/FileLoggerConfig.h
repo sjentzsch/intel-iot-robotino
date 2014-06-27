@@ -42,7 +42,7 @@ pan_be_N_t  PAN_BE_N_BACKEND_LIST[] = // configure backend splitter
     PANTHEIOS_BE_N_STDFORM_ENTRY(2, pantheios_be_file, PANTHEIOS_BE_N_F_ID_MUST_MATCH_CUSTOM28),
     PANTHEIOS_BE_N_STDFORM_ENTRY(2, pantheios_be_fprintf, PANTHEIOS_BE_N_F_ID_MUST_MATCH_CUSTOM28),
     PANTHEIOS_BE_N_STDFORM_ENTRY(4, pantheios_be_file, PANTHEIOS_BE_N_F_ID_MUST_MATCH_CUSTOM28),
-    PANTHEIOS_BE_N_STDFORM_ENTRY(4, pantheios_be_fprintf, PANTHEIOS_BE_N_F_ID_MUST_MATCH_CUSTOM28),	// uncomment to log communication on console
+    //PANTHEIOS_BE_N_STDFORM_ENTRY(4, pantheios_be_fprintf, PANTHEIOS_BE_N_F_ID_MUST_MATCH_CUSTOM28),	// uncomment to log communication on console
     PANTHEIOS_BE_N_STDFORM_ENTRY(5, pantheios_be_file, PANTHEIOS_BE_N_F_ID_MUST_MATCH_CUSTOM28),
     PANTHEIOS_BE_N_STDFORM_ENTRY(5, pantheios_be_fprintf, PANTHEIOS_BE_N_F_ID_MUST_MATCH_CUSTOM28),
     PANTHEIOS_BE_N_STDFORM_ENTRY(6, pantheios_be_file, PANTHEIOS_BE_N_F_ID_MUST_MATCH_CUSTOM28),

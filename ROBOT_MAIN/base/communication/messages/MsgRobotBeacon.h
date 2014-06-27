@@ -16,7 +16,7 @@ using namespace std;
 class MsgRobotBeacon
 {
 public:
-	MsgRobotBeacon(unsigned long time_, double x_, double y_, string state_, unsigned long drinks_available_);
+	MsgRobotBeacon(unsigned long time_, double x_, double y_, double phi_, string state_, unsigned long drinks_available_);
 	MsgRobotBeacon(boost::property_tree::ptree& pt);
 	virtual ~MsgRobotBeacon();
 
@@ -30,6 +30,7 @@ public:
 	unsigned long time;
 	double x;
 	double y;
+	double phi;
 	string state;
 	unsigned long drinks_available;
 };

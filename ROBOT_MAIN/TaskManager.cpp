@@ -6,6 +6,7 @@
  */
 
 #include "TaskManager.h"
+#include "base/communication/CloudComm.h"
 
 TaskManager::TaskManager(StateBehaviorController* stateBhvContrl,SensorServer *sensorSrv_):asyncStateMachine(stateBhvContrl->getAsyncStateMachine()),sensorServer(sensorSrv_)
 {
@@ -13,6 +14,7 @@ TaskManager::TaskManager(StateBehaviorController* stateBhvContrl,SensorServer *s
 	currState = "NoStateYet";
 	currCustomerOrder = NULL;
 	nextTask_exec = NULL;
+	sendBeacon_exec = NULL;
 }
 
 TaskManager::~TaskManager()
@@ -37,6 +39,10 @@ void TaskManager::nextTask()
 	}
 }
 
+void TaskManager::startSendBeacon()
+{
+	sendBeacon_exec = new boost::thread(&TaskManager::sendBeacon_impl,this);
+}
 
 void TaskManager::nextTask_impl()
 {
@@ -112,11 +118,26 @@ void TaskManager::nextTask_impl()
 	return;
 }
 
+void TaskManager::sendBeacon_impl()
+{
+	while(true)
+	{
+		float x, y, phi;
+		this->sensorServer->getOdometry(x, y, phi);
+		MsgRobotBeacon msgRobotBeacon((unsigned long)std::time(0), x, y, phi, this->currState, this->sensorServer->numDrinks());
+		CloudComm::getInstance()->getCloudClient()->send(msgRobotBeacon.save());
+
+		boost::this_thread::sleep(boost::posix_time::milliseconds(500));
+	}
+}
+
 void TaskManager::serveDrink()
 {
 	if(this->currCustomerOrder != NULL)
 	{
-		this->vecMsgRobotServed.push_back(MsgRobotServed(42, this->currCustomerOrder->order_id));
+		MsgRobotServed msgRobotServed((unsigned long)std::time(0), this->currCustomerOrder->order_id);
+		CloudComm::getInstance()->getCloudClient()->send(msgRobotServed.save());
+		this->vecMsgRobotServed.push_back(msgRobotServed);
 
 		delete this->currCustomerOrder;
 		this->currCustomerOrder = NULL;
@@ -126,4 +147,9 @@ void TaskManager::serveDrink()
 MsgCustomerOrder TaskManager::getCurrCustomerOrder()
 {
 	return *this->currCustomerOrder;
+}
+
+void TaskManager::setCurrState(std::string newState)
+{
+	this->currState = newState;
 }

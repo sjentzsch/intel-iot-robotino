@@ -31,8 +31,7 @@ int main(int argc, char* argv[])
 		boost::asio::io_service io_service;
 		boost::asio::io_service::work work(io_service);
 		boost::thread* ioServiceThread = new boost::thread(boost::bind(&boost::asio::io_service::run, &io_service));
-		//CloudComm::getInstance()->init(new CloudServer(8190), new CloudClient(io_service, "172.26.1.1", 8191));
-		CloudComm::getInstance()->init(new CloudServer(8198), new CloudClient(io_service, "localhost", 8198));
+		CloudComm::getInstance()->init(new CloudServer(8190), new CloudClient(io_service, "172.26.1.1", 8191));
 		CloudComm::getInstance()->getCloudServer()->handleConnections();
 
 		MsgEnvironment msgEnv(0, 1.6, 2.7, 0.23, 0.23, 0.0, 0.9, 2.0, 0.5, 2.5, 90.0);
@@ -65,13 +64,28 @@ int main(int argc, char* argv[])
 		MsgCustomerPos msgCustPos5(0, 24, "Klaus", 1.0, 1.5);
 		CloudComm::getInstance()->getCloudClient()->send(msgCustPos5.save());
 
-		CloudComm::getInstance()->getCloudClient()->send("blalalalala!!");
+		//CloudComm::getInstance()->getCloudClient()->send("blalalalala!!");
 
 		MsgRobotPos msgRobotPos2(0, 8.8, 9.9);
 		CloudComm::getInstance()->getCloudClient()->send(msgRobotPos2.save());
 
-		while(true)
+		FileLog::log_NOTICE("Waiting for receiving first MsgRobotBeacon ...");
+		while(!DataProvider::getInstance()->isValidMsgRobotBeacon())
 			boost::this_thread::sleep(boost::posix_time::milliseconds(10));
+
+		while(true)
+		{
+			MsgRobotBeacon msg = DataProvider::getInstance()->getLatestMsgRobotBeacon();
+			cout << std::to_string(msg.time) << ": robot in state '" << msg.state << "' at " << msg.x << ", " << msg.y << ", " << msg.phi << " with " << msg.drinks_available << " drink(s) available" << endl;
+
+			vector< MsgRobotServed > vecMsgRobotServed = DataProvider::getInstance()->getMsgRobotServed();
+			cout << "robot served " << vecMsgRobotServed.size() << " drink(s) already: ";
+			for(unsigned int i=0; i<vecMsgRobotServed.size(); i++)
+				cout << std::to_string(vecMsgRobotServed.at(i).order_id) << " ";
+			cout << endl;
+
+			boost::this_thread::sleep(boost::posix_time::milliseconds(500));
+		}
 
 		// Debug stuff: print the messages ...
 		/*boost::this_thread::sleep(boost::posix_time::milliseconds(5000));

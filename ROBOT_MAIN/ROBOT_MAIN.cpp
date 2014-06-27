@@ -64,46 +64,12 @@ int main(int argc, char* argv[])
 		boost::asio::io_service io_service;
 		boost::asio::io_service::work work(io_service);
 		boost::thread* ioServiceThread = new boost::thread(boost::bind(&boost::asio::io_service::run, &io_service));
-		//CloudComm::getInstance()->init(new CloudServer(8190), new CloudClient(io_service, "172.26.1.1", 8191));
-		CloudComm::getInstance()->init(new CloudServer(8198), new CloudClient(io_service, "localhost", 8198));
+		CloudComm::getInstance()->init(new CloudServer(8191), new CloudClient(io_service, "172.26.1.114", 8190));
+		//CloudComm::getInstance()->init(new CloudServer(8198), new CloudClient(io_service, "localhost", 8198));
 		CloudComm::getInstance()->getCloudServer()->handleConnections();
 
-		MsgEnvironment msgEnv(0, 1.6, 2.7, 0.23, 0.23, 0.0, 0.9, 2.0, 0.5, 2.5, 90.0);
-		CloudComm::getInstance()->getCloudClient()->send(msgEnv.save());
-
-		MsgRobotPos msgRobotPos1(0, 0.8, 0.9);
-		CloudComm::getInstance()->getCloudClient()->send(msgRobotPos1.save());
-
-		MsgCustomerOrder msgCustOrder1(0, 5, 22);
-		CloudComm::getInstance()->getCloudClient()->send(msgCustOrder1.save());
-
-		MsgCustomerOrder msgCustOrder2(2, 6, 23);
-		CloudComm::getInstance()->getCloudClient()->send(msgCustOrder2.save());
-
-		MsgCustomerOrder msgCustOrder3(1, 7, 22);
-		CloudComm::getInstance()->getCloudClient()->send(msgCustOrder3.save());
-
-		MsgCustomerOrder msgCustOrder4(2, 8, 24);
-		CloudComm::getInstance()->getCloudClient()->send(msgCustOrder4.save());
-
-		MsgCustomerPos msgCustPos1(0, 22, "John", 1.0, 0.5);
-		CloudComm::getInstance()->getCloudClient()->send(msgCustPos1.save());
-
-		MsgCustomerPos msgCustPos2(0, 22, "John", 0.5, 1.5);
-		CloudComm::getInstance()->getCloudClient()->send(msgCustPos2.save());
-
-		MsgCustomerPos msgCustPos4(0, 23, "Peter", 1.0, 0.5);
-		CloudComm::getInstance()->getCloudClient()->send(msgCustPos4.save());
-
-		MsgCustomerPos msgCustPos5(0, 24, "Klaus", 1.0, 1.5);
-		CloudComm::getInstance()->getCloudClient()->send(msgCustPos5.save());
-
-		CloudComm::getInstance()->getCloudClient()->send("blalalalala!!");
-
-		MsgRobotPos msgRobotPos2(0, 8.8, 9.9);
-		CloudComm::getInstance()->getCloudClient()->send(msgRobotPos2.save());
-
-		// wait for MsgEnvironment to arrive from the CloudServer ...
+		// wait for MsgEnvironment to arrive ...
+		FileLog::log_NOTICE("Waiting for receiving MsgEnvironment ...");
 		while(!DataProvider::getInstance()->isValidMsgEnvironment())
 			boost::this_thread::sleep(boost::posix_time::milliseconds(10));
 

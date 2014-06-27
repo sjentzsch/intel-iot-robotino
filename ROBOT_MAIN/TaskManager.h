@@ -21,18 +21,22 @@ class TaskManager
 public:
 	TaskManager(StateBehaviorController* stateBhvContrl, SensorServer *sensorSrv_);
 	virtual ~TaskManager();
-	void nextTask(); //creates a new thread which triggers a new event
+	void nextTask(); 		// creates a new thread which triggers a new event
+	void startSendBeacon();	// creates a new thread which sends beacons periodically
 	void serveDrink();
+	void setCurrState(std::string newState);
 	MsgCustomerOrder getCurrCustomerOrder();
 
 private:
 	void nextTask_impl();
+	void sendBeacon_impl();
 
 	std::string currState;
 	MsgCustomerOrder* currCustomerOrder;
 	vector< MsgRobotServed > vecMsgRobotServed;
 
 	boost::thread* nextTask_exec;
+	boost::thread* sendBeacon_exec;
 	AsyncStateMachine* asyncStateMachine;
 	SensorServer* sensorServer;
 };
