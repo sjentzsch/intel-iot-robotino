@@ -213,6 +213,8 @@ public:
 
 	virtual void calibrateAngle(float newAngle);
 
+	virtual void calibrateOnBaseFront();
+
 	virtual bool setCameraSettingsforLight();
 	virtual bool setCameraSettingsforPuck();
 

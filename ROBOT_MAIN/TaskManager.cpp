@@ -10,6 +10,7 @@
 TaskManager::TaskManager(StateBehaviorController* stateBhvContrl,SensorServer *sensorSrv_):asyncStateMachine(stateBhvContrl->getAsyncStateMachine()),sensorServer(sensorSrv_)
 {
 	FileLog::log_NOTICE("[TaskManager] Initial Drinks available: ", std::to_string(this->sensorServer->numDrinks()));
+	currState = "NoStateYet";
 	currCustomerOrder = NULL;
 	nextTask_exec = NULL;
 }

@@ -1,62 +1,70 @@
 /*
- * MsgCustomerOrder.cpp
+ * MsgCustomerPos.cpp
  *
  *  Created on: Jun 10, 2014
  *      Author: root
  */
 
-#include "MsgCustomerOrder.h"
+#include "MsgCustomerPos.h"
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
 #define PARAM_PRINT(__var__) #__var__ << ": " << __var__ << std::endl
 
-MsgCustomerOrder::MsgCustomerOrder(unsigned long time_, unsigned long order_id_, unsigned long customer_id_)
+MsgCustomerPos::MsgCustomerPos(unsigned long time_, unsigned long customer_id_, string name_, double x_, double y_)
 {
-	this->message = MsgCustomerOrder::Message();
+	this->message = MsgCustomerPos::Message();
 	this->time = time_;
-	this->order_id = order_id_;
 	this->customer_id = customer_id_;
+	this->name = name_;
+	this->x = x_;
+	this->y = y_;
 }
 
-MsgCustomerOrder::MsgCustomerOrder(boost::property_tree::ptree& pt)
+MsgCustomerPos::MsgCustomerPos(boost::property_tree::ptree& pt)
 {
 	this->load(pt);
 }
 
-MsgCustomerOrder::~MsgCustomerOrder()
+MsgCustomerPos::~MsgCustomerPos()
 {
 
 }
 
-void MsgCustomerOrder::load(boost::property_tree::ptree& pt)
+void MsgCustomerPos::load(boost::property_tree::ptree& pt)
 {
 	message = pt.get<string>("message");
 	time = pt.get<unsigned long>("time");
-	order_id = pt.get<unsigned long>("order_id");
 	customer_id = pt.get<unsigned long>("customer_id");
+	name = pt.get<string>("name");
+	x = pt.get<double>("x");
+	y = pt.get<double>("y");
 }
 
-::std::string MsgCustomerOrder::save()
+::std::string MsgCustomerPos::save()
 {
 	::std::stringstream jsonMsgStream;
 	boost::property_tree::ptree pt;
 	pt.put("message", message);
 	pt.put("time", time);
-	pt.put("order_id", order_id);
 	pt.put("customer_id", customer_id);
+	pt.put("name", name);
+	pt.put("x", x);
+	pt.put("y", y);
 	boost::property_tree::json_parser::write_json(jsonMsgStream, pt, false);
 	return jsonMsgStream.str();
 }
 
-void MsgCustomerOrder::print()
+void MsgCustomerPos::print()
 {
 	std::cout << "####################:\n";
-	std::cout << "MsgCustomerOrder:\n";
+	std::cout << "MsgCustomerPos:\n";
 	std::cout << "####################:\n";
 	std::cout << PARAM_PRINT(message);
 	std::cout << PARAM_PRINT(time);
-	std::cout << PARAM_PRINT(order_id);
 	std::cout << PARAM_PRINT(customer_id);
+	std::cout << PARAM_PRINT(name);
+	std::cout << PARAM_PRINT(x);
+	std::cout << PARAM_PRINT(y);
 }

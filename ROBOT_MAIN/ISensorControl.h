@@ -25,6 +25,7 @@ public:
 	virtual void calibrateOnLineX(float x) = 0;
 	virtual void calibrateOnLineY(float y) = 0;
 	virtual void calibrateAngle(float newAngle) = 0;
+	virtual void calibrateOnBaseFront() = 0;
 	virtual bool setCameraSettingsforLight() = 0;
 	virtual bool setCameraSettingsforPuck() = 0;
 

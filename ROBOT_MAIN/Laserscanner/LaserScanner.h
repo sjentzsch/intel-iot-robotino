@@ -44,6 +44,7 @@ public:
 	LaserScannerReadings readings() const;
 
 	ObstacleBuffer getLatestObstacleBuffer();
+	LaserScannerReadings getLatestScan();
 
 	// helper functions
 	static void angle2vec2d(const float angle, float& vec_x, float& vec_y)
@@ -69,14 +70,21 @@ public:
 
 	void rangeInBaseFrame(const float range, const float angle, float& base_range, float& base_angle) const;
 
+	bool hasValidData() {return this->validData;}
+
 	boost::thread *execThread;
 	LaserScannerSignal::LaserScanner signal; //represents the current control signal
 	boost::mutex signal_mutex; //mutex for access control
 	boost::condition_variable signal_cond; //condition variable, signals changes to control signal
 
 private:
-	// physical calibration  offset of laserrange finder
+	bool validData;
+
+	// physical calibration offset of laserrange finder
 	float T_laser2base[9];
+
+	LaserScannerReadings latestScan;
+	boost::mutex m_mutex_scan;
 
 	ObstacleBuffer latestObstacleBuffer;
 

@@ -12,13 +12,13 @@
 const float MotorController::MIN_SPEED(40.0f); // original value 40.0f (03.06.11)
 const float MotorController::MIN_ROT_SPEED(8.0f); // original value 5.0f (03.06.11), increased to 7.0f (29.0
 const unsigned int MotorController::MIN_DISTANCE(15);
-const unsigned int MotorController::MIN_DEGREE_DISTANCE(3);
+const unsigned int MotorController::MIN_DEGREE_DISTANCE(2);
 const unsigned int MotorController::SLOW_DEGREE_DISTANCE(45);
 const unsigned int MotorController::SLOW_START_DURATION(2000);
 const unsigned int MotorController::SLOW_DISTANCE(250);
 const float MotorController::PHI_CONTROL_PROPORTIONAL_CONSTANT(2.5);
 const unsigned int MotorController::DEST_TO_TARGET_BEGIN_ROTATE = 1100; // original value 600
-const float MotorController::MAX_ROT_SPEED(20.0f); // original value 30.0f (02.07.11)
+const float MotorController::MAX_ROT_SPEED(30.0f); // original value 30.0f (02.07.11)
 const float MotorController::MAX_SPEED(300.0f);
 
 

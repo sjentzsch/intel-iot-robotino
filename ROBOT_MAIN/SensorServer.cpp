@@ -7,6 +7,7 @@
 
 #include "SensorServer.h"
 #include "utils/FileLogger.h"
+#include "DataProvider.h"
 #include <cmath>
 
 const unsigned int SensorServer::brightSensorFrontLeft(0);
@@ -86,6 +87,10 @@ SensorServer::SensorServer() :havingPuck(false)
 
 	laserScanner = new LaserScanner(this);
 	laserScanner->startThread();
+#if SIMULATION_MODE == 0
+	while(!laserScanner->hasValidData())
+		boost::this_thread::sleep(boost::posix_time::milliseconds(10));
+#endif
 }
 
 SensorServer::~SensorServer()
@@ -279,13 +284,15 @@ void SensorServer::setOdometry(float x, float y, float phi)
 
 	int counter = 0;
 
-	while(counter < 50 && (abs(newPose.x-x) > 0.1 || abs(newPose.y-y) > 0.1 || abs(fmod((double)newPose.phi-phi, 360.0)) > 0.3))
+	while(counter < 50 && (abs(newPose.x-x) > 1.0 || abs(newPose.y-y) > 1.0 || abs(fmod((double)newPose.phi-phi, 360.0)) > 0.5))
 	{
 		cout << "set odometry wait ... " << newPose.x << " to " << x << ", " << newPose.y << " to " << y << ", " << newPose.phi << " to " << phi << endl;
 		boost::this_thread::sleep(boost::posix_time::milliseconds(5));
 		getOdometry(newPose);
 		counter++;
 	}
+	if(counter >= 50)
+		cout << "set odometry give up ..." << endl;
 
 		//boost::this_thread::yield();
 
@@ -483,6 +490,48 @@ void SensorServer::calibrateAngle(float newAngle)
 	double x,y,phi;
 	getOdometry(x, y, phi);
 	setOdometry(x,y,(float)newAngle);
+}
+
+void SensorServer::calibrateOnBaseFront()
+{
+	// wait for latest odometry values to arrive ....
+	boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
+
+	MsgEnvironment msgEnvironment = DataProvider::getInstance()->getLatestMsgEnvironment();
+	Direction::DIRECTION dirBase = DataProvider::getInstance()->getLatestBaseDir();
+	cout << "calibrateOnBaseFront: " << Direction::cDIRECTION[dirBase] << endl;
+
+	LaserScannerReadings scan = this->laserScanner->getLatestScan();
+	float midPosGlobX = scan.positionsGlob.at(scan.positions.size()/2).at(0);
+	float midPosGlobY = scan.positionsGlob.at(scan.positions.size()/2).at(1);
+	//this->laserScanner->getLatestMidPosGlob(midPosGlobX, midPosGlobY);
+
+	float xCurr,yCurr,phiCurr;
+	getOdometry(xCurr, yCurr, phiCurr);
+	cout << "calibrateOnBaseFront: xCurr: " << xCurr << ", " << "yCurr: " << yCurr << ", " << "phiCurr: " << phiCurr << endl;
+
+	float xDiff, yDiff;
+	switch(dirBase)
+	{
+	case Direction::DIRECTION::NORTH:
+
+		break;
+	case Direction::DIRECTION::EAST:
+		yDiff = (msgEnvironment.y_base_end - midPosGlobY)*1000;
+		cout << "calibrateOnBaseFront: yDiff (desired - actual): " << yDiff << " (in mm)" << endl;
+		setOdometry(xCurr, yCurr + yDiff, phiCurr);
+		break;
+	case Direction::DIRECTION::SOUTH:
+
+		break;
+	case Direction::DIRECTION::WEST:
+
+		break;
+	default:
+		break;
+	}
+
+	cin.get(); cin.clear();
 }
 
 bool SensorServer::setCameraSettingsforPuck()

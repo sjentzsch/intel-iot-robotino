@@ -28,6 +28,7 @@ public:
 private:
 	void nextTask_impl();
 
+	std::string currState;
 	MsgCustomerOrder* currCustomerOrder;
 	vector< MsgRobotServed > vecMsgRobotServed;
 

@@ -37,15 +37,19 @@ struct RefillDrinks : sc::state<RefillDrinks, StateMachine1, refillInit>
 	} // exit
 
 	void rotateToBaseStart() {
-		stateBehavCtrl->getMotorCtrl()->rotateToAbsAngle(RADTODEG(atan2(msgEnvironment->y_base*1000 - stateBehavCtrl->getSensorControl()->getRobotY(), msgEnvironment->x_base*1000 - stateBehavCtrl->getSensorControl()->getRobotX())));
+		stateBehavCtrl->getMotorCtrl()->rotateToAbsAngle(RADTODEG(atan2(msgEnvironment->y_base_start*1000 - stateBehavCtrl->getSensorControl()->getRobotY(), msgEnvironment->x_base_start*1000 - stateBehavCtrl->getSensorControl()->getRobotX())));
 	}
 
 	void driveToBaseStart() {
-		stateBehavCtrl->getMotorCtrl()->moveToAbsPosOnly(msgEnvironment->x_base*1000, msgEnvironment->y_base*1000);
+		stateBehavCtrl->getMotorCtrl()->moveToAbsPosOnly(msgEnvironment->x_base_start*1000, msgEnvironment->y_base_start*1000);
 	}
 
 	void rotateToBase() {
 		stateBehavCtrl->getMotorCtrl()->rotateToAbsAngle(msgEnvironment->phi_base);
+	}
+
+	void calibrateOnBaseFront() {
+		stateBehavCtrl->getSensorControl()->calibrateOnBaseFront();
 	}
 
 	//Reactions
@@ -133,6 +137,7 @@ struct refillRotatingToBase : sc::state<refillRotatingToBase, RefillDrinks>
 
 	sc::result react(const EvMotorCtrlReady&)
 	{
+		context<RefillDrinks>().calibrateOnBaseFront();
 		return transit<refillWaitForRefill>();
 	}
 

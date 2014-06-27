@@ -2,21 +2,12 @@
 #include <cstdlib>
 #include <ctime>
 #include <queue>
-#include "config.h"
+#include "utils/config.h"
 #include <boost/thread.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/filesystem.hpp>
-#include "MotorController.h"
-#include "SensorServer.h"
-#include "SensorEventGenerator.h"
-#include "StateBehaviorController.h"
 #include "utils/FileLoggerConfig.h"
-#include "model/ModelProvider.h"
 #include "communication/CloudComm.h"
-#include "Simulation/SimApi2Com.h"
-#include "Api2Com.h"
-
-#include <rec/robotino/api2/all.h>
 
 using namespace std;
 using namespace boost;
@@ -25,30 +16,6 @@ using boost::bad_lexical_cast;
 
 void initLog();
 void pantheios_init();
-
-void initApi2(rec::robotino::api2::Com *api2Com) {
-
-	FileLog::log_NOTICE("[Api2Com] Initializing API2 Com");
-	api2Com->setAddress( "127.0.0.1" );
-
-	api2Com->connectToServer( true );
-
-	if( !api2Com->isConnected() )
-	{
-		//TODO FileLogger
-		FileLog::log_ERROR("[Api2Com] Could not connect to ",api2Com->address());
-		exit( 1 );
-	}
-	else
-	{
-		FileLog::log_NOTICE("[Api2Com] connected to api server");
-	}
-
-	if (!api2Com->isLocalConnection()) {
-		//TODO FileLoggerb
-		FileLog::log_WARNING("[Api2Com] WARNING: Api2 connection isn't local (SharedMemory disabled). ",api2Com->address());
-	}
-}
 
 int main(int argc, char* argv[])
 {
@@ -103,8 +70,7 @@ int main(int argc, char* argv[])
 		MsgRobotPos msgRobotPos2(0, 8.8, 9.9);
 		CloudComm::getInstance()->getCloudClient()->send(msgRobotPos2.save());
 
-		// wait for MsgEnvironment to arrive from the CloudServer ...
-		while(!DataProvider::getInstance()->isValidMsgEnvironment())
+		while(true)
 			boost::this_thread::sleep(boost::posix_time::milliseconds(10));
 
 		// Debug stuff: print the messages ...
@@ -118,32 +84,6 @@ int main(int argc, char* argv[])
 		for(unsigned int i=0; i<vecMsgCustomerPoses.size(); i++)
 			vecMsgCustomerPoses.at(i).print();*/
 
-#if SIMULATION_MODE == 1
-		rec::robotino::api2::Com* api2Com = new SimApi2Com();
-#else
-		rec::robotino::api2::Com* api2Com = new Api2Com();
-		initApi2(api2Com);
-#endif
-
-		SensorServer* sensorSrv = new SensorServer();
-		FileLog::log_NOTICE("Instantiated SensorServer");
-		MotorController* motorCtrl = new MotorController(sensorSrv);
-		FileLog::log_NOTICE("Instantiated MotorController");
-		SensorEventGenerator* sensorEvtGen = new SensorEventGenerator(sensorSrv);
-		FileLog::log_NOTICE("Instantiated SensorEventGenerator");
-		StateBehaviorController *stateCtrl = new StateBehaviorController(motorCtrl, sensorSrv, sensorEvtGen);
-		FileLog::log_NOTICE("Instantiated StateBehaviorController, starting statemachine");
-		stateCtrl->initiate();
-
-		while(true)
-		{
-#if SIMULATION_MODE == 1
-			boost::this_thread::sleep(boost::posix_time::milliseconds(10));
-#else
-			api2Com->processEvents();
-			rec::robotino::api2::msleep(10);
-#endif
-		}
 	}
 	catch( const std::exception& e )
 	{

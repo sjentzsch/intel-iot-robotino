@@ -12,8 +12,10 @@
 
 LaserScanner::LaserScanner(SensorServer* sensorServer): execThread(NULL), signal(LaserScannerSignal::RUN)
 {
+	validData = false;
+
 	// setting up physical laser calibration
-	float offset_x = 0.107;
+	float offset_x = 0.104;
 	float offset_y = 0.0;
 	float theta = 0.0;
 
@@ -64,7 +66,7 @@ void LaserScanner::loop()
 		LaserScannerReadings scan = this->readings();
 
 		//cout << "*****************" << endl;
-		/*cout << "angle_min: " << scan.api_readings.angle_min << endl;
+		cout << "angle_min: " << scan.api_readings.angle_min << endl;
 		cout << "angle_max: " << scan.api_readings.angle_max << endl;
 		cout << "angle_increment: " << scan.api_readings.angle_increment << endl;
 		cout << "time_increment: " << scan.api_readings.time_increment << endl;
@@ -78,7 +80,7 @@ void LaserScanner::loop()
 		if(scan.positions.size() > 0)
 		{
 			cout << "middle: " << scan.ranges[scan.positions.size()/2] << endl;
-		}*/
+		}
 
 		float my_x, my_y, my_phi;
 		this->sensorServer->getOdometry(my_x, my_y, my_phi);
@@ -93,8 +95,9 @@ void LaserScanner::loop()
 			else
 				isValid.at(i) = true;
 		}
-		//cout << "obstacle ratio: " << numDynObstacles << "/" << scan.positions.size() << endl;
 
+		//if(scan.positions.size() > 0)
+		//	cout << "middleGlob: " << scan.positionsGlob.at(scan.positions.size()/2).at(0) << ", " << scan.positionsGlob.at(scan.positions.size()/2).at(1) << endl;
 
 		// set latestObstacleBuffer
 		{
@@ -103,6 +106,16 @@ void LaserScanner::loop()
 			this->latestObstacleBuffer.my_y = my_y;
 			this->latestObstacleBuffer.my_phi = my_phi;
 			//this->latestObstacleBuffer.obstacles = clustersMid;
+
+			if(scan.positions.size() > 0)
+				this->validData = true;
+			else
+				this->validData = false;
+		}
+
+		{
+			boost::mutex::scoped_lock l(m_mutex_scan);
+			this->latestScan = scan;
 		}
 	}
 }
@@ -424,4 +437,10 @@ ObstacleBuffer LaserScanner::getLatestObstacleBuffer()
 {
 	boost::mutex::scoped_lock l(m_mutex);
 	return this->latestObstacleBuffer;
+}
+
+LaserScannerReadings LaserScanner::getLatestScan()
+{
+	boost::mutex::scoped_lock l(m_mutex_scan);
+	return this->latestScan;
 }
