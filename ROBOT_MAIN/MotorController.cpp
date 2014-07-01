@@ -198,12 +198,13 @@ void MotorController::moveToAbsPos_impl(vector<vec3D> vPoints, float myMaxSpeed,
 			//cout << "[MotorController] Checkpoint 2" << endl;
 
 			//GOT PAUSE SIGNAL?
-			while(ModelProvider::getInstance()->gameStateIsPaused()){
+			// TODO: implement new Intel msg?!
+			/*while(ModelProvider::getInstance()->gameStateIsPaused()){
 				setVelocity(0, 0, 0);
 				boost::this_thread::sleep(boost::posix_time::milliseconds(500));
 				slowStartTimer.reset();
 				slowStartTimer.start();
-			}
+			}*/
 
 			//FileLog::log(log_MotorController, "CP 3");
 

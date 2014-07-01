@@ -6,15 +6,8 @@
  */
 
 #include "AsyncStateMachine.h"
-//#include "StateMachine_CameraTest.h"
 #include "statemachine/StateMachine.h"
-//#include "tests/StateMachine_POIMoveTest.h"
-//#include "tests/StateMachine_OdometryTest.h"
-//#include "tests/StateMachine_SensorTest.h"
-//#include "tests/StateMachine_OdometryConstants.h"
-//#include "tests/StateMachine_PathfinderTest.h"
-//#include "tests/StateMachine_RegainPuck.h"
-//#include "tests/StateMachine_DriveToPuck.h"
+//#include "statemachine/StateMachine_Test.h"
 
 AsyncStateMachine::AsyncStateMachine(StateBehaviorController* stateBehavCtrl):sema_queue_stored(0){
 	//sema_queue_stored = boost::interprocess::interprocess_semaphore(0);

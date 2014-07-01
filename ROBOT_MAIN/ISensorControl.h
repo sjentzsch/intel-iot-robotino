@@ -8,9 +8,8 @@
 #ifndef ISENSORCONTROL_H_
 #define ISENSORCONTROL_H_
 
-#include "model/RobotCameraEnums.h"
-#include "pathfinder/Grid.h"
-#include "LSPBTrajectory/pose.h"
+#include "Camera/RobotCameraEnums.h"
+#include "utils/pose.h"
 
 class ISensorControl
 {
@@ -19,13 +18,11 @@ public:
 	virtual void setOdometry(float x, float y, float phi) = 0;
 	virtual void setCameraDetection(CameraPuckDetection::CameraPuckDetection puckDetection, CameraLightDetection::CameraLightDetection lightDetection) = 0;
 	virtual void setHavingPuck(bool havingPuck) = 0;
-	virtual void calibrateOnMachineFront(Node* nodePOI, POIDirection::POIDirection directionPOI) = 0;
-	virtual void calibrateOnMachineSide(Node* nodePOI, POIDirection::POIDirection directionPOI) = 0;
-	virtual vec3D getPosOnMachineFront(Node* nodePOI, POIDirection::POIDirection directionPOI, float xOffset, float yOffset) = 0;
 	virtual void calibrateOnLineX(float x) = 0;
 	virtual void calibrateOnLineY(float y) = 0;
 	virtual void calibrateAngle(float newAngle) = 0;
 	virtual void calibrateOnBaseFront() = 0;
+	virtual void calibrateOnBaseSide() = 0;
 	virtual bool setCameraSettingsforLight() = 0;
 	virtual bool setCameraSettingsforPuck() = 0;
 

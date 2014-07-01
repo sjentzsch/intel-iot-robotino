@@ -22,7 +22,6 @@
 #include "../StateMachineEvents.h"
 #include "utils/FileLogger.h"
 #include "../StateBehaviorController.h"
-#include "model/WorldModel.h"
 
 namespace sc = boost::statechart;
 namespace mpl = boost::mpl;

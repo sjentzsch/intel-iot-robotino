@@ -136,6 +136,8 @@ struct randFinished : sc::state<randFinished, RandomMovement>
 {
 	randFinished(my_context ctx) : my_base(ctx) {
 		context<StateMachine1>().logAndDisplayStateName("randFinished");
+		// wait for 2 seconds for a more natural behavior, not driving away immediately ...
+		//boost::this_thread::sleep(boost::posix_time::milliseconds(2000));
 		post_event(EvSuccess());
 	} // entry
 

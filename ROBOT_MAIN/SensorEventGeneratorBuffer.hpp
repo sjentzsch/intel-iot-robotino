@@ -9,6 +9,7 @@
 #define SENSOREVENTGENERATORBUFFER_HPP_
 
 #include "Laserscanner/ObstacleBuffer.h"
+#include "utils/pose.h"
 
 // contains Variables for sensor monitoring
 class SensorEventGeneratorBuffer

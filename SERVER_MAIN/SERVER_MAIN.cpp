@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <queue>
-#include "utils/config.h"
+#include "config.h"
 #include <boost/thread.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/filesystem.hpp>
@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
 		CloudComm::getInstance()->init(new CloudServer(8190), new CloudClient(io_service, "172.26.1.1", 8191));
 		CloudComm::getInstance()->getCloudServer()->handleConnections();
 
-		MsgEnvironment msgEnv(0, 1.6, 2.7, 0.23, 0.23, 0.0, 0.9, 2.0, 0.5, 2.5, 90.0);
+		MsgEnvironment msgEnv(0, 3.0, 3.0, 0.23, 0.23, 0.0, 1.4, 2.2, 0.83, 2.8, 90.0);
 		CloudComm::getInstance()->getCloudClient()->send(msgEnv.save());
 
 		MsgRobotPos msgRobotPos1(0, 0.8, 0.9);
@@ -147,12 +147,7 @@ void pantheios_init(){
 	filesystem::create_directory(nextLogFolder);
 
 	pantheios_be_file_setFilePath((string(nextLogFolder.string()+"log_TBU_ACAPS")).c_str(),0);
-	pantheios_be_file_setFilePath((string(nextLogFolder.string()+"log_MotorController")).c_str(),1);
-	pantheios_be_file_setFilePath((string(nextLogFolder.string()+"log_SensorEventGenerator")).c_str(),2);
-	pantheios_be_file_setFilePath((string(nextLogFolder.string()+"log_AsyncWorldModelUpdater")).c_str(),3);
 	pantheios_be_file_setFilePath((string(nextLogFolder.string()+"log_Communication")).c_str(),4);
-	pantheios_be_file_setFilePath((string(nextLogFolder.string()+"log_Camera")).c_str(),5);
-	pantheios_be_file_setFilePath((string(nextLogFolder.string()+"log_Job")).c_str(),6);
 
 	initLog();
 }

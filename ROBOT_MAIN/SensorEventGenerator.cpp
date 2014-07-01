@@ -27,8 +27,6 @@ SensorEventGenerator::SensorEventGenerator(SensorServer *sensorSrv_):sensorSrv(s
 
 	evObstacleIsCloseThrown = false;
 
-	grid = new Grid();
-
 	oldSensorState = NULL;
 	getNewSensorValues();
 	oldSensorState = newSensorState;
@@ -39,8 +37,6 @@ SensorEventGenerator::SensorEventGenerator(SensorServer *sensorSrv_):sensorSrv(s
 	lastLineCrossSensor = FloorSensor::INIT;
 
 	pause();
-
-	lastObstacleNodesInRange = NULL;
 }
 
 SensorEventGenerator::~SensorEventGenerator()
@@ -100,12 +96,13 @@ void SensorEventGenerator::monitorSensors()
 
 	while(true)
 	{
-		if(ModelProvider::getInstance()->gameStateIsPaused())
+		// TODO: implement new Intel msg?!
+		/*if(ModelProvider::getInstance()->gameStateIsPaused())
 		{
 			boost::this_thread::sleep(boost::posix_time::milliseconds(500));
 			//cout << "monitorSensors() paused" << endl;
 			continue;
-		}
+		}*/
 
 		//Make FPS calculation
 //		dtToLastImageInMs = (int)timer.msecsElapsed();
@@ -647,21 +644,4 @@ float SensorEventGenerator::getDistDegree(float phi1, float phi2) const
 		return diff;
 	else
 		return 360-diff;
-}
-
-void SensorEventGenerator::addNodeIfNotFound(vector<Node*>* v, Node* n)
-{
-	if(n != NULL && std::find(v->begin(), v->end(), n) == v->end())
-		v->push_back(n);
-}
-
-bool SensorEventGenerator::isEqualNodeList(vector<Node*>* v1, vector<Node*>* v2)
-{
-	if(v1 == NULL || v2 == NULL)
-		return false;
-	if(v1->size() != v2->size())
-	   return false;
-	std::sort(v1->begin(),v1->end());
-	std::sort(v2->begin(),v2->end());
-	return std::equal(v1->begin(), v1->end(), v2->begin());
 }

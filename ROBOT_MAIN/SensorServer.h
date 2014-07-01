@@ -28,7 +28,7 @@
 #include <rec/robotino/api2/utils.h>
 
 #include "SensorEventGeneratorBuffer.hpp"
-#include "LSPBTrajectory/pose.h"
+#include "utils/pose.h"
 
 
 using namespace std;
@@ -204,9 +204,6 @@ public:
 	virtual void setOdometry(float x, float y, float phi);
 	virtual void setCameraDetection(CameraPuckDetection::CameraPuckDetection puckDetection, CameraLightDetection::CameraLightDetection lightDetection);
 	virtual void setHavingPuck(bool havingPuck);
-	virtual void calibrateOnMachineFront(Node* nodePOI, POIDirection::POIDirection directionPOI);
-	virtual vec3D getPosOnMachineFront(Node* nodePOI, POIDirection::POIDirection directionPOI, float xOffset, float yOffset);
-	virtual void calibrateOnMachineSide(Node* nodePOI, POIDirection::POIDirection directionPOI);
 
 	virtual void calibrateOnLineX(float x);
 	virtual void calibrateOnLineY(float y);
@@ -214,6 +211,7 @@ public:
 	virtual void calibrateAngle(float newAngle);
 
 	virtual void calibrateOnBaseFront();
+	virtual void calibrateOnBaseSide();
 
 	virtual bool setCameraSettingsforLight();
 	virtual bool setCameraSettingsforPuck();

@@ -34,7 +34,6 @@
 									<listOptionValue builtIn="false" value="/home/robotino/opencv-2.4.9/include"/>
 									<listOptionValue builtIn="false" value="/home/robotino/pantheios-1.0.1-beta214/include"/>
 									<listOptionValue builtIn="false" value="/home/robotino/stlsoft-1.9.117/include"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ROBOT_MAIN/base}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ROBOT_MAIN}&quot;"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.dialect.std.243489887" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
@@ -50,7 +49,6 @@
 									<listOptionValue builtIn="false" value="/home/robotino/opencv-2.4.9/include"/>
 									<listOptionValue builtIn="false" value="/home/robotino/pantheios-1.0.1-beta214/include"/>
 									<listOptionValue builtIn="false" value="/home/robotino/stlsoft-1.9.117/include"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ROBOT_MAIN/base}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ROBOT_MAIN}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1191396393" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
@@ -97,7 +95,6 @@
 									<listOptionValue builtIn="false" value="/home/robotino/opencv-2.4.9/include"/>
 									<listOptionValue builtIn="false" value="/home/robotino/pantheios-1.0.1-beta214/include"/>
 									<listOptionValue builtIn="false" value="/home/robotino/stlsoft-1.9.117/include"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ROBOT_MAIN/base}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ROBOT_MAIN}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1126304428" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
@@ -139,7 +136,6 @@
 									<listOptionValue builtIn="false" value="/home/robotino/opencv-2.4.9/include"/>
 									<listOptionValue builtIn="false" value="/home/robotino/pantheios-1.0.1-beta214/include"/>
 									<listOptionValue builtIn="false" value="/home/robotino/stlsoft-1.9.117/include"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ROBOT_MAIN/base}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ROBOT_MAIN}&quot;"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.other.other.50247547" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -std=c++0x -Wno-unused-variable" valueType="string"/>
@@ -152,9 +148,7 @@
 									<listOptionValue builtIn="false" value="/usr/local/robotino/api2/include"/>
 									<listOptionValue builtIn="false" value="/home/robotino/stlsoft-1.9.117/include"/>
 									<listOptionValue builtIn="false" value="/home/robotino/pantheios-1.0.1-beta214/include"/>
-									<listOptionValue builtIn="false" value="/home/robotino/boost_1_55_0/boost"/>
 									<listOptionValue builtIn="false" value="/home/robotino/opencv-2.4.9/include"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ROBOT_MAIN/base}&quot;"/>
 									<listOptionValue builtIn="false" value="/home/robotino/boost_1_55_0/stage/include"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ROBOT_MAIN}&quot;"/>
 								</option>
@@ -202,7 +196,6 @@
 									<listOptionValue builtIn="false" value="/home/robotino/pantheios-1.0.1-beta214/include"/>
 									<listOptionValue builtIn="false" value="/home/robotino/boost_1_55_0/boost"/>
 									<listOptionValue builtIn="false" value="/home/robotino/opencv-2.4.9/include"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ROBOT_MAIN/base}&quot;"/>
 									<listOptionValue builtIn="false" value="/home/robotino/boost_1_55_0/stage/include"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ROBOT_MAIN}&quot;"/>
 								</option>

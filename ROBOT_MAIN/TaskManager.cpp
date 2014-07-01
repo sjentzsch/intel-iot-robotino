@@ -6,7 +6,7 @@
  */
 
 #include "TaskManager.h"
-#include "base/communication/CloudComm.h"
+#include "communication/CloudComm.h"
 
 TaskManager::TaskManager(StateBehaviorController* stateBhvContrl,SensorServer *sensorSrv_):asyncStateMachine(stateBhvContrl->getAsyncStateMachine()),sensorServer(sensorSrv_)
 {

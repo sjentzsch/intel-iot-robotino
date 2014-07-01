@@ -17,7 +17,6 @@ struct vec2D
 {
 	double x;
 	double y;
-//	float phi;
 	vec2D(){}
 	vec2D(double x_, double y_) : x(x_), y(y_){}
 

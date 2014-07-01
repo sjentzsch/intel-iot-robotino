@@ -319,159 +319,6 @@ void SensorServer::setHavingPuck(bool havingPuck)
 	}
 }
 
-void SensorServer::calibrateOnMachineFront(Node* nodePOI, POIDirection::POIDirection directionPOI)
-{
-	float distanceToMachine = 380.0f;	// TODO: was 240.0f before, test if it works now, 38 too huge
-
-	//cout << "calibrateOnMachineFront: " << POIDirection::cPOIDirection[directionPOI] << endl;
-
-	if((directionPOI == POIDirection::NORTH) || (directionPOI == POIDirection::SOUTH))
-	{
-		//cout << "actual x position: " << getX() << endl;
-		//cout << "machine x position: " << (nodePOI->getX())*X_GRID_WIDTH+560 << endl;
-
-		float newXPos = 0.0f;
-		if(directionPOI == POIDirection::SOUTH)
-			newXPos = (float)((nodePOI->getX())*X_GRID_WIDTH+560 + distanceToMachine);
-		else
-			newXPos = (float)((nodePOI->getX())*X_GRID_WIDTH+560 - distanceToMachine);
-
-		//cout << "set x position to: " << newXPos << endl;
-
-		float diff = newXPos - getX();
-		if(diff >= 0)
-			FileLog::log_NOTICE("[SensorServer] calibrateOnMachineFront: x += ", FileLog::real(diff));
-		else
-			FileLog::log_NOTICE("[SensorServer] calibrateOnMachineFront: x -= ", FileLog::real(-diff));
-
-		setOdometry(newXPos, getY(), getPhi());
-	}
-	else
-	{
-		//cout << "actual y position: " << getY() << endl;
-		//cout << "machine y position: " << (nodePOI->getY())*Y_GRID_WIDTH+560 << endl;
-
-		float newYPos = 0.0f;
-		if(directionPOI == POIDirection::EAST)
-			newYPos = (float)((nodePOI->getY())*Y_GRID_WIDTH+560 + distanceToMachine);
-		else
-			newYPos = (float)((nodePOI->getY())*Y_GRID_WIDTH+560 - distanceToMachine);
-
-		//cout << "set y position to: " << newYPos << endl;
-
-		float diff = newYPos - getY();
-		if(diff >= 0)
-			FileLog::log_NOTICE("[SensorServer] calibrateOnMachineFront: y += ", FileLog::real(diff));
-		else
-			FileLog::log_NOTICE("[SensorServer] calibrateOnMachineFront: y -= ", FileLog::real(-diff));
-
-		setOdometry(getX(), newYPos, getPhi());
-	}
-
-	/*int tempValue;
-	cout << "Type any char to continue: ";
-	cin >> tempValue;
-	cout << endl;*/
-}
-
-vec3D SensorServer::getPosOnMachineFront(Node* nodePOI, POIDirection::POIDirection directionPOI, float xOffset, float yOffset)
-{
-	float distanceToMachineX = 380.0f - xOffset;
-
-	float newXPos = 0.0f;
-	float newYPos = 0.0f;
-	float newPhiPos = 0.0f;
-
-	if((directionPOI == POIDirection::NORTH) || (directionPOI == POIDirection::SOUTH))
-	{
-		if(directionPOI == POIDirection::SOUTH)
-			newXPos = (float)((nodePOI->getX())*X_GRID_WIDTH+560 + distanceToMachineX);
-		else
-			newXPos = (float)((nodePOI->getX())*X_GRID_WIDTH+560 - distanceToMachineX);
-
-		if(directionPOI == POIDirection::SOUTH)
-			newYPos = (float)((nodePOI->getY())*Y_GRID_WIDTH+560 - yOffset + CAM_WIDTH/2 - robotCamera->GRABBER_MIDPOINT);
-		else
-			newYPos = (float)((nodePOI->getY())*Y_GRID_WIDTH+560 + yOffset + robotCamera->GRABBER_MIDPOINT - CAM_WIDTH/2);
-	}
-	else
-	{
-		if(directionPOI == POIDirection::WEST)
-			newXPos = (float)((nodePOI->getX())*X_GRID_WIDTH+560 - yOffset + CAM_WIDTH/2 - robotCamera->GRABBER_MIDPOINT);
-		else
-			newXPos = (float)((nodePOI->getX())*X_GRID_WIDTH+560 + yOffset + robotCamera->GRABBER_MIDPOINT - CAM_WIDTH/2);
-
-		if(directionPOI == POIDirection::WEST)
-			newYPos = (float)((nodePOI->getY())*Y_GRID_WIDTH+560 - distanceToMachineX);
-		else
-			newYPos = (float)((nodePOI->getY())*Y_GRID_WIDTH+560 + distanceToMachineX);
-	}
-
-	if(directionPOI == POIDirection::NORTH)
-		newPhiPos = 0;
-	else if(directionPOI == POIDirection::SOUTH)
-		newPhiPos = 180;
-	else if(directionPOI == POIDirection::EAST)
-		newPhiPos = -90;
-	else if(directionPOI == POIDirection::WEST)
-		newPhiPos = 90;
-
-	return vec3D(newXPos, newYPos, newPhiPos);
-}
-
-void SensorServer::calibrateOnMachineSide(Node* nodePOI, POIDirection::POIDirection directionPOI)
-{
-	//cout << "calibrateOnMachineSide: " << POIDirection::cPOIDirection[directionPOI] << endl;
-
-	if((directionPOI == POIDirection::WEST) || (directionPOI == POIDirection::EAST))
-	{
-		//cout << "actual x position: " << getX() << endl;
-		//cout << "machine x position: " << (nodePOI->getX())*X_GRID_WIDTH+560 << endl;
-
-		float newXPos = 0.0f;
-		if(directionPOI == POIDirection::WEST)
-			newXPos = (float)((nodePOI->getX())*X_GRID_WIDTH+560 + CAM_WIDTH/2 - robotCamera->GRABBER_MIDPOINT);
-		else
-			newXPos = (float)((nodePOI->getX())*X_GRID_WIDTH+560 + robotCamera->GRABBER_MIDPOINT - CAM_WIDTH/2);
-
-		//cout << "set x position to: " << newXPos << endl;
-
-		float diff = newXPos - getX();
-		if(diff >= 0)
-			FileLog::log_NOTICE("[SensorServer] calibrateOnMachineSide: x += ", FileLog::real(diff));
-		else
-			FileLog::log_NOTICE("[SensorServer] calibrateOnMachineSide: x -= ", FileLog::real(-diff));
-
-		setOdometry(newXPos, getY(), getPhi());
-	}
-	else
-	{
-		//cout << "actual y position: " << getY() << endl;
-		//cout << "machine y position: " << (nodePOI->getY())*Y_GRID_WIDTH+560 << endl;
-
-		float newYPos = 0.0f;
-		if(directionPOI == POIDirection::SOUTH)
-			newYPos = (float)((nodePOI->getY())*Y_GRID_WIDTH+560 + CAM_WIDTH/2 - robotCamera->GRABBER_MIDPOINT);
-		else
-			newYPos = (float)((nodePOI->getY())*Y_GRID_WIDTH+560 + robotCamera->GRABBER_MIDPOINT - CAM_WIDTH/2);
-
-		//cout << "set y position to: " << newYPos << endl;
-
-		float diff = newYPos - getY();
-		if(diff >= 0)
-			FileLog::log_NOTICE("[SensorServer] calibrateOnMachineSide: y += ", FileLog::real(diff));
-		else
-			FileLog::log_NOTICE("[SensorServer] calibrateOnMachineSide: y -= ", FileLog::real(-diff));
-
-		setOdometry(getX(), newYPos, getPhi());
-	}
-
-	/*int tempValue;
-	cout << "Type any char to continue: ";
-	cin >> tempValue;
-	cout << endl;*/
-}
-
 void SensorServer::calibrateOnLineX(float x){
 
 	 double x_,y_,phi_;
@@ -504,7 +351,6 @@ void SensorServer::calibrateOnBaseFront()
 	LaserScannerReadings scan = this->laserScanner->getLatestScan();
 	float midPosGlobX = scan.positionsGlob.at(scan.positions.size()/2).at(0);
 	float midPosGlobY = scan.positionsGlob.at(scan.positions.size()/2).at(1);
-	//this->laserScanner->getLatestMidPosGlob(midPosGlobX, midPosGlobY);
 
 	float xCurr,yCurr,phiCurr;
 	getOdometry(xCurr, yCurr, phiCurr);
@@ -531,7 +377,71 @@ void SensorServer::calibrateOnBaseFront()
 		break;
 	}
 
-	cin.get(); cin.clear();
+	/*cout << "wait for key pressed ..." << endl;
+	cin.get(); cin.clear();*/
+}
+
+void SensorServer::calibrateOnBaseSide()
+{
+	const float LINE_DIFF_THRESHOLD = 0.05;	// in m
+
+	// wait for latest odometry values to arrive ....
+	boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
+
+	MsgEnvironment msgEnvironment = DataProvider::getInstance()->getLatestMsgEnvironment();
+	Direction::DIRECTION dirBase = DataProvider::getInstance()->getLatestBaseDir();
+	cout << "calibrateOnBaseSide: " << Direction::cDIRECTION[dirBase] << endl;
+
+	LaserScannerReadings scan = this->laserScanner->getLatestScan();
+
+	float xCurr,yCurr,phiCurr;
+	getOdometry(xCurr, yCurr, phiCurr);
+	cout << "calibrateOnBaseSide: xCurr: " << xCurr << ", " << "yCurr: " << yCurr << ", " << "phiCurr: " << phiCurr << endl;
+
+	float xDiff, yDiff;
+	switch(dirBase)
+	{
+	case Direction::DIRECTION::NORTH:
+	{
+
+		break;
+	}
+	case Direction::DIRECTION::EAST:
+	{
+		unsigned int i = scan.positions.size()/2;
+		cout << "start at ray " << i << endl;
+		vec2D lastPosGlob, currPosGlob;
+		do
+		{
+			lastPosGlob = vec2D(scan.positionsGlob.at(i).at(0), scan.positionsGlob.at(i).at(1));
+			i++;
+			currPosGlob = vec2D(scan.positionsGlob.at(i).at(0), scan.positionsGlob.at(i).at(1));
+			//cout << "scan diffs between scan curr " << i << " (" << currPosGlob.x << ", " << currPosGlob.y << ", angle: " << RADTODEG(scan.angles.at(i)) << ") and scan last " << (i-1) << " (" << lastPosGlob.x << ", " << lastPosGlob.y << ", angle: " << RADTODEG(scan.angles.at(i-1)) << ")" << endl;
+		}while(i < scan.positions.size()-1 && abs(lastPosGlob.y - currPosGlob.y) < LINE_DIFF_THRESHOLD);
+
+		//cout << "=> scan diffs between scan curr " << i << " (" << currPosGlob.x << ", " << currPosGlob.y << ", angle: " << RADTODEG(scan.angles.at(i)) << ") and scan last " << (i-1) << " (" << lastPosGlob.x << ", " << lastPosGlob.y << ", angle: " << RADTODEG(scan.angles.at(i-1)) << ")" << endl;
+
+		xDiff = (msgEnvironment.x_base_end - lastPosGlob.x)*1000;
+		cout << "calibrateOnBaseSide: xDiff (desired - actual): " << xDiff << " (in mm)" << endl;
+		setOdometry(xCurr + xDiff, yCurr, phiCurr);
+		break;
+	}
+	case Direction::DIRECTION::SOUTH:
+	{
+
+		break;
+	}
+	case Direction::DIRECTION::WEST:
+	{
+
+		break;
+	}
+	default:
+		break;
+	}
+
+	/*cout << "wait for key pressed ..." << endl;
+	cin.get(); cin.clear();*/
 }
 
 bool SensorServer::setCameraSettingsforPuck()

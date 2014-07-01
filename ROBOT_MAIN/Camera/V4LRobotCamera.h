@@ -13,11 +13,8 @@
 #include <boost/thread/mutex.hpp>
 #include "config.h"
 #include "utils/FileLogger.h"
-#include "model/Timer.h"
-#include "model/ModelProvider.h"
-#include "model/ImageData.h"
-#include "model/RobotCameraEnums.h"
-#include "../pathfinder/Grid.h"
+#include "utils/Timer.h"
+#include "RobotCameraEnums.h"
 #include "AbstractV4LCamera.h"
 
 using namespace cv;

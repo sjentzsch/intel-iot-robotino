@@ -11,7 +11,6 @@
 #include "SensorEventGenerator.h"
 #include "StateBehaviorController.h"
 #include "utils/FileLoggerConfig.h"
-#include "model/ModelProvider.h"
 #include "communication/CloudComm.h"
 #include "Simulation/SimApi2Com.h"
 #include "Api2Com.h"
@@ -161,7 +160,6 @@ void pantheios_init(){
 	pantheios_be_file_setFilePath((string(nextLogFolder.string()+"log_TBU_ACAPS")).c_str(),0);
 	pantheios_be_file_setFilePath((string(nextLogFolder.string()+"log_MotorController")).c_str(),1);
 	pantheios_be_file_setFilePath((string(nextLogFolder.string()+"log_SensorEventGenerator")).c_str(),2);
-	pantheios_be_file_setFilePath((string(nextLogFolder.string()+"log_AsyncWorldModelUpdater")).c_str(),3);
 	pantheios_be_file_setFilePath((string(nextLogFolder.string()+"log_Communication")).c_str(),4);
 	pantheios_be_file_setFilePath((string(nextLogFolder.string()+"log_Camera")).c_str(),5);
 	pantheios_be_file_setFilePath((string(nextLogFolder.string()+"log_Job")).c_str(),6);

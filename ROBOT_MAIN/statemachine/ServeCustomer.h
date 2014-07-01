@@ -156,6 +156,8 @@ struct serveFinished : sc::state<serveFinished, ServeCustomer>
 {
 	serveFinished(my_context ctx) : my_base(ctx) {
 		context<StateMachine1>().logAndDisplayStateName("serveFinished");
+		// wait for 2 seconds for a more natural behavior, not driving away immediately ...
+		//boost::this_thread::sleep(boost::posix_time::milliseconds(2000));
 		post_event(EvSuccess());
 	} // entry
 

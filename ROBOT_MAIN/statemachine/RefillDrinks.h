@@ -15,6 +15,8 @@ struct refillInit;
 struct refillRotatingToBaseStart;
 struct refillDrivingToBaseStart;
 struct refillRotatingToBase;
+struct refillCalibratingOnBaseFront;
+struct refillCalibratingOnBaseSide;
 struct refillWaitForRefill;
 struct refillFinished;
 
@@ -50,6 +52,12 @@ struct RefillDrinks : sc::state<RefillDrinks, StateMachine1, refillInit>
 
 	void calibrateOnBaseFront() {
 		stateBehavCtrl->getSensorControl()->calibrateOnBaseFront();
+		stateBehavCtrl->getMotorCtrl()->moveToAbsPos(msgEnvironment->x_base_start*1000, msgEnvironment->y_base_start*1000, msgEnvironment->phi_base);
+	}
+
+	void calibrateOnBaseSide() {
+		stateBehavCtrl->getSensorControl()->calibrateOnBaseSide();
+		stateBehavCtrl->getMotorCtrl()->moveToAbsPos(msgEnvironment->x_base_start*1000, msgEnvironment->y_base_start*1000, msgEnvironment->phi_base);
 	}
 
 	//Reactions
@@ -66,6 +74,11 @@ struct refillInit : sc::state<refillInit, RefillDrinks>
 {
 	refillInit(my_context ctx) : my_base(ctx) {
 		context<StateMachine1>().logAndDisplayStateName("refillInit");
+
+		// TODO: TEST CODE
+		cout << "wait for key pressed ..." << endl;
+		cin.get(); cin.clear();
+
 		post_event(EvInit());
 	} // entry
 
@@ -138,6 +151,47 @@ struct refillRotatingToBase : sc::state<refillRotatingToBase, RefillDrinks>
 	sc::result react(const EvMotorCtrlReady&)
 	{
 		context<RefillDrinks>().calibrateOnBaseFront();
+		return transit<refillCalibratingOnBaseFront>();
+	}
+
+	//Reactions
+	typedef mpl::list<
+		sc::custom_reaction<EvMotorCtrlReady>
+	> reactions;
+};
+
+struct refillCalibratingOnBaseFront : sc::state<refillCalibratingOnBaseFront, RefillDrinks>
+{
+	refillCalibratingOnBaseFront(my_context ctx) : my_base(ctx) {
+		context<StateMachine1>().logAndDisplayStateName("refillCalibratingOnBaseFront");
+	} // entry
+
+	virtual ~refillCalibratingOnBaseFront() {
+	} // exit
+
+	sc::result react(const EvMotorCtrlReady&)
+	{
+		context<RefillDrinks>().calibrateOnBaseSide();
+		return transit<refillCalibratingOnBaseSide>();
+	}
+
+	//Reactions
+	typedef mpl::list<
+		sc::custom_reaction<EvMotorCtrlReady>
+	> reactions;
+};
+
+struct refillCalibratingOnBaseSide : sc::state<refillCalibratingOnBaseSide, RefillDrinks>
+{
+	refillCalibratingOnBaseSide(my_context ctx) : my_base(ctx) {
+		context<StateMachine1>().logAndDisplayStateName("refillCalibratingOnBaseSide");
+	} // entry
+
+	virtual ~refillCalibratingOnBaseSide() {
+	} // exit
+
+	sc::result react(const EvMotorCtrlReady&)
+	{
 		return transit<refillWaitForRefill>();
 	}
 
@@ -171,6 +225,8 @@ struct refillFinished : sc::state<refillFinished, RefillDrinks>
 {
 	refillFinished(my_context ctx) : my_base(ctx) {
 		context<StateMachine1>().logAndDisplayStateName("refillFinished");
+		// wait for 2 seconds for a more natural behavior, not driving away immediately ...
+		//boost::this_thread::sleep(boost::posix_time::milliseconds(2000));
 		post_event(EvSuccess());
 	} // entry
 

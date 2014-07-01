@@ -9,8 +9,7 @@
 #define STATEMACHINEEVENTS_H_
 
 #include <boost/statechart/event.hpp>
-#include "model/WorldModel.h"
-#include "pathfinder/Grid.h"
+#include "utils/pose.h"
 
 namespace sc = boost::statechart;
 
@@ -89,13 +88,6 @@ struct EvAngleCalibration : sc::event<EvAngleCalibration> {
 	float diffAngle;
 	EvAngleCalibration(float lineAngle_, float diffAngle_):lineAngle(lineAngle_), diffAngle(diffAngle_){};
 	~EvAngleCalibration(){};
-};
-
-// Laserscanner and Obstacle Events
-struct EvObstacleMap : sc::event<EvObstacleMap>{
-	vector<Node*> obstacleNodes;
-	EvObstacleMap(vector<Node*> obstacleNodes_):obstacleNodes(obstacleNodes_){};
-	~EvObstacleMap(){};
 };
 
 struct EvObstacleIsClose : sc::event<EvObstacleIsClose> {

@@ -10,7 +10,7 @@
 
 #include <cmath>
 #include <iostream>
-#include "model/Timer.h"
+#include "utils/Timer.h"
 #include <boost/thread.hpp>
 #include <boost/lexical_cast.hpp>
 

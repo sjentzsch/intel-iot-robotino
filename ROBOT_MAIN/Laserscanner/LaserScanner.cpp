@@ -66,9 +66,9 @@ void LaserScanner::loop()
 		LaserScannerReadings scan = this->readings();
 
 		//cout << "*****************" << endl;
-		/*cout << "angle_min: " << scan.api_readings.angle_min << endl;
-		cout << "angle_max: " << scan.api_readings.angle_max << endl;
-		cout << "angle_increment: " << scan.api_readings.angle_increment << endl;
+		/*cout << "angle_min: " << RADTODEG(scan.api_readings.angle_min) << endl;
+		cout << "angle_max: " << RADTODEG(scan.api_readings.angle_max) << endl;
+		cout << "angle_increment: " << RADTODEG(scan.api_readings.angle_increment) << endl;
 		cout << "time_increment: " << scan.api_readings.time_increment << endl;
 		cout << "scan_time: " << scan.api_readings.scan_time << endl;
 		cout << "range_min: " << scan.api_readings.range_min << endl;
@@ -413,6 +413,8 @@ LaserScannerReadings LaserScanner::readings() const
 		readings.positionsGlob[i].resize(2);
 		readings.positionsGlob[i][0] = 0;
 		readings.positionsGlob[i][1] = 0;
+
+		//cout << "range: " << i << ", cur_angle: " << RADTODEG(cur_angle) <<  ", angle: " << RADTODEG(readings.angles[i]) << endl;
 	}
 
 	return readings;

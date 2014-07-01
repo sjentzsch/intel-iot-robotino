@@ -13,9 +13,8 @@
 #include <boost/array.hpp>
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
-#include "model/Timer.h"
-#include "model/SimData.h"
-#include "model/RobotCameraEnums.h"
+#include "utils/Timer.h"
+#include "Camera/RobotCameraEnums.h"
 #include "utils/FileLogger.h"
 #include "StateMachineEvents.h"
 #include "SensorEventGeneratorBuffer.hpp"
@@ -88,13 +87,6 @@ private:
 	float lastLineCrossPhi;
 	FloorSensor::FloorSensor lastLineCrossSensor;
 	Timer lastLineCrossTimer;
-
-	Grid* grid;
-
-	vector<Node*>* lastObstacleNodesInRange;
-
-	void addNodeIfNotFound(vector<Node*>* v, Node* n);
-	bool isEqualNodeList(vector<Node*>* v1, vector<Node*>* v2);
 
 	int dtToLastImageInMs;
 	int fps;
