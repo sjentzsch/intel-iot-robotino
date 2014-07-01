@@ -13,7 +13,6 @@
 #include "ISensorControl.h"
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
-#include "Camera/V4LRobotCamera.h"
 #include "Api2Com.h"
 #include "Simulation/OdometrySimulation.h"
 #include "Laserscanner/LaserScanner.h"
@@ -62,14 +61,11 @@ private:
 	rec::robotino::api2::DistanceSensorArray distanceSensorArray;
 	LaserScanner *laserScanner;
 
-	V4LRobotCamera *robotCamera;
 	bool havingPuck;
 
 
 
 	void relToAbsCoord(float* xWorldPos, float* yWorldPos, float myX, float myY, float myPhi) const;
-
-	CameraPuckState::CameraPuckState calcPuckInfos(bool &gotCameraPuckPos, float* xWorldPos, float* yWorldPos, float* distWorld, float myX, float myY, float myPhi);
 
 	void getOdometryReadings(double &x, double &y, double &phi)
 	{
@@ -193,17 +189,8 @@ public:
 
 	void getNewSensorValues(SensorEventGeneratorBuffer* buf,SensorEventGeneratorBuffer* oldSensorState);
 
-	CameraPuckState::CameraPuckState getPuckState() const {return robotCamera->getPuckState();}
-	CameraLampState::CameraLampState getLampState() const {return robotCamera->getLampState();}
-	CameraLightState::CameraLightState getLightState() const {return robotCamera->getLightState();}
-	bool getHavingPuck() const {return havingPuck;}
-	//bool getPuckAbsPos(float* xWorldPos, float* yWorldPos, float myX, float myY, float myPhi) const;
-	bool getLampAbsPos(float* xWorldPos, float* yWorldPos, float myX, float myY, float myPhi) const;
-
 
 	virtual void setOdometry(float x, float y, float phi);
-	virtual void setCameraDetection(CameraPuckDetection::CameraPuckDetection puckDetection, CameraLightDetection::CameraLightDetection lightDetection);
-	virtual void setHavingPuck(bool havingPuck);
 
 	virtual void calibrateOnLineX(float x);
 	virtual void calibrateOnLineY(float y);
@@ -212,9 +199,6 @@ public:
 
 	virtual void calibrateOnBaseFront();
 	virtual void calibrateOnBaseSide();
-
-	virtual bool setCameraSettingsforLight();
-	virtual bool setCameraSettingsforPuck();
 
 	virtual void setVelocity(float vx, float vy, float vphi);
 

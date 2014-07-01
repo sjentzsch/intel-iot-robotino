@@ -31,17 +31,6 @@ public:
 
 	float sensorDistance[9];
 
-	CameraPuckState::CameraPuckState cameraPuckState;
-	bool gotCameraPuckPos;
-	vec3D cameraPuckPos;
-	bool havingPuck;
-
-	CameraLampState::CameraLampState cameraLampState;
-	bool gotCameraLampPos;
-	vec3D cameraLampPos;
-
-	CameraLightState::CameraLightState cameraLightState;
-
 	ObstacleBuffer obstacleBuffer;
 };
 

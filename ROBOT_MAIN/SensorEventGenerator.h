@@ -14,7 +14,6 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 #include "utils/Timer.h"
-#include "Camera/RobotCameraEnums.h"
 #include "utils/FileLogger.h"
 #include "StateMachineEvents.h"
 #include "SensorEventGeneratorBuffer.hpp"
@@ -64,14 +63,6 @@ private:
 
 	SensorEventGeneratorBuffer *oldSensorState;
 	SensorEventGeneratorBuffer *newSensorState;
-	bool cameraPuckPosWasJustSent;
-	vec3D lastSentCameraPuckPos;
-	Timer lastPuckSendTimer;
-	bool cameraLampPosWasJustSent;
-	vec3D lastSentCameraLampPos;
-	Timer lastLampSendTimer;
-	bool cameraLightWasJustSent;
-	Timer lastLightSendTimer;
 
 	bool evObstacleIsCloseThrown;
 
