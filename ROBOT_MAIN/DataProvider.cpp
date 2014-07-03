@@ -35,6 +35,7 @@ DataProvider *DataProvider::instance = NULL;
 DataProvider::DataProvider()
 {
 	this->msgEnvironment = NULL;
+	this->running = false;
 	this->msgRobotPos = NULL;
 	this->dirBase = Direction::EAST;
 }
@@ -95,6 +96,12 @@ void DataProvider::processMsg(::std::stringstream& msg)
 
 		::std::cout << "[DataProvider] Updated message: " << message << ::std::endl;
 	}
+	else if(message == MsgRobotPause::Message())
+	{
+		boost::unique_lock< boost::shared_mutex > lock(mutexMsgRobotPause);
+		this->running = !this->running;
+		::std::cout << "[DataProvider] Updated message: " << message << ::std::endl;
+	}
 	else if(message == MsgRobotPos::Message())
 	{
 		boost::unique_lock< boost::shared_mutex > lock(mutexMsgRobotPos);
@@ -127,6 +134,7 @@ void DataProvider::processMsg(::std::stringstream& msg)
 		}
 		if(!alreadyContained)
 			this->vecMsgCustomerPos.push_back(newMsgCustomerPos);
+		::std::cout << "[DataProvider] Updated message: " << message << ::std::endl;
 	}
 	else
 	{
@@ -154,6 +162,12 @@ Direction::DIRECTION DataProvider::getLatestBaseDir()
 {
 	boost::shared_lock<boost::shared_mutex> r_lock(mutexMsgEnvironment);
 	return this->dirBase;
+}
+
+bool DataProvider::isRunning()
+{
+	boost::shared_lock<boost::shared_mutex> r_lock(mutexMsgRobotPause);
+	return this->running;
 }
 
 MsgRobotPos DataProvider::getLatestMsgRobotPos()

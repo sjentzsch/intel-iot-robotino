@@ -143,7 +143,7 @@ void TaskManager::sendBeacon_impl()
 	{
 		float x, y, phi;
 		this->sensorServer->getOdometry(x, y, phi);
-		MsgRobotBeacon msgRobotBeacon((unsigned long)std::time(0), x, y, phi, this->currState, this->sensorServer->numDrinks());
+		MsgRobotBeacon msgRobotBeacon((unsigned long)std::time(0), x, y, phi, this->currState, DataProvider::getInstance()->isRunning(), this->sensorServer->numDrinks());
 		CloudComm::getInstance()->getCloudClient()->send(msgRobotBeacon.save());
 
 		boost::this_thread::sleep(boost::posix_time::milliseconds(500));

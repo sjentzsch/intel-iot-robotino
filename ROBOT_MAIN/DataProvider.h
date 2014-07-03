@@ -33,6 +33,7 @@
 #include "communication/messages/MsgCustomerPos.h"
 #include "communication/messages/MsgEnvironment.h"
 #include "communication/messages/MsgRobotBeacon.h"
+#include "communication/messages/MsgRobotPause.h"
 #include "communication/messages/MsgRobotPos.h"
 #include "communication/messages/MsgRobotServed.h"
 
@@ -56,6 +57,7 @@ public:
 	bool isValidMsgRobotPos();
 	MsgEnvironment getLatestMsgEnvironment();
 	Direction::DIRECTION getLatestBaseDir();
+	bool isRunning();
 	MsgRobotPos getLatestMsgRobotPos();
 	vector< MsgCustomerOrder > getMsgCustomerOrders();
 	vector< MsgCustomerPos > getMsgCustomerPoses();
@@ -65,10 +67,12 @@ private:
 
 	Direction::DIRECTION dirBase;
 	MsgEnvironment* msgEnvironment;
+	bool running;
 	MsgRobotPos* msgRobotPos;
 	vector< MsgCustomerOrder* > vecMsgCustomerOrder;
 	vector< MsgCustomerPos* > vecMsgCustomerPos;
 	boost::shared_mutex mutexMsgEnvironment;
+	boost::shared_mutex mutexMsgRobotPause;
 	boost::shared_mutex mutexMsgRobotPos;
 	boost::shared_mutex mutexVecMsgCustomerOrder;
 	boost::shared_mutex mutexVecMsgCustomerPos;

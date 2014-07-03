@@ -1,5 +1,5 @@
 //
-// MsgEnvironment.h
+// MsgRobotPause.cpp
 //
 // Authors:
 //   Sören Jentzsch <soren.jentzsch@gmail.com>
@@ -24,36 +24,50 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef MSGENVIRONMENT_H_
-#define MSGENVIRONMENT_H_
+#include "MsgRobotPause.h"
 
-#include <string>
 #include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
-using namespace std;
+#define PARAM_PRINT(__var__) #__var__ << ": " << __var__ << std::endl
 
-class MsgEnvironment
+MsgRobotPause::MsgRobotPause(unsigned long time_)
 {
-public:
-	MsgEnvironment(unsigned long time_, double x_max_, double y_max_, double x_base_robot_start_, double y_base_robot_start_, double x_base_left_corner_, double y_base_left_corner_, double phi_base_);
-	MsgEnvironment(boost::property_tree::ptree& pt);
-	virtual ~MsgEnvironment();
+	this->message = MsgRobotPause::Message();
+	this->time = time_;
+}
 
-	static ::std::string Message() {return "msg_environment";};
+MsgRobotPause::MsgRobotPause(boost::property_tree::ptree& pt)
+{
+	this->load(pt);
+}
 
-	void load(boost::property_tree::ptree& pt);
-	::std::string save();
-	void print();
+MsgRobotPause::~MsgRobotPause()
+{
 
-	string message;
-	unsigned long time;
-	double x_max;
-	double y_max;
-	double x_base_robot_start;
-	double y_base_robot_start;
-	double x_base_left_corner;
-	double y_base_left_corner;
-	double phi_base;
-};
+}
 
-#endif /* MSGENVIRONMENT_H_ */
+void MsgRobotPause::load(boost::property_tree::ptree& pt)
+{
+	message = pt.get<string>("message");
+	time = pt.get<unsigned long>("time");
+}
+
+::std::string MsgRobotPause::save()
+{
+	::std::stringstream jsonMsgStream;
+	boost::property_tree::ptree pt;
+	pt.put("message", message);
+	pt.put("time", time);
+	boost::property_tree::json_parser::write_json(jsonMsgStream, pt, false);
+	return jsonMsgStream.str();
+}
+
+void MsgRobotPause::print()
+{
+	std::cout << "####################:\n";
+	std::cout << "MsgRobotPause:\n";
+	std::cout << "####################:\n";
+	std::cout << PARAM_PRINT(message);
+	std::cout << PARAM_PRINT(time);
+}

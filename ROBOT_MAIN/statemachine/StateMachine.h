@@ -75,7 +75,7 @@ struct StateMachine1 : sc::state_machine<StateMachine1, Init>
 
 	void nextTask(const EvInit&){
 		MsgEnvironment msgEnvironment = DataProvider::getInstance()->getLatestMsgEnvironment();
-		stateBehavCtrl->getSensorControl()->setOdometry(msgEnvironment.x_robot*1000, msgEnvironment.y_robot*1000, msgEnvironment.phi_robot);
+		stateBehavCtrl->getSensorControl()->setOdometry(msgEnvironment.x_base_robot_start*1000, msgEnvironment.y_base_robot_start*1000, msgEnvironment.phi_base);
 
 		/*while(true)
 			boost::this_thread::sleep(boost::posix_time::milliseconds(10));*/

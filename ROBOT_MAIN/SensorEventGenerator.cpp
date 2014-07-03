@@ -104,13 +104,12 @@ void SensorEventGenerator::monitorSensors()
 
 	while(true)
 	{
-		// TODO: implement new Intel msg?!
-		/*if(ModelProvider::getInstance()->gameStateIsPaused())
+		// GOT PAUSE SIGNAL? Wait!
+		while(!DataProvider::getInstance()->isRunning())
 		{
 			boost::this_thread::sleep(boost::posix_time::milliseconds(500));
-			//cout << "monitorSensors() paused" << endl;
 			continue;
-		}*/
+		}
 
 		//Make FPS calculation
 //		dtToLastImageInMs = (int)timer.msecsElapsed();

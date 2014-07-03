@@ -31,7 +31,7 @@
 
 #define PARAM_PRINT(__var__) #__var__ << ": " << __var__ << std::endl
 
-MsgRobotBeacon::MsgRobotBeacon(unsigned long time_, double x_, double y_, double phi_, string state_, unsigned long drinks_available_)
+MsgRobotBeacon::MsgRobotBeacon(unsigned long time_, double x_, double y_, double phi_, string state_, bool running_, unsigned long drinks_available_)
 {
 	this->message = MsgRobotBeacon::Message();
 	this->time = time_;
@@ -39,6 +39,7 @@ MsgRobotBeacon::MsgRobotBeacon(unsigned long time_, double x_, double y_, double
 	this->y = y_;
 	this->phi = phi_;
 	this->state = state_;
+	this->running = running_;
 	this->drinks_available = drinks_available_;
 }
 
@@ -60,6 +61,7 @@ void MsgRobotBeacon::load(boost::property_tree::ptree& pt)
 	y = pt.get<double>("y");
 	phi = pt.get<double>("phi");
 	state = pt.get<string>("state");
+	running = pt.get<bool>("running");
 	drinks_available = pt.get<unsigned long>("drinks_available");
 }
 
@@ -73,6 +75,7 @@ void MsgRobotBeacon::load(boost::property_tree::ptree& pt)
 	pt.put("y", y);
 	pt.put("phi", phi);
 	pt.put("state", state);
+	pt.put("running", running);
 	pt.put("drinks_available", drinks_available);
 	boost::property_tree::json_parser::write_json(jsonMsgStream, pt, false);
 	return jsonMsgStream.str();
@@ -89,5 +92,6 @@ void MsgRobotBeacon::print()
 	std::cout << PARAM_PRINT(y);
 	std::cout << PARAM_PRINT(phi);
 	std::cout << PARAM_PRINT(state);
+	std::cout << PARAM_PRINT(running);
 	std::cout << PARAM_PRINT(drinks_available);
 }

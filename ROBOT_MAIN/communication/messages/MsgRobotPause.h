@@ -1,5 +1,5 @@
 //
-// MsgEnvironment.h
+// MsgRobotPause.h
 //
 // Authors:
 //   Sören Jentzsch <soren.jentzsch@gmail.com>
@@ -24,22 +24,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef MSGENVIRONMENT_H_
-#define MSGENVIRONMENT_H_
+#ifndef MsgRobotPause_H_
+#define MsgRobotPause_H_
 
-#include <string>
 #include <boost/property_tree/ptree.hpp>
 
 using namespace std;
 
-class MsgEnvironment
+class MsgRobotPause
 {
 public:
-	MsgEnvironment(unsigned long time_, double x_max_, double y_max_, double x_base_robot_start_, double y_base_robot_start_, double x_base_left_corner_, double y_base_left_corner_, double phi_base_);
-	MsgEnvironment(boost::property_tree::ptree& pt);
-	virtual ~MsgEnvironment();
+	MsgRobotPause(unsigned long time_);
+	MsgRobotPause(boost::property_tree::ptree& pt);
+	virtual ~MsgRobotPause();
 
-	static ::std::string Message() {return "msg_environment";};
+	static ::std::string Message() {return "msg_robot_pause";};
 
 	void load(boost::property_tree::ptree& pt);
 	::std::string save();
@@ -47,13 +46,6 @@ public:
 
 	string message;
 	unsigned long time;
-	double x_max;
-	double y_max;
-	double x_base_robot_start;
-	double y_base_robot_start;
-	double x_base_left_corner;
-	double y_base_left_corner;
-	double phi_base;
 };
 
-#endif /* MSGENVIRONMENT_H_ */
+#endif /* MsgRobotPause_H_ */

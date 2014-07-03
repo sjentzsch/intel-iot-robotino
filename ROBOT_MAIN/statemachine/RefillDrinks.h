@@ -58,11 +58,11 @@ struct RefillDrinks : sc::state<RefillDrinks, StateMachine1, refillInit>
 	} // exit
 
 	void rotateToBaseStart() {
-		stateBehavCtrl->getMotorCtrl()->rotateToAbsAngle(RADTODEG(atan2(msgEnvironment->y_base_start*1000 - stateBehavCtrl->getSensorControl()->getRobotY(), msgEnvironment->x_base_start*1000 - stateBehavCtrl->getSensorControl()->getRobotX())));
+		stateBehavCtrl->getMotorCtrl()->rotateToAbsAngle(RADTODEG(atan2(msgEnvironment->y_base_robot_start*1000 - stateBehavCtrl->getSensorControl()->getRobotY(), msgEnvironment->x_base_robot_start*1000 - stateBehavCtrl->getSensorControl()->getRobotX())));
 	}
 
 	void driveToBaseStart() {
-		stateBehavCtrl->getMotorCtrl()->moveToAbsPosOnly(msgEnvironment->x_base_start*1000, msgEnvironment->y_base_start*1000);
+		stateBehavCtrl->getMotorCtrl()->moveToAbsPosOnly(msgEnvironment->x_base_robot_start*1000, msgEnvironment->y_base_robot_start*1000);
 	}
 
 	void rotateToBase() {
@@ -71,12 +71,12 @@ struct RefillDrinks : sc::state<RefillDrinks, StateMachine1, refillInit>
 
 	void calibrateOnBaseFront() {
 		stateBehavCtrl->getSensorControl()->calibrateOnBaseFront();
-		stateBehavCtrl->getMotorCtrl()->moveToAbsPos(msgEnvironment->x_base_start*1000, msgEnvironment->y_base_start*1000, msgEnvironment->phi_base);
+		stateBehavCtrl->getMotorCtrl()->moveToAbsPos(msgEnvironment->x_base_robot_start*1000, msgEnvironment->y_base_robot_start*1000, msgEnvironment->phi_base);
 	}
 
 	void calibrateOnBaseSide() {
 		stateBehavCtrl->getSensorControl()->calibrateOnBaseSide();
-		stateBehavCtrl->getMotorCtrl()->moveToAbsPos(msgEnvironment->x_base_start*1000, msgEnvironment->y_base_start*1000, msgEnvironment->phi_base);
+		stateBehavCtrl->getMotorCtrl()->moveToAbsPos(msgEnvironment->x_base_robot_start*1000, msgEnvironment->y_base_robot_start*1000, msgEnvironment->phi_base);
 	}
 
 	//Reactions
@@ -95,8 +95,8 @@ struct refillInit : sc::state<refillInit, RefillDrinks>
 		context<StateMachine1>().logAndDisplayStateName("refillInit");
 
 		// TODO: TEST CODE
-		cout << "wait for key pressed ..." << endl;
-		cin.get(); cin.clear();
+		/*cout << "wait for key pressed ..." << endl;
+		cin.get(); cin.clear();*/
 
 		post_event(EvInit());
 	} // entry

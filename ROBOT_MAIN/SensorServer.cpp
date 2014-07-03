@@ -229,7 +229,7 @@ void SensorServer::calibrateOnBaseFront()
 
 		break;
 	case Direction::DIRECTION::EAST:
-		yDiff = (msgEnvironment.y_base_end - midPosGlobY)*1000;
+		yDiff = (msgEnvironment.y_base_left_corner - midPosGlobY)*1000;
 		cout << "calibrateOnBaseFront: yDiff (desired - actual): " << yDiff << " (in mm)" << endl;
 		setOdometry(xCurr, yCurr + yDiff, phiCurr);
 		break;
@@ -287,7 +287,7 @@ void SensorServer::calibrateOnBaseSide()
 
 		//cout << "=> scan diffs between scan curr " << i << " (" << currPosGlob.x << ", " << currPosGlob.y << ", angle: " << RADTODEG(scan.angles.at(i)) << ") and scan last " << (i-1) << " (" << lastPosGlob.x << ", " << lastPosGlob.y << ", angle: " << RADTODEG(scan.angles.at(i-1)) << ")" << endl;
 
-		xDiff = (msgEnvironment.x_base_end - lastPosGlob.x)*1000;
+		xDiff = (msgEnvironment.x_base_left_corner - lastPosGlob.x)*1000;
 		cout << "calibrateOnBaseSide: xDiff (desired - actual): " << xDiff << " (in mm)" << endl;
 		setOdometry(xCurr + xDiff, yCurr, phiCurr);
 		break;
