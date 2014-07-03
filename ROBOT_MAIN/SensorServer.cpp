@@ -207,6 +207,11 @@ void SensorServer::calibrateAngle(float newAngle)
 
 void SensorServer::calibrateOnBaseFront()
 {
+#if SIMULATION_MODE == 1
+	FileLog::log_NOTICE("No calibration available in Simulation mode. Skipping.");
+	return;
+#endif
+
 	// wait for latest odometry values to arrive ....
 	boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
 
@@ -249,6 +254,11 @@ void SensorServer::calibrateOnBaseFront()
 
 void SensorServer::calibrateOnBaseSide()
 {
+#if SIMULATION_MODE == 1
+	FileLog::log_NOTICE("No calibration available in Simulation mode. Skipping.");
+	return;
+#endif
+
 	const float LINE_DIFF_THRESHOLD = 0.05;	// in m
 
 	// wait for latest odometry values to arrive ....

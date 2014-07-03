@@ -43,6 +43,18 @@ using boost::bad_lexical_cast;
 void initLog();
 void pantheios_init();
 
+// hit Enter key = send MsgRobotPause = toggle pause/unpause of the robot
+void robotPauseThread_impl()
+{
+	string temp;
+	while(true)
+	{
+		getline(cin, temp);
+		MsgRobotPause msgRobotPause((unsigned long)std::time(0));
+		CloudComm::getInstance()->getCloudClient()->send(msgRobotPause.save());
+	}
+}
+
 int main(int argc, char* argv[])
 {
 	try
@@ -57,14 +69,17 @@ int main(int argc, char* argv[])
 		boost::asio::io_service io_service;
 		boost::asio::io_service::work work(io_service);
 		boost::thread* ioServiceThread = new boost::thread(boost::bind(&boost::asio::io_service::run, &io_service));
+
+#if SIMULATION_MODE == 1
+		CloudComm::getInstance()->init(new CloudServer(8197), new CloudClient(io_service, "localhost", 8198));
+#else
 		CloudComm::getInstance()->init(new CloudServer(8190), new CloudClient(io_service, "172.26.1.1", 8191));
+#endif
+
 		CloudComm::getInstance()->getCloudServer()->handleConnections();
 
-		MsgEnvironment msgEnv(0, 3.0, 3.0, 1.4, 2.2, 0.83, 2.8, 90.0);
+		MsgEnvironment msgEnv((unsigned long)std::time(0), 3.0, 3.0, 1.4, 2.2, 0.83, 2.8, 90.0);
 		CloudComm::getInstance()->getCloudClient()->send(msgEnv.save());
-
-		MsgRobotPos msgRobotPos1(0, 0.8, 0.9);
-		CloudComm::getInstance()->getCloudClient()->send(msgRobotPos1.save());
 
 		MsgCustomerOrder msgCustOrder1(0, 5, 22);
 		CloudComm::getInstance()->getCloudClient()->send(msgCustOrder1.save());
@@ -90,19 +105,17 @@ int main(int argc, char* argv[])
 		MsgCustomerPos msgCustPos5(0, 24, "Klaus", 1.0, 1.5);
 		CloudComm::getInstance()->getCloudClient()->send(msgCustPos5.save());
 
-		//CloudComm::getInstance()->getCloudClient()->send("blalalalala!!");
-
-		MsgRobotPos msgRobotPos2(0, 8.8, 9.9);
-		CloudComm::getInstance()->getCloudClient()->send(msgRobotPos2.save());
-
 		FileLog::log_NOTICE("Waiting for receiving first MsgRobotBeacon ...");
 		while(!DataProvider::getInstance()->isValidMsgRobotBeacon())
 			boost::this_thread::sleep(boost::posix_time::milliseconds(10));
 
+		// Start async thread for enabling the user to pause/unpause the robot
+		boost::thread* robotPauseThread = new boost::thread(robotPauseThread_impl);
+
 		while(true)
 		{
 			MsgRobotBeacon msg = DataProvider::getInstance()->getLatestMsgRobotBeacon();
-			cout << std::to_string(msg.time) << ": robot is " << (msg.running ? "'running'" : "'pausing'") << " in state '" << msg.state << "' at " << msg.x << ", " << msg.y << ", " << msg.phi << " with " << msg.drinks_available << " drink(s) available" << endl;
+			cout << std::to_string(msg.time) << ": robot " << (msg.running ? "'RUN'" : "'PAUSE'") << " in state '" << msg.state << "' at " << msg.x << ", " << msg.y << ", " << msg.phi << " with " << msg.drinks_available << " drink(s) available" << endl;
 
 			vector< MsgRobotServed > vecMsgRobotServed = DataProvider::getInstance()->getMsgRobotServed();
 			cout << "robot served " << vecMsgRobotServed.size() << " drink(s) already: ";

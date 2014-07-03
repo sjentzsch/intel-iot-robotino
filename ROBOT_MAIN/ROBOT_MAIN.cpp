@@ -89,8 +89,11 @@ int main(int argc, char* argv[])
 		boost::asio::io_service io_service;
 		boost::asio::io_service::work work(io_service);
 		boost::thread* ioServiceThread = new boost::thread(boost::bind(&boost::asio::io_service::run, &io_service));
+#if SIMULATION_MODE == 1
+		CloudComm::getInstance()->init(new CloudServer(8198), new CloudClient(io_service, "localhost", 8197));
+#else
 		CloudComm::getInstance()->init(new CloudServer(8191), new CloudClient(io_service, "172.26.1.114", 8190));
-		//CloudComm::getInstance()->init(new CloudServer(8198), new CloudClient(io_service, "localhost", 8198));
+#endif
 		CloudComm::getInstance()->getCloudServer()->handleConnections();
 
 		// wait for MsgEnvironment to arrive ...

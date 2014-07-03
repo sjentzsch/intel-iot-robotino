@@ -33,6 +33,7 @@
 #include "communication/messages/MsgCustomerPos.h"
 #include "communication/messages/MsgEnvironment.h"
 #include "communication/messages/MsgRobotBeacon.h"
+#include "communication/messages/MsgRobotPause.h"
 #include "communication/messages/MsgRobotPos.h"
 #include "communication/messages/MsgRobotServed.h"
 
