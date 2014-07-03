@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
 		CloudComm::getInstance()->init(new CloudServer(8190), new CloudClient(io_service, "172.26.1.1", 8191));
 		CloudComm::getInstance()->getCloudServer()->handleConnections();
 
-		MsgEnvironment msgEnv(0, 3.0, 3.0, 0.23, 0.23, 0.0, 1.4, 2.2, 0.83, 2.8, 90.0);
+		MsgEnvironment msgEnv(0, 3.0, 3.0, 1.4, 2.2, 0.83, 2.8, 90.0);
 		CloudComm::getInstance()->getCloudClient()->send(msgEnv.save());
 
 		MsgRobotPos msgRobotPos1(0, 0.8, 0.9);
@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
 		while(true)
 		{
 			MsgRobotBeacon msg = DataProvider::getInstance()->getLatestMsgRobotBeacon();
-			cout << std::to_string(msg.time) << ": robot in state '" << msg.state << "' at " << msg.x << ", " << msg.y << ", " << msg.phi << " with " << msg.drinks_available << " drink(s) available" << endl;
+			cout << std::to_string(msg.time) << ": robot is " << (msg.running ? "'running'" : "'pausing'") << " in state '" << msg.state << "' at " << msg.x << ", " << msg.y << ", " << msg.phi << " with " << msg.drinks_available << " drink(s) available" << endl;
 
 			vector< MsgRobotServed > vecMsgRobotServed = DataProvider::getInstance()->getMsgRobotServed();
 			cout << "robot served " << vecMsgRobotServed.size() << " drink(s) already: ";

@@ -1,5 +1,5 @@
 //
-// MsgRobotServed.h
+// MsgRobotPause.cpp
 //
 // Authors:
 //   Sören Jentzsch <soren.jentzsch@gmail.com>
@@ -24,30 +24,50 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef MSGROBOTSERVED_H_
-#define MSGROBOTSERVED_H_
+#include "MsgRobotPause.h"
 
-#include <string>
 #include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
-using namespace std;
+#define PARAM_PRINT(__var__) #__var__ << ": " << __var__ << std::endl
 
-class MsgRobotServed
+MsgRobotPause::MsgRobotPause(unsigned long time_)
 {
-public:
-	MsgRobotServed(unsigned long time_, unsigned long order_id_);
-	MsgRobotServed(boost::property_tree::ptree& pt);
-	virtual ~MsgRobotServed();
+	this->message = MsgRobotPause::Message();
+	this->time = time_;
+}
 
-	static ::std::string Message() {return "msg_robot_served";};
+MsgRobotPause::MsgRobotPause(boost::property_tree::ptree& pt)
+{
+	this->load(pt);
+}
 
-	void load(boost::property_tree::ptree& pt);
-	::std::string save();
-	void print();
+MsgRobotPause::~MsgRobotPause()
+{
 
-	string message;
-	unsigned long time;
-	unsigned long order_id;
-};
+}
 
-#endif /* MSGROBOTSERVED_H_ */
+void MsgRobotPause::load(boost::property_tree::ptree& pt)
+{
+	message = pt.get<string>("message");
+	time = pt.get<unsigned long>("time");
+}
+
+::std::string MsgRobotPause::save()
+{
+	::std::stringstream jsonMsgStream;
+	boost::property_tree::ptree pt;
+	pt.put("message", message);
+	pt.put("time", time);
+	boost::property_tree::json_parser::write_json(jsonMsgStream, pt, false);
+	return jsonMsgStream.str();
+}
+
+void MsgRobotPause::print()
+{
+	std::cout << "####################:\n";
+	std::cout << "MsgRobotPause:\n";
+	std::cout << "####################:\n";
+	std::cout << PARAM_PRINT(message);
+	std::cout << PARAM_PRINT(time);
+}

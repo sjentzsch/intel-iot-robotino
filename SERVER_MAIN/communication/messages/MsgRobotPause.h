@@ -1,5 +1,5 @@
 //
-// MsgRobotServed.h
+// MsgRobotPause.h
 //
 // Authors:
 //   Sören Jentzsch <soren.jentzsch@gmail.com>
@@ -24,22 +24,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef MSGROBOTSERVED_H_
-#define MSGROBOTSERVED_H_
+#ifndef MsgRobotPause_H_
+#define MsgRobotPause_H_
 
-#include <string>
 #include <boost/property_tree/ptree.hpp>
 
 using namespace std;
 
-class MsgRobotServed
+class MsgRobotPause
 {
 public:
-	MsgRobotServed(unsigned long time_, unsigned long order_id_);
-	MsgRobotServed(boost::property_tree::ptree& pt);
-	virtual ~MsgRobotServed();
+	MsgRobotPause(unsigned long time_);
+	MsgRobotPause(boost::property_tree::ptree& pt);
+	virtual ~MsgRobotPause();
 
-	static ::std::string Message() {return "msg_robot_served";};
+	static ::std::string Message() {return "msg_robot_pause";};
 
 	void load(boost::property_tree::ptree& pt);
 	::std::string save();
@@ -47,7 +46,6 @@ public:
 
 	string message;
 	unsigned long time;
-	unsigned long order_id;
 };
 
-#endif /* MSGROBOTSERVED_H_ */
+#endif /* MsgRobotPause_H_ */

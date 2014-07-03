@@ -1,9 +1,28 @@
-/*
- * MsgEnvironment.h
- *
- *  Created on: Jun 10, 2014
- *      Author: root
- */
+//
+// MsgEnvironment.h
+//
+// Authors:
+//   Sören Jentzsch <soren.jentzsch@gmail.com>
+//
+// Copyright (c) 2014 Sören Jentzsch
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
 
 #ifndef MSGENVIRONMENT_H_
 #define MSGENVIRONMENT_H_
@@ -16,7 +35,7 @@ using namespace std;
 class MsgEnvironment
 {
 public:
-	MsgEnvironment(unsigned long time_start_, double x_max_, double y_max_, double x_robot_, double y_robot_, double phi_robot_, double x_base_start_, double y_base_start_, double x_base_end_, double y_base_end_, double phi_base_);
+	MsgEnvironment(unsigned long time_, double x_max_, double y_max_, double x_base_robot_start_, double y_base_robot_start_, double x_base_left_corner_, double y_base_left_corner_, double phi_base_);
 	MsgEnvironment(boost::property_tree::ptree& pt);
 	virtual ~MsgEnvironment();
 
@@ -27,16 +46,13 @@ public:
 	void print();
 
 	string message;
-	unsigned long time_start;
+	unsigned long time;
 	double x_max;
 	double y_max;
-	double x_robot;
-	double y_robot;
-	double phi_robot;
-	double x_base_start;
-	double y_base_start;
-	double x_base_end;
-	double y_base_end;
+	double x_base_robot_start;
+	double y_base_robot_start;
+	double x_base_left_corner;
+	double y_base_left_corner;
 	double phi_base;
 };
 
