@@ -53,6 +53,7 @@ struct Dispatcher;
 struct RandomMovement;
 struct RefillDrinks;
 struct ServeCustomer;
+struct StartupCalibration;
 
 /////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////
@@ -81,7 +82,7 @@ struct StateMachine1 : sc::state_machine<StateMachine1, Init>
 			boost::this_thread::sleep(boost::posix_time::milliseconds(10));*/
 
 		stateBehavCtrl->getTaskManager()->startSendBeacon();
-		stateBehavCtrl->getTaskManager()->nextTask();
+		post_event(EvStartupCalibration());
 	}
 
 	void nextTask(const EvSuccess&){
@@ -121,7 +122,8 @@ struct Dispatcher : sc::state< Dispatcher, StateMachine1>
 	typedef mpl::list<
 		sc::transition<EvRandomMovement,RandomMovement>,
 		sc::transition<EvRefillDrinks,RefillDrinks>,
-		sc::transition<EvServeCustomer,ServeCustomer>
+		sc::transition<EvServeCustomer,ServeCustomer>,
+		sc::transition<EvStartupCalibration,StartupCalibration>
 		> reactions;
 };
 
@@ -129,5 +131,6 @@ struct Dispatcher : sc::state< Dispatcher, StateMachine1>
 #include "RandomMovement.h"
 #include "RefillDrinks.h"
 #include "ServeCustomer.h"
+#include "StartupCalibration.h"
 
 #endif /* STATEMACHINE_H_ */

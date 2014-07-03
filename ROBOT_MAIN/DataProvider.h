@@ -58,6 +58,7 @@ public:
 	MsgEnvironment getLatestMsgEnvironment();
 	Direction::DIRECTION getLatestBaseDir();
 	bool isRunning();
+	void setRunning(bool running_);
 	MsgRobotPos getLatestMsgRobotPos();
 	vector< MsgCustomerOrder > getMsgCustomerOrders();
 	vector< MsgCustomerPos > getMsgCustomerPoses();

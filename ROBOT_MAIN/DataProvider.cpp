@@ -170,6 +170,12 @@ bool DataProvider::isRunning()
 	return this->running;
 }
 
+void DataProvider::setRunning(bool running_)
+{
+	boost::shared_lock<boost::shared_mutex> r_lock(mutexMsgRobotPause);
+	this->running = running_;
+}
+
 MsgRobotPos DataProvider::getLatestMsgRobotPos()
 {
 	boost::shared_lock<boost::shared_mutex> r_lock(mutexMsgRobotPos);

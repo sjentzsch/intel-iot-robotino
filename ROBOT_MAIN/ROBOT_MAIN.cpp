@@ -96,6 +96,13 @@ int main(int argc, char* argv[])
 #endif
 		CloudComm::getInstance()->getCloudServer()->handleConnections();
 
+#if SIMULATION_MODE == 1
+		rec::robotino::api2::Com* api2Com = new SimApi2Com();
+#else
+		rec::robotino::api2::Com* api2Com = new Api2Com();
+		initApi2(api2Com);
+#endif
+
 		// wait for MsgEnvironment to arrive ...
 		FileLog::log_NOTICE("Waiting for receiving MsgEnvironment ...");
 		while(!DataProvider::getInstance()->isValidMsgEnvironment())
@@ -111,13 +118,6 @@ int main(int argc, char* argv[])
 		vector< MsgCustomerPos > vecMsgCustomerPoses = DataProvider::getInstance()->getMsgCustomerPoses();
 		for(unsigned int i=0; i<vecMsgCustomerPoses.size(); i++)
 			vecMsgCustomerPoses.at(i).print();*/
-
-#if SIMULATION_MODE == 1
-		rec::robotino::api2::Com* api2Com = new SimApi2Com();
-#else
-		rec::robotino::api2::Com* api2Com = new Api2Com();
-		initApi2(api2Com);
-#endif
 
 		SensorServer* sensorSrv = new SensorServer();
 		FileLog::log_NOTICE("Instantiated SensorServer");

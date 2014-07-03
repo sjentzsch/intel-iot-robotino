@@ -36,6 +36,7 @@ struct refillDrivingToBaseStart;
 struct refillRotatingToBase;
 struct refillCalibratingOnBaseFront;
 struct refillCalibratingOnBaseSide;
+struct refillDrivingToRefillPoint;
 struct refillWaitForRefill;
 struct refillFinished;
 
@@ -77,6 +78,11 @@ struct RefillDrinks : sc::state<RefillDrinks, StateMachine1, refillInit>
 	void calibrateOnBaseSide() {
 		stateBehavCtrl->getSensorControl()->calibrateOnBaseSide();
 		stateBehavCtrl->getMotorCtrl()->moveToAbsPos(msgEnvironment->x_base_robot_start*1000, msgEnvironment->y_base_robot_start*1000, msgEnvironment->phi_base);
+	}
+
+	void driveToRefillPoint() {
+		// TODO: depends on base_dir!
+		stateBehavCtrl->getMotorCtrl()->moveToAbsPos(msgEnvironment->x_base_left_corner*1000+400, msgEnvironment->y_base_left_corner*1000-400, msgEnvironment->phi_base+180);
 	}
 
 	//Reactions
@@ -207,6 +213,27 @@ struct refillCalibratingOnBaseSide : sc::state<refillCalibratingOnBaseSide, Refi
 	} // entry
 
 	virtual ~refillCalibratingOnBaseSide() {
+	} // exit
+
+	sc::result react(const EvMotorCtrlReady&)
+	{
+		context<RefillDrinks>().driveToRefillPoint();
+		return transit<refillDrivingToRefillPoint>();
+	}
+
+	//Reactions
+	typedef mpl::list<
+		sc::custom_reaction<EvMotorCtrlReady>
+	> reactions;
+};
+
+struct refillDrivingToRefillPoint : sc::state<refillDrivingToRefillPoint, RefillDrinks>
+{
+	refillDrivingToRefillPoint(my_context ctx) : my_base(ctx) {
+		context<StateMachine1>().logAndDisplayStateName("refillDrivingToRefillPoint");
+	} // entry
+
+	virtual ~refillDrivingToRefillPoint() {
 	} // exit
 
 	sc::result react(const EvMotorCtrlReady&)

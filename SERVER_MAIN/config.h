@@ -27,8 +27,7 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
-#define SIMULATION_MODE 1
-#define USE_CAMERA 0
+#define SIMULATION_MODE 0
 
 /* USEFUL PREPROCESSOR DIRECTIVES */
 #define PRINT(x) std::cout << x << std::endl

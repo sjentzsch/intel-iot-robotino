@@ -57,6 +57,7 @@ struct EvPathDriven : sc::event<EvPathDriven> {};
 struct EvRandomMovement : sc::event<EvRandomMovement> {};
 struct EvRefillDrinks : sc::event<EvRefillDrinks> {};
 struct EvServeCustomer : sc::event<EvServeCustomer> {};
+struct EvStartupCalibration : sc::event<EvStartupCalibration> {};
 
 // Motor Events
 struct EvMotorCtrlReady : sc::event<EvMotorCtrlReady> {};
