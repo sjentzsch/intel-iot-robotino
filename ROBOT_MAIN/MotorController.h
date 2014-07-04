@@ -3,8 +3,9 @@
 //
 // Authors:
 //   Sören Jentzsch <soren.jentzsch@gmail.com>
+//   Sebastian Riedel <riedels@cs.tum.edu>
 //
-// Copyright (c) 2014 Sören Jentzsch
+// Copyright (c) 2014 Sören Jentzsch, Sebastian Riedel
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -83,6 +84,7 @@ private:
 	void sendReadyEvent();
 	void setVelocity(float vx, float vy, float vphi);
 	void moveToAbsPos_impl(vector<vec3D> vPoints, float myMaxSpeed, float myMaxRotSpeed, bool onlyRotate, ForceRotationDirection::ForceRotationDirection forcedDir);
+	void moveToAbsPosCF_impl(float destX, float destY, float myMaxSpeed);
 
 public:
 	MotorController(SensorServer *sensorSrv_);
@@ -103,6 +105,8 @@ public:
 	void moveToAbsXPosRelYPos(float destX, float destY, float destPhi, float myMaxSpeed=MAX_SPEED);
 	void rotateToAbsAngle(float destPhi, ForceRotationDirection::ForceRotationDirection forcedDir=ForceRotationDirection::SHORTEST, float myMaxRotSpeed=MAX_ROT_SPEED);
 	void rotateToRelAngle(float destPhi, ForceRotationDirection::ForceRotationDirection forcedDir=ForceRotationDirection::SHORTEST, float myMaxRotSpeed=MAX_ROT_SPEED);
+
+	void moveToAbsPosOnlyCF(float destX, float destY, float myMaxSpeed=MAX_SPEED);
 };
 
 #endif /* MOTORCONTROLLER_H_ */

@@ -68,7 +68,7 @@ struct ServeCustomer : sc::state<ServeCustomer, StateMachine1, serveInit>
 	}
 
 	void driveToCustomer() {
-		stateBehavCtrl->getMotorCtrl()->moveToAbsPosOnly(msgCustomerPos->x*1000, msgCustomerPos->y*1000);
+		stateBehavCtrl->getMotorCtrl()->moveToAbsPosOnlyCF(msgCustomerPos->x*1000, msgCustomerPos->y*1000);
 	}
 
 	void serveDrink() {

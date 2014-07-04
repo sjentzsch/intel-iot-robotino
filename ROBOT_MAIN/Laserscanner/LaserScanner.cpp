@@ -87,17 +87,8 @@ void LaserScanner::loop()
 
 		float my_x, my_y, my_phi;
 		this->sensorServer->getOdometry(my_x, my_y, my_phi);
-		std::vector<bool> isValid(scan.positions.size());
 		for(unsigned int i=0; i<scan.positions.size(); i++)
-		{
 			this->sensorServer->transformBase2World(scan.positions.at(i)[0], scan.positions.at(i)[1], my_x, my_y, my_phi, scan.positionsGlob.at(i)[0], scan.positionsGlob.at(i)[1]);
-
-			// if point is outside the field dimensions OR point range is outside the valid range of the laserscanner
-			if(!scannerDriver->coordInsideField(scan.positionsGlob.at(i)[0], scan.positionsGlob.at(i)[1]) || !scan.inRange.at(i))
-				isValid.at(i) = false;
-			else
-				isValid.at(i) = true;
-		}
 
 		//if(scan.positions.size() > 0)
 		//	cout << "middleGlob: " << scan.positionsGlob.at(scan.positions.size()/2).at(0) << ", " << scan.positionsGlob.at(scan.positions.size()/2).at(1) << endl;
@@ -206,6 +197,9 @@ LaserScannerReadings LaserScanner::readings() const
 		readings.positionsGlob[i].resize(2);
 		readings.positionsGlob[i][0] = 0;
 		readings.positionsGlob[i][1] = 0;
+
+		if(x_base >= 0.1 && x_base <= 2.0 && y_base >= -0.3 && y_base <= 0.3)
+			readings.indicesInFrontPos.push_back(i);
 
 		//cout << "range: " << i << ", cur_angle: " << RADTODEG(cur_angle) <<  ", angle: " << RADTODEG(readings.angles[i]) << endl;
 	}

@@ -3,8 +3,9 @@
 //
 // Authors:
 //   Sören Jentzsch <soren.jentzsch@gmail.com>
+//   Sebastian Riedel <riedels@cs.tum.edu>
 //
-// Copyright (c) 2014 Sören Jentzsch
+// Copyright (c) 2014 Sören Jentzsch, Sebastian Riedel
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -347,6 +348,152 @@ void MotorController::moveToAbsPos_impl(vector<vec3D> vPoints, float myMaxSpeed,
 	}
 }
 
+void MotorController::moveToAbsPosCF_impl(float destX, float destY, float myMaxSpeed)
+{
+	float myMaxRotSpeed = MAX_ROT_SPEED;
+
+	float destPhi = sensorSrv->getPhi();
+
+	bool wasTerminated = false;
+
+	unsigned int counter = 0;
+
+	/* rotate: declare variables */
+	float destPhiNow = getPositiveDegree(sensorSrv->getPhi());
+	float nowPhi, distRotate, diffPhi, dirRotate, speedRotate;
+
+	/* drive: declare variables */
+	float rotX, rotY, distDrive, speedDrive;
+
+	/* timer to ensure slow start */
+	slowStartTimer.start();
+
+	vec3D pose;
+	sensorSrv->getOdometry(pose);
+
+	unsigned int MIN_DISTANCE_curr = MIN_DISTANCE;
+	unsigned int MIN_DEGREE_DISTANCE_curr = MIN_DEGREE_DISTANCE;
+
+	cout << "moveToAbsPos_impl: driving from curr (" << pose.x << ", " << pose.y << ", " << pose.phi << ") to goal (" << destX << ", " << destY << ", " << destPhi << ")" << endl;
+
+	do
+	{
+		if(!checkSignalStatus()) //received TERMINATE signal
+		{
+			wasTerminated = true;
+			break;
+		}
+
+		// GOT PAUSE SIGNAL? Wait!
+		while(!DataProvider::getInstance()->isRunning())
+		{
+			setVelocity(0, 0, 0);
+			boost::this_thread::sleep(boost::posix_time::milliseconds(500));
+			slowStartTimer.reset();
+			slowStartTimer.start();
+		}
+
+
+		sensorSrv->getOdometry(pose);
+		LaserScannerReadings scan = this->sensorSrv->getLatestScan();
+
+
+		cout << "#rays blocking my path: " << scan.indicesInFrontPos.size() << endl;
+		float nearestObsX = 0;
+		float nearestObsY = 0;
+		float distSquare = std::numeric_limits<float>::max();
+		for(unsigned int i=0; i<scan.indicesInFrontPos.size(); i++)
+		{
+			float currDistSquare = scan.positions.at(scan.indicesInFrontPos.at(i)).at(0)*scan.positions.at(scan.indicesInFrontPos.at(i)).at(0) + scan.positions.at(scan.indicesInFrontPos.at(i)).at(1)*scan.positions.at(scan.indicesInFrontPos.at(i)).at(1);
+			if(currDistSquare < distSquare)
+			{
+				nearestObsX = scan.positions.at(scan.indicesInFrontPos.at(i)).at(0);
+				nearestObsY = scan.positions.at(scan.indicesInFrontPos.at(i)).at(1);
+				distSquare = currDistSquare;
+			}
+			cout << "\t" << i << ": " << scan.positions.at(scan.indicesInFrontPos.at(i)).at(0) << ", " << scan.positions.at(scan.indicesInFrontPos.at(i)).at(1) << endl;
+		}
+		cout << "nearest ray: " << nearestObsX << ", " << nearestObsY << endl;
+
+
+		rotX = cos(-DEGTORAD(pose.phi))*(destX-pose.x) - sin(-DEGTORAD(pose.phi))*(destY-pose.y);
+		rotY = sin(-DEGTORAD(pose.phi))*(destX-pose.x) + cos(-DEGTORAD(pose.phi))*(destY-pose.y);
+
+		distDrive = sqrt(SQUARE(rotX) + SQUARE(rotY));
+
+		if(distDrive < DEST_TO_TARGET_BEGIN_ROTATE)
+		{
+			destPhiNow = getPositiveDegree(destPhi);
+		}
+
+		nowPhi = getPositiveDegree(pose.phi);
+		distRotate = getDistDegree(destPhiNow, nowPhi);
+		diffPhi = destPhiNow - nowPhi;
+
+		if((diffPhi < -180) || (diffPhi > 0 && diffPhi < 180)) // ForceRotationDirection == SHORTEST
+			dirRotate = 1;	// rotate anti-clockwise (= to the left)
+		else
+			dirRotate = -1;	// rotate clockwise (= to the right)
+
+		speedDrive = 0;
+		speedRotate = 0;
+
+		//cout << "x: " << sensorSrv->getX() << "\t y: " << sensorSrv->getY() << "\t p: " << sensorSrv->getPhi() << "\t distDrive: " << distDrive << "\t distRotate: " << distRotate << endl;
+		if(distDrive > MIN_DISTANCE_curr)
+		{
+			if(slowStartTimer.msecsElapsed() < SLOW_START_DURATION && distDrive > SLOW_DISTANCE)
+				speedDrive = ((float)slowStartTimer.msecsElapsed())/SLOW_START_DURATION*(myMaxSpeed-MIN_SPEED) + MIN_SPEED;
+			else if(distDrive <= SLOW_DISTANCE)
+				speedDrive = (myMaxSpeed-MIN_SPEED)/(SLOW_DISTANCE-MIN_DISTANCE_curr) * (distDrive-MIN_DISTANCE_curr) + MIN_SPEED;
+			else
+				speedDrive = myMaxSpeed;
+		}
+
+		if(distRotate > MIN_DEGREE_DISTANCE_curr)
+		{
+			if(slowStartTimer.msecsElapsed() < SLOW_START_DURATION)
+				speedRotate = dirRotate*(((float)slowStartTimer.msecsElapsed())/SLOW_START_DURATION*(myMaxRotSpeed-MIN_ROT_SPEED) + MIN_ROT_SPEED);
+
+			/*else if(distRotate > SLOW_DEGREE_DISTANCE)
+				speedRotate = dirRotate*(myMaxRotSpeed);
+			else
+				speedRotate = dirRotate*((myMaxRotSpeed-MIN_ROT_SPEED)/(SLOW_DEGREE_DISTANCE-MIN_DEGREE_DISTANCE_curr) * (distRotate-MIN_DEGREE_DISTANCE_curr) + MIN_ROT_SPEED);*/
+			speedRotate = abs(distRotate)*PHI_CONTROL_PROPORTIONAL_CONSTANT; // make rotation speed proportional to difference in between target and current phi
+			if(speedRotate < MIN_ROT_SPEED)
+				speedRotate = MIN_ROT_SPEED;
+			if(speedRotate > myMaxRotSpeed)
+				speedRotate = myMaxRotSpeed;
+
+			speedRotate *= dirRotate; // give the speed the correct direction
+		}
+		else
+		{
+			speedRotate = dirRotate*abs(distRotate)*PHI_CONTROL_PROPORTIONAL_CONSTANT; // make rotation speed proportional to difference in between target and current phi
+		}
+
+		if(distDrive == 0)
+			setVelocity(0, 0, speedRotate);
+		else
+			setVelocity(speedDrive*rotX/distDrive, speedDrive*rotY/distDrive, speedRotate);
+
+		if(counter%500==0)
+		{
+			FileLog::log_NOTICE("[MotorController] running: distDrive ", FileLog::real(distDrive), " distRotate: ", FileLog::real(distRotate), " speedRotate:", FileLog::real(speedRotate), " speedDrive:", FileLog::real(speedDrive));
+		}
+		counter++;
+		boost::this_thread::sleep(boost::posix_time::milliseconds(5));
+
+	} while (distDrive > MIN_DISTANCE_curr || distRotate > MIN_DEGREE_DISTANCE_curr);
+
+	slowStartTimer.reset();
+	setVelocity(0, 0, 0);
+
+	if(!wasTerminated)
+	{
+		sendReadyEvent();
+	}
+}
+
 /* converts the API degree value (range: -180 - 180) into a positive degree value (range: 0 - 360) */
 float MotorController::getPositiveDegree(float phi) const
 {
@@ -489,4 +636,18 @@ void MotorController::rotateToAbsAngle(float destPhi, ForceRotationDirection::Fo
 void MotorController::rotateToRelAngle(float destPhi, ForceRotationDirection::ForceRotationDirection forcedDir, float myMaxRotSpeed)
 {
 	moveToRelPos(0, 0, destPhi, MAX_SPEED, myMaxRotSpeed, true, forcedDir);
+}
+
+void MotorController::moveToAbsPosOnlyCF(float destX, float destY, float myMaxSpeed)
+{
+	if(execThread != NULL)
+	{
+		//Terminate current thread
+		terminate(); //Blocks until execThread is terminated
+	}
+
+	pause(); //prevent dangling TERMINATE signals by actively signaling PAUSE
+
+	execThread = new boost::thread(&MotorController::moveToAbsPosCF_impl,this,destX,destY,myMaxSpeed);
+	run(); //start the motor thread
 }

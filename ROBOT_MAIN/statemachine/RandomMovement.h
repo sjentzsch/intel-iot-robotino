@@ -72,7 +72,7 @@ struct RandomMovement : sc::state<RandomMovement, StateMachine1, randInit>
 	}
 
 	void driveToRandPos() {
-		stateBehavCtrl->getMotorCtrl()->moveToAbsPosOnly(randX*1000, randY*1000);
+		stateBehavCtrl->getMotorCtrl()->moveToAbsPosOnlyCF(randX*1000, randY*1000);
 	}
 
 	//Reactions

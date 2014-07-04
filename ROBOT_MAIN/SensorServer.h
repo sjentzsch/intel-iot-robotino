@@ -206,6 +206,8 @@ public:
 
 	ObstacleBuffer getLatestObstacleBuffer() const {return laserScanner->getLatestObstacleBuffer();}
 
+	LaserScannerReadings getLatestScan() const {return laserScanner->getLatestScan();}
+
 	void getNewSensorValues(SensorEventGeneratorBuffer* buf,SensorEventGeneratorBuffer* oldSensorState);
 
 

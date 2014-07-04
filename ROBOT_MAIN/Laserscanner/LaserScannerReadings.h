@@ -40,6 +40,7 @@ public:
 	std::vector<bool> inRange;	// true if range value is between range_min and range_max
 	std::vector<std::vector<float> > positions;		// vector of x,y in m (robotino frame)
 	std::vector<std::vector<float> > positionsGlob;	// vector of x,y in m (global frame)
+	std::vector<unsigned int> indicesInFrontPos;	// vector of indices of positions in front
 
 	rec::robotino::api2::LaserRangeFinderReadings api_readings;
 };
