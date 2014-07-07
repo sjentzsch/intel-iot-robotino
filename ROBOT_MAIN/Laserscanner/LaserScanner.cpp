@@ -198,7 +198,7 @@ LaserScannerReadings LaserScanner::readings() const
 		readings.positionsGlob[i][0] = 0;
 		readings.positionsGlob[i][1] = 0;
 
-		if(x_base >= 0.1 && x_base <= 2.0 && y_base >= -0.3 && y_base <= 0.3)
+		if(x_base >= OBS_X_START && x_base <= OBS_X_END && y_base >= -OBS_Y_END && y_base <= OBS_Y_END)
 			readings.indicesInFrontPos.push_back(i);
 
 		//cout << "range: " << i << ", cur_angle: " << RADTODEG(cur_angle) <<  ", angle: " << RADTODEG(readings.angles[i]) << endl;

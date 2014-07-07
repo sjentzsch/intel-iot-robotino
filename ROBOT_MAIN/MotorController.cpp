@@ -352,29 +352,29 @@ void MotorController::moveToAbsPosCF_impl(float destX, float destY, float myMaxS
 {
 	float myMaxRotSpeed = MAX_ROT_SPEED;
 
-	float destPhi = sensorSrv->getPhi();
-
 	bool wasTerminated = false;
 
 	unsigned int counter = 0;
 
+	vec3D pose;
+	sensorSrv->getOdometry(pose);
+
 	/* rotate: declare variables */
-	float destPhiNow = getPositiveDegree(sensorSrv->getPhi());
+	float destPhiNow = getPositiveDegree(RADTODEG(atan2(destY - pose.y, destX - pose.x)));
 	float nowPhi, distRotate, diffPhi, dirRotate, speedRotate;
 
 	/* drive: declare variables */
 	float rotX, rotY, distDrive, speedDrive;
+	float distToGoal;
+	float currBaseVel = 300.0f;
 
 	/* timer to ensure slow start */
 	slowStartTimer.start();
 
-	vec3D pose;
-	sensorSrv->getOdometry(pose);
-
 	unsigned int MIN_DISTANCE_curr = MIN_DISTANCE;
 	unsigned int MIN_DEGREE_DISTANCE_curr = MIN_DEGREE_DISTANCE;
 
-	cout << "moveToAbsPos_impl: driving from curr (" << pose.x << ", " << pose.y << ", " << pose.phi << ") to goal (" << destX << ", " << destY << ", " << destPhi << ")" << endl;
+	cout << "moveToAbsPos_impl: driving from curr (" << pose.x << ", " << pose.y << ", " << pose.phi << ") to goal (" << destX << ", " << destY << ", " << destPhiNow << ")" << endl;
 
 	do
 	{
@@ -394,38 +394,63 @@ void MotorController::moveToAbsPosCF_impl(float destX, float destY, float myMaxS
 		}
 
 
+		// get current pose/odometry and laser scan
 		sensorSrv->getOdometry(pose);
 		LaserScannerReadings scan = this->sensorSrv->getLatestScan();
 
 
+		// get the position of the nearest obstacle relative to the Robotino frame
 		cout << "#rays blocking my path: " << scan.indicesInFrontPos.size() << endl;
+		bool hasObstacle = false;
 		float nearestObsX = 0;
 		float nearestObsY = 0;
 		float distSquare = std::numeric_limits<float>::max();
 		for(unsigned int i=0; i<scan.indicesInFrontPos.size(); i++)
 		{
-			float currDistSquare = scan.positions.at(scan.indicesInFrontPos.at(i)).at(0)*scan.positions.at(scan.indicesInFrontPos.at(i)).at(0) + scan.positions.at(scan.indicesInFrontPos.at(i)).at(1)*scan.positions.at(scan.indicesInFrontPos.at(i)).at(1);
+			float currDistSquare = SQUARE(scan.positions.at(scan.indicesInFrontPos.at(i)).at(0)) + SQUARE(scan.positions.at(scan.indicesInFrontPos.at(i)).at(1));
 			if(currDistSquare < distSquare)
 			{
 				nearestObsX = scan.positions.at(scan.indicesInFrontPos.at(i)).at(0);
 				nearestObsY = scan.positions.at(scan.indicesInFrontPos.at(i)).at(1);
 				distSquare = currDistSquare;
+				hasObstacle = true;
 			}
-			cout << "\t" << i << ": " << scan.positions.at(scan.indicesInFrontPos.at(i)).at(0) << ", " << scan.positions.at(scan.indicesInFrontPos.at(i)).at(1) << endl;
+			//cout << "\t" << i << ": " << scan.positions.at(scan.indicesInFrontPos.at(i)).at(0) << ", " << scan.positions.at(scan.indicesInFrontPos.at(i)).at(1) << endl;
 		}
-		cout << "nearest ray: " << nearestObsX << ", " << nearestObsY << endl;
+
+		// calculate the amount of sidewards velocity
+		float speedSidewards = 0.0f;
+		float dirSidewards = 1.0f;
+		if(hasObstacle)
+		{
+			if(nearestObsX < OBS_X_STILL_MAX)
+				speedSidewards = 1.0f;
+			else
+				speedSidewards = (nearestObsX-OBS_X_END)/(OBS_X_STILL_MAX-OBS_X_END);
+
+			if(nearestObsY > 0)
+				dirSidewards = -1.0f;
+
+			cout << "nearest ray: " << nearestObsX << ", " << nearestObsY << " => speedSidewards: " << speedSidewards << ", dirSidewards: " << dirSidewards << endl;
+		}
+		else
+			cout << "no obstacle in front => speedSidewards: " << speedSidewards << ", dirSidewards: " << dirSidewards << endl;
 
 
-		rotX = cos(-DEGTORAD(pose.phi))*(destX-pose.x) - sin(-DEGTORAD(pose.phi))*(destY-pose.y);
+
+		// ???
+		/*rotX = cos(-DEGTORAD(pose.phi))*(destX-pose.x) - sin(-DEGTORAD(pose.phi))*(destY-pose.y);
 		rotY = sin(-DEGTORAD(pose.phi))*(destX-pose.x) + cos(-DEGTORAD(pose.phi))*(destY-pose.y);
 
-		distDrive = sqrt(SQUARE(rotX) + SQUARE(rotY));
+		distDrive = sqrt(SQUARE(rotX) + SQUARE(rotY));*/
 
-		if(distDrive < DEST_TO_TARGET_BEGIN_ROTATE)
-		{
-			destPhiNow = getPositiveDegree(destPhi);
-		}
+		distToGoal = sqrt(SQUARE(destX-pose.x) + SQUARE(destY-pose.y));
 
+
+
+
+		// calculate the rotation part
+		destPhiNow = getPositiveDegree(RADTODEG(atan2(destY - pose.y, destX - pose.x)));
 		nowPhi = getPositiveDegree(pose.phi);
 		distRotate = getDistDegree(destPhiNow, nowPhi);
 		diffPhi = destPhiNow - nowPhi;
@@ -435,10 +460,11 @@ void MotorController::moveToAbsPosCF_impl(float destX, float destY, float myMaxS
 		else
 			dirRotate = -1;	// rotate clockwise (= to the right)
 
-		speedDrive = 0;
-		speedRotate = 0;
 
-		//cout << "x: " << sensorSrv->getX() << "\t y: " << sensorSrv->getY() << "\t p: " << sensorSrv->getPhi() << "\t distDrive: " << distDrive << "\t distRotate: " << distRotate << endl;
+
+
+
+		/*speedDrive = 0;
 		if(distDrive > MIN_DISTANCE_curr)
 		{
 			if(slowStartTimer.msecsElapsed() < SLOW_START_DURATION && distDrive > SLOW_DISTANCE)
@@ -447,17 +473,12 @@ void MotorController::moveToAbsPosCF_impl(float destX, float destY, float myMaxS
 				speedDrive = (myMaxSpeed-MIN_SPEED)/(SLOW_DISTANCE-MIN_DISTANCE_curr) * (distDrive-MIN_DISTANCE_curr) + MIN_SPEED;
 			else
 				speedDrive = myMaxSpeed;
-		}
+		}*/
 
+		// determine the final rotation speed
+		speedRotate = 0;
 		if(distRotate > MIN_DEGREE_DISTANCE_curr)
 		{
-			if(slowStartTimer.msecsElapsed() < SLOW_START_DURATION)
-				speedRotate = dirRotate*(((float)slowStartTimer.msecsElapsed())/SLOW_START_DURATION*(myMaxRotSpeed-MIN_ROT_SPEED) + MIN_ROT_SPEED);
-
-			/*else if(distRotate > SLOW_DEGREE_DISTANCE)
-				speedRotate = dirRotate*(myMaxRotSpeed);
-			else
-				speedRotate = dirRotate*((myMaxRotSpeed-MIN_ROT_SPEED)/(SLOW_DEGREE_DISTANCE-MIN_DEGREE_DISTANCE_curr) * (distRotate-MIN_DEGREE_DISTANCE_curr) + MIN_ROT_SPEED);*/
 			speedRotate = abs(distRotate)*PHI_CONTROL_PROPORTIONAL_CONSTANT; // make rotation speed proportional to difference in between target and current phi
 			if(speedRotate < MIN_ROT_SPEED)
 				speedRotate = MIN_ROT_SPEED;
@@ -467,23 +488,25 @@ void MotorController::moveToAbsPosCF_impl(float destX, float destY, float myMaxS
 			speedRotate *= dirRotate; // give the speed the correct direction
 		}
 		else
-		{
-			speedRotate = dirRotate*abs(distRotate)*PHI_CONTROL_PROPORTIONAL_CONSTANT; // make rotation speed proportional to difference in between target and current phi
-		}
+			speedRotate = 0;
 
-		if(distDrive == 0)
+		cout << "xVel: " << ((1-speedSidewards)*currBaseVel) << ", yVel: " << (dirSidewards*speedSidewards*currBaseVel) << ", rot: " << speedRotate << endl;
+
+		// set the final velocities
+		/*if(distDrive == 0)
 			setVelocity(0, 0, speedRotate);
 		else
-			setVelocity(speedDrive*rotX/distDrive, speedDrive*rotY/distDrive, speedRotate);
+			setVelocity(speedDrive*rotX/distDrive, speedDrive*rotY/distDrive, speedRotate);*/
+		setVelocity((1-speedSidewards)*currBaseVel, dirSidewards*speedSidewards*currBaseVel, speedRotate);
 
-		if(counter%500==0)
+		if(counter%50==0)
 		{
-			FileLog::log_NOTICE("[MotorController] running: distDrive ", FileLog::real(distDrive), " distRotate: ", FileLog::real(distRotate), " speedRotate:", FileLog::real(speedRotate), " speedDrive:", FileLog::real(speedDrive));
+			//FileLog::log_NOTICE("[MotorController] running: distToGoal ", FileLog::real(distToGoal), " distRotate: ", FileLog::real(distRotate), " speedRotate:", FileLog::real(speedRotate), " speedDrive:", FileLog::real(speedDrive));
 		}
 		counter++;
 		boost::this_thread::sleep(boost::posix_time::milliseconds(5));
 
-	} while (distDrive > MIN_DISTANCE_curr || distRotate > MIN_DEGREE_DISTANCE_curr);
+	} while (distToGoal > MIN_DISTANCE_curr);
 
 	slowStartTimer.reset();
 	setVelocity(0, 0, 0);
