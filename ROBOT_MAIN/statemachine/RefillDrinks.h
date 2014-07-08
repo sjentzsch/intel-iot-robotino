@@ -63,7 +63,7 @@ struct RefillDrinks : sc::state<RefillDrinks, StateMachine1, refillInit>
 	}
 
 	void driveToBaseStart() {
-		stateBehavCtrl->getMotorCtrl()->moveToAbsPosOnlyCF(msgEnvironment->x_base_robot_start*1000, msgEnvironment->y_base_robot_start*1000);
+		stateBehavCtrl->getMotorCtrl()->moveToAbsPosOnlyCF(msgEnvironment->x_base_robot_start*1000, msgEnvironment->y_base_robot_start*1000, 400.0f, false);
 	}
 
 	void rotateToBase() {

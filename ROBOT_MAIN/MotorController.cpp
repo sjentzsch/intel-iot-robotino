@@ -29,7 +29,7 @@
 #include "StateBehaviorController.h"
 #include "StateMachineEvents.h"
 
-const float MotorController::MIN_SPEED(40.0f); // original value 40.0f (03.06.11)
+const float MotorController::MIN_SPEED(60.0f); // original value 40.0f (03.06.11)
 const float MotorController::MIN_ROT_SPEED(8.0f); // original value 5.0f (03.06.11), increased to 7.0f (29.0
 const unsigned int MotorController::MIN_DISTANCE(15);
 const unsigned int MotorController::MIN_DEGREE_DISTANCE(2);
@@ -39,7 +39,7 @@ const unsigned int MotorController::SLOW_DISTANCE(250);
 const float MotorController::PHI_CONTROL_PROPORTIONAL_CONSTANT(2.5);
 const unsigned int MotorController::DEST_TO_TARGET_BEGIN_ROTATE = 1100; // original value 600
 const float MotorController::MAX_ROT_SPEED(30.0f); // original value 30.0f (02.07.11)
-const float MotorController::MAX_SPEED(300.0f);
+const float MotorController::MAX_SPEED(400.0f);
 
 
 MotorController::MotorController(SensorServer *sensorSrv_):sensorSrv(sensorSrv_){
@@ -348,33 +348,42 @@ void MotorController::moveToAbsPos_impl(vector<vec3D> vPoints, float myMaxSpeed,
 	}
 }
 
-void MotorController::moveToAbsPosCF_impl(float destX, float destY, float myMaxSpeed)
+void MotorController::moveToAbsPosCF_impl(float destX, float destY, float myMaxSpeed, bool allowRedefineTarget)
 {
-	float myMaxRotSpeed = MAX_ROT_SPEED;
+	const unsigned int SLOW_DISTANCE_CF = 800;
+	const unsigned int MIN_DISTANCE_CF = allowRedefineTarget ? 100 : 20;
+	const unsigned int MAX_DIST_TO_ORIG_GOAL = 800;
 
 	bool wasTerminated = false;
-
 	unsigned int counter = 0;
 
 	vec3D pose;
 	sensorSrv->getOdometry(pose);
+	float readings[9];
 
 	/* rotate: declare variables */
 	float destPhiNow = getPositiveDegree(RADTODEG(atan2(destY - pose.y, destX - pose.x)));
 	float nowPhi, distRotate, diffPhi, dirRotate, speedRotate;
 
 	/* drive: declare variables */
-	float rotX, rotY, distDrive, speedDrive;
-	float distToGoal;
-	float currBaseVel = 300.0f;
+	float distToOrigGoal = sqrt(SQUARE(destX-pose.x) + SQUARE(destY-pose.y));
+	float distToGoal = distToOrigGoal;
+	float currBaseVel = MIN_SPEED;
+
+	/* variables used for local-minima-avoidance routine */
+	float lastDistToGoal = distToGoal;
+	bool avoidToLeft = false;
+	bool avoidToRight = false;
+	bool allowDriveToRight = true;
+
+	/* variables used for redefining target */
+	float currDestX = destX;
+	float currDestY = destY;
 
 	/* timer to ensure slow start */
 	slowStartTimer.start();
 
-	unsigned int MIN_DISTANCE_curr = MIN_DISTANCE;
-	unsigned int MIN_DEGREE_DISTANCE_curr = MIN_DEGREE_DISTANCE;
-
-	cout << "moveToAbsPos_impl: driving from curr (" << pose.x << ", " << pose.y << ", " << pose.phi << ") to goal (" << destX << ", " << destY << ", " << destPhiNow << ")" << endl;
+	cout << "moveToAbsPosCF_impl: driving from curr (" << pose.x << ", " << pose.y << ", " << pose.phi << ") to goal (" << currDestX << ", " << currDestY << ", " << destPhiNow << ")" << endl;
 
 	do
 	{
@@ -394,9 +403,11 @@ void MotorController::moveToAbsPosCF_impl(float destX, float destY, float myMaxS
 		}
 
 
-		// get current pose/odometry and laser scan
+		// get current pose/odometry, laser scan, and ir sensors
 		sensorSrv->getOdometry(pose);
 		LaserScannerReadings scan = this->sensorSrv->getLatestScan();
+		this->sensorSrv->getIRSensors(readings);
+
 
 
 		// get the position of the nearest obstacle relative to the Robotino frame
@@ -405,6 +416,7 @@ void MotorController::moveToAbsPosCF_impl(float destX, float destY, float myMaxS
 		float nearestObsX = 0;
 		float nearestObsY = 0;
 		float distSquare = std::numeric_limits<float>::max();
+		unsigned int winnerIndex = 0;
 		for(unsigned int i=0; i<scan.indicesInFrontPos.size(); i++)
 		{
 			float currDistSquare = SQUARE(scan.positions.at(scan.indicesInFrontPos.at(i)).at(0)) + SQUARE(scan.positions.at(scan.indicesInFrontPos.at(i)).at(1));
@@ -413,91 +425,154 @@ void MotorController::moveToAbsPosCF_impl(float destX, float destY, float myMaxS
 				nearestObsX = scan.positions.at(scan.indicesInFrontPos.at(i)).at(0);
 				nearestObsY = scan.positions.at(scan.indicesInFrontPos.at(i)).at(1);
 				distSquare = currDistSquare;
+				winnerIndex = i;
 				hasObstacle = true;
 			}
 			//cout << "\t" << i << ": " << scan.positions.at(scan.indicesInFrontPos.at(i)).at(0) << ", " << scan.positions.at(scan.indicesInFrontPos.at(i)).at(1) << endl;
 		}
+		float distToNearestObs = sqrt(distSquare)*1000;
+
+		// calculate the remaining distance to goal
+		distToGoal = sqrt(SQUARE(currDestX-pose.x) + SQUARE(currDestY-pose.y));
+
+		// redefine goal: if obstacle in front of the original goal location, take a location in front of the obstacle as goal
+		if(hasObstacle && allowRedefineTarget && distToNearestObs < distToGoal && abs(distToNearestObs-distToOrigGoal) < MAX_DIST_TO_ORIG_GOAL)
+		{
+			float rayGlobPosX = scan.positionsGlob.at(winnerIndex).at(0) * 1000;
+			float rayGlobPosY = scan.positionsGlob.at(winnerIndex).at(1) * 1000;
+			currDestX = (pose.x > rayGlobPosX) ? (rayGlobPosX + 300) : (rayGlobPosX - 300);
+			currDestY = (pose.y > rayGlobPosY) ? (rayGlobPosY + 300) : (rayGlobPosY - 300);
+			distToGoal = sqrt(SQUARE(currDestX-pose.x) + SQUARE(currDestY-pose.y));
+			cout << "update goal to " << currDestX << ", " << currDestY << endl;
+		}
+
+		// discard obstacles behind the goal
+		if(hasObstacle && distToNearestObs > (distToGoal + 300))
+			hasObstacle = false;
+
+		// include frontal IR-sensors for obstacle detection
+		if(readings[1] < 0.1)
+		{
+			nearestObsX = 0.2;
+			nearestObsY = 0.2;
+			hasObstacle = true;
+		}
+		if(readings[8] < 0.1)
+		{
+			nearestObsX = 0.2;
+			nearestObsY = -0.2;
+			hasObstacle = true;
+		}
+
+
 
 		// calculate the amount of sidewards velocity
-		float speedSidewards = 0.0f;
+		float propSidewards = 0.0f;
 		float dirSidewards = 1.0f;
 		if(hasObstacle)
 		{
 			if(nearestObsX < OBS_X_STILL_MAX)
-				speedSidewards = 1.0f;
+				propSidewards = 1.0f;
 			else
-				speedSidewards = (nearestObsX-OBS_X_END)/(OBS_X_STILL_MAX-OBS_X_END);
+				propSidewards = (nearestObsX-OBS_X_END)/(OBS_X_STILL_MAX-OBS_X_END);
 
 			if(nearestObsY > 0)
+			{
+				if(avoidToRight)
+					lastDistToGoal = distToGoal;
+				avoidToRight = true;
+			}
+			else
+			{
+				if(avoidToLeft)
+					lastDistToGoal = distToGoal;
+				avoidToLeft = true;
+			}
+
+			if(avoidToRight && avoidToLeft && lastDistToGoal-distToGoal < 100)
+				allowDriveToRight = false;
+
+			if(nearestObsY > 0 && allowDriveToRight)
 				dirSidewards = -1.0f;
 
-			cout << "nearest ray: " << nearestObsX << ", " << nearestObsY << " => speedSidewards: " << speedSidewards << ", dirSidewards: " << dirSidewards << endl;
+			cout << "nearest ray: " << nearestObsX << ", " << nearestObsY << " => propSidewards: " << propSidewards << ", dirSidewards: " << dirSidewards << endl;
 		}
 		else
-			cout << "no obstacle in front => speedSidewards: " << speedSidewards << ", dirSidewards: " << dirSidewards << endl;
-
-
-
-		// ???
-		/*rotX = cos(-DEGTORAD(pose.phi))*(destX-pose.x) - sin(-DEGTORAD(pose.phi))*(destY-pose.y);
-		rotY = sin(-DEGTORAD(pose.phi))*(destX-pose.x) + cos(-DEGTORAD(pose.phi))*(destY-pose.y);
-
-		distDrive = sqrt(SQUARE(rotX) + SQUARE(rotY));*/
-
-		distToGoal = sqrt(SQUARE(destX-pose.x) + SQUARE(destY-pose.y));
-
-
+		{
+			lastDistToGoal = distToGoal;
+			avoidToLeft = false;
+			avoidToRight = false;
+			allowDriveToRight = true;
+			cout << "no obstacle in front => propSidewards: " << propSidewards << ", dirSidewards: " << dirSidewards << endl;
+		}
 
 
 		// calculate the rotation part
-		destPhiNow = getPositiveDegree(RADTODEG(atan2(destY - pose.y, destX - pose.x)));
+		destPhiNow = getPositiveDegree(RADTODEG(atan2(currDestY - pose.y, currDestX - pose.x)));
 		nowPhi = getPositiveDegree(pose.phi);
 		distRotate = getDistDegree(destPhiNow, nowPhi);
 		diffPhi = destPhiNow - nowPhi;
 
-		if((diffPhi < -180) || (diffPhi > 0 && diffPhi < 180)) // ForceRotationDirection == SHORTEST
+		if((diffPhi < -180) || (diffPhi > 0 && diffPhi < 180))
 			dirRotate = 1;	// rotate anti-clockwise (= to the left)
 		else
 			dirRotate = -1;	// rotate clockwise (= to the right)
 
-
-
-
-
-		/*speedDrive = 0;
-		if(distDrive > MIN_DISTANCE_curr)
-		{
-			if(slowStartTimer.msecsElapsed() < SLOW_START_DURATION && distDrive > SLOW_DISTANCE)
-				speedDrive = ((float)slowStartTimer.msecsElapsed())/SLOW_START_DURATION*(myMaxSpeed-MIN_SPEED) + MIN_SPEED;
-			else if(distDrive <= SLOW_DISTANCE)
-				speedDrive = (myMaxSpeed-MIN_SPEED)/(SLOW_DISTANCE-MIN_DISTANCE_curr) * (distDrive-MIN_DISTANCE_curr) + MIN_SPEED;
-			else
-				speedDrive = myMaxSpeed;
-		}*/
-
-		// determine the final rotation speed
+		// determine the final rotation speed -> only rotate if need to rotate and if *not* moving very sidewards
 		speedRotate = 0;
-		if(distRotate > MIN_DEGREE_DISTANCE_curr)
+		if(distRotate > MIN_DEGREE_DISTANCE && propSidewards < 0.95f)
 		{
 			speedRotate = abs(distRotate)*PHI_CONTROL_PROPORTIONAL_CONSTANT; // make rotation speed proportional to difference in between target and current phi
 			if(speedRotate < MIN_ROT_SPEED)
 				speedRotate = MIN_ROT_SPEED;
-			if(speedRotate > myMaxRotSpeed)
-				speedRotate = myMaxRotSpeed;
+			if(speedRotate > MAX_ROT_SPEED)
+				speedRotate = MAX_ROT_SPEED;
 
 			speedRotate *= dirRotate; // give the speed the correct direction
 		}
 		else
 			speedRotate = 0;
 
-		cout << "xVel: " << ((1-speedSidewards)*currBaseVel) << ", yVel: " << (dirSidewards*speedSidewards*currBaseVel) << ", rot: " << speedRotate << endl;
+		// determine current base velocity
+		currBaseVel = (1.0f-propSidewards)*(MAX_SPEED-MIN_SPEED)+MIN_SPEED;
+		if(distToGoal <= SLOW_DISTANCE_CF)
+		{
+			float baseVelForGoal = (MAX_SPEED-MIN_SPEED)/(SLOW_DISTANCE_CF-MIN_DISTANCE_CF) * (distToGoal-MIN_DISTANCE_CF) + MIN_SPEED;
+			if(baseVelForGoal < currBaseVel)
+				currBaseVel = baseVelForGoal;
+		}
 
-		// set the final velocities
-		/*if(distDrive == 0)
-			setVelocity(0, 0, speedRotate);
+		cout << "xVel: " << ((1-propSidewards)*currBaseVel) << ", yVel: " << (dirSidewards*propSidewards*currBaseVel) << ", rot: " << speedRotate << endl;
+
+
+		if(hasObstacle && nearestObsX < OBS_X_SAFETY_BACK && nearestObsY > -0.25 && nearestObsY < 0.25)
+		{
+			if(readings[4] > IR_SENSOR_THRESHOLD && readings[5] > IR_SENSOR_THRESHOLD)
+				setVelocity(-MIN_SPEED, 0, speedRotate);
+			else
+				setVelocity(0, 0, speedRotate);
+		}
 		else
-			setVelocity(speedDrive*rotX/distDrive, speedDrive*rotY/distDrive, speedRotate);*/
-		setVelocity((1-speedSidewards)*currBaseVel, dirSidewards*speedSidewards*currBaseVel, speedRotate);
+		{
+			cout << "propSidewards: " << propSidewards << " | " << "dirSidewards: " << dirSidewards << endl;
+
+			bool wayBlocked = false;
+			if(dirSidewards > 0.0f)
+			{
+				if((propSidewards > 0.4f && readings[1] < IR_SENSOR_THRESHOLD) || (propSidewards > 0.6f && readings[2] < IR_SENSOR_THRESHOLD) || (propSidewards > 0.85f && readings[3] < IR_SENSOR_THRESHOLD))
+					wayBlocked = true;
+			}
+			else if(dirSidewards < 0.0f)
+			{
+				if((propSidewards > 0.4f && readings[8] < IR_SENSOR_THRESHOLD) || (propSidewards > 0.6f && readings[7] < IR_SENSOR_THRESHOLD) || (propSidewards > 0.85f && readings[6] < IR_SENSOR_THRESHOLD))
+					wayBlocked = true;
+			}
+
+			if(wayBlocked)
+				setVelocity(0, 0, speedRotate);
+			else
+				setVelocity((1-propSidewards)*currBaseVel, dirSidewards*propSidewards*currBaseVel, speedRotate);
+		}
 
 		if(counter%50==0)
 		{
@@ -506,7 +581,7 @@ void MotorController::moveToAbsPosCF_impl(float destX, float destY, float myMaxS
 		counter++;
 		boost::this_thread::sleep(boost::posix_time::milliseconds(5));
 
-	} while (distToGoal > MIN_DISTANCE_curr);
+	} while (distToGoal > MIN_DISTANCE_CF);
 
 	slowStartTimer.reset();
 	setVelocity(0, 0, 0);
@@ -661,7 +736,7 @@ void MotorController::rotateToRelAngle(float destPhi, ForceRotationDirection::Fo
 	moveToRelPos(0, 0, destPhi, MAX_SPEED, myMaxRotSpeed, true, forcedDir);
 }
 
-void MotorController::moveToAbsPosOnlyCF(float destX, float destY, float myMaxSpeed)
+void MotorController::moveToAbsPosOnlyCF(float destX, float destY, float myMaxSpeed, bool allowRedefineTarget)
 {
 	if(execThread != NULL)
 	{
@@ -671,6 +746,6 @@ void MotorController::moveToAbsPosOnlyCF(float destX, float destY, float myMaxSp
 
 	pause(); //prevent dangling TERMINATE signals by actively signaling PAUSE
 
-	execThread = new boost::thread(&MotorController::moveToAbsPosCF_impl,this,destX,destY,myMaxSpeed);
+	execThread = new boost::thread(&MotorController::moveToAbsPosCF_impl,this,destX,destY,myMaxSpeed,allowRedefineTarget);
 	run(); //start the motor thread
 }

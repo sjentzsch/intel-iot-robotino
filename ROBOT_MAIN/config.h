@@ -31,9 +31,11 @@
 #define USE_CAMERA 0
 
 const float OBS_X_START = 0.1;
-const float OBS_X_STILL_MAX = 0.2;
+const float OBS_X_STILL_MAX = 0.35;
+const float OBS_X_SAFETY_BACK = 0.30;
 const float OBS_X_END = 2.0;
 const float OBS_Y_END = 0.3;
+const float IR_SENSOR_THRESHOLD = 0.12;
 
 /* USEFUL PREPROCESSOR DIRECTIVES */
 #define PRINT(x) std::cout << x << std::endl

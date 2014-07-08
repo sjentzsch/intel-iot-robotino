@@ -147,6 +147,10 @@ public:
 		return i;
 	}
 
+	void getIRSensors(float* readings) {
+		distanceSensorArray.distances(readings);
+	}
+
 	float getX() {
 		double x,y,phi;
 		getOdometryReadings(x,y,phi);

@@ -25,8 +25,8 @@
 // THE SOFTWARE.
 
 #include "AsyncStateMachine.h"
-//#include "statemachine/StateMachine.h"
-#include "statemachine/StateMachine_Test.h"
+#include "statemachine/StateMachine.h"
+//#include "statemachine/StateMachine_Test.h"
 
 AsyncStateMachine::AsyncStateMachine(StateBehaviorController* stateBehavCtrl):sema_queue_stored(0){
 	//sema_queue_stored = boost::interprocess::interprocess_semaphore(0);

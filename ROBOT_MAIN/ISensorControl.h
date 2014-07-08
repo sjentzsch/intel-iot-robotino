@@ -42,6 +42,8 @@ public:
 
 	virtual void setVelocity(float vx, float vy, float vphi) = 0;
 
+	virtual void getIRSensors(float* readings) = 0;
+
 	virtual float getRobotX() = 0;
 	virtual float getRobotY() = 0;
 	virtual float getRobotPhi() = 0;

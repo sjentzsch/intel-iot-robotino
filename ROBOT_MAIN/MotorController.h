@@ -84,7 +84,7 @@ private:
 	void sendReadyEvent();
 	void setVelocity(float vx, float vy, float vphi);
 	void moveToAbsPos_impl(vector<vec3D> vPoints, float myMaxSpeed, float myMaxRotSpeed, bool onlyRotate, ForceRotationDirection::ForceRotationDirection forcedDir);
-	void moveToAbsPosCF_impl(float destX, float destY, float myMaxSpeed);
+	void moveToAbsPosCF_impl(float destX, float destY, float myMaxSpeed, bool allowRedefineTarget);
 
 public:
 	MotorController(SensorServer *sensorSrv_);
@@ -106,7 +106,7 @@ public:
 	void rotateToAbsAngle(float destPhi, ForceRotationDirection::ForceRotationDirection forcedDir=ForceRotationDirection::SHORTEST, float myMaxRotSpeed=MAX_ROT_SPEED);
 	void rotateToRelAngle(float destPhi, ForceRotationDirection::ForceRotationDirection forcedDir=ForceRotationDirection::SHORTEST, float myMaxRotSpeed=MAX_ROT_SPEED);
 
-	void moveToAbsPosOnlyCF(float destX, float destY, float myMaxSpeed=MAX_SPEED);
+	void moveToAbsPosOnlyCF(float destX, float destY, float myMaxSpeed=MAX_SPEED, bool allowRedefineTarget=true);
 };
 
 #endif /* MOTORCONTROLLER_H_ */

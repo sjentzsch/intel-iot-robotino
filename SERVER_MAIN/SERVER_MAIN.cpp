@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
 
 		CloudComm::getInstance()->getCloudServer()->handleConnections();
 
-		MsgEnvironment msgEnv((unsigned long)std::time(0), 3.0, 3.0, 1.4, 2.2, 0.83, 2.8, 90.0);
+		MsgEnvironment msgEnv((unsigned long)std::time(0), 2.8, 3.2, 1.55, 2.2, 1.05, 3.0, 90.0);
 		CloudComm::getInstance()->getCloudClient()->send(msgEnv.save());
 
 		MsgCustomerOrder msgCustOrder1(0, 5, 22);
@@ -93,16 +93,16 @@ int main(int argc, char* argv[])
 		MsgCustomerOrder msgCustOrder4(2, 8, 24);
 		CloudComm::getInstance()->getCloudClient()->send(msgCustOrder4.save());
 
-		MsgCustomerPos msgCustPos1(0, 22, "John", 1.0, 0.5);
+		MsgCustomerPos msgCustPos1(0, 22, "John", 1.5, 1.5);
 		CloudComm::getInstance()->getCloudClient()->send(msgCustPos1.save());
 
-		MsgCustomerPos msgCustPos2(0, 22, "John", 0.5, 1.5);
+		MsgCustomerPos msgCustPos2(0, 22, "John", 1.0, 0.5);
 		CloudComm::getInstance()->getCloudClient()->send(msgCustPos2.save());
 
-		MsgCustomerPos msgCustPos4(0, 23, "Peter", 1.0, 0.5);
+		MsgCustomerPos msgCustPos4(0, 23, "Peter", 2.0, 2.5);
 		CloudComm::getInstance()->getCloudClient()->send(msgCustPos4.save());
 
-		MsgCustomerPos msgCustPos5(0, 24, "Klaus", 1.0, 1.5);
+		MsgCustomerPos msgCustPos5(0, 24, "Klaus", 0.5, 1.5);
 		CloudComm::getInstance()->getCloudClient()->send(msgCustPos5.save());
 
 		FileLog::log_NOTICE("Waiting for receiving first MsgRobotBeacon ...");
