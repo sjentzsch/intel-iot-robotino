@@ -354,12 +354,14 @@ void MotorController::moveToAbsPosCF_impl(float destX, float destY, float myMaxS
 	const unsigned int MIN_DISTANCE_CF = allowRedefineTarget ? 100 : 20;
 	const unsigned int MAX_DIST_TO_ORIG_GOAL = 800;
 
+	enum DRIVE_DIR {BOTH, ONLY_LEFT, ONLY_RIGHT};
+	DRIVE_DIR currDriveDir = DRIVE_DIR::BOTH;
+
 	bool wasTerminated = false;
 	unsigned int counter = 0;
 
 	vec3D pose;
 	sensorSrv->getOdometry(pose);
-	float readings[9];
 
 	/* rotate: declare variables */
 	float destPhiNow = getPositiveDegree(RADTODEG(atan2(destY - pose.y, destX - pose.x)));
@@ -379,6 +381,10 @@ void MotorController::moveToAbsPosCF_impl(float destX, float destY, float myMaxS
 	/* variables used for redefining target */
 	float currDestX = destX;
 	float currDestY = destY;
+
+	/* variables used for storing latest control direction -> for bumper routine etc. */
+	float currVelX = 0.0f;
+	float currVelY = 0.0f;
 
 	/* timer to ensure slow start */
 	slowStartTimer.start();
@@ -411,7 +417,7 @@ void MotorController::moveToAbsPosCF_impl(float destX, float destY, float myMaxS
 
 
 		// get the position of the nearest obstacle relative to the Robotino frame
-		cout << "#rays blocking my path: " << scan.indicesInFrontPos.size() << endl;
+		//cout << "#rays blocking my path: " << scan.indicesInFrontPos.size() << endl;
 		bool hasObstacle = false;
 		float nearestObsX = 0;
 		float nearestObsY = 0;
@@ -425,7 +431,7 @@ void MotorController::moveToAbsPosCF_impl(float destX, float destY, float myMaxS
 				nearestObsX = scan.positions.at(scan.indicesInFrontPos.at(i)).at(0);
 				nearestObsY = scan.positions.at(scan.indicesInFrontPos.at(i)).at(1);
 				distSquare = currDistSquare;
-				winnerIndex = i;
+				winnerIndex = scan.indicesInFrontPos.at(i);
 				hasObstacle = true;
 			}
 			//cout << "\t" << i << ": " << scan.positions.at(scan.indicesInFrontPos.at(i)).at(0) << ", " << scan.positions.at(scan.indicesInFrontPos.at(i)).at(1) << endl;
@@ -542,36 +548,60 @@ void MotorController::moveToAbsPosCF_impl(float destX, float destY, float myMaxS
 				currBaseVel = baseVelForGoal;
 		}
 
-		cout << "xVel: " << ((1-propSidewards)*currBaseVel) << ", yVel: " << (dirSidewards*propSidewards*currBaseVel) << ", rot: " << speedRotate << endl;
+
+		cout << "curr (" << pose.x << ", " << pose.y << ", " << pose.phi << ") to goal (" << currDestX << ", " << currDestY << ", " << destPhiNow << ")" << endl;
 
 
-		if(hasObstacle && nearestObsX < OBS_X_SAFETY_BACK && nearestObsY > -0.25 && nearestObsY < 0.25)
+		if(this->sensorSrv->bumperHasContact())
 		{
-			if(readings[4] > IR_SENSOR_THRESHOLD && readings[5] > IR_SENSOR_THRESHOLD)
-				setVelocity(-MIN_SPEED, 0, speedRotate);
-			else
-				setVelocity(0, 0, speedRotate);
+			cout << "bumper has contact. driving in opposed direction: " << -currVelX << ", " << -currVelY << endl;
+
+			system("nohup play -v 0.05 /home/robotino/Yamaha-SY-35-Clarinet-C5.wav > /dev/null 2>&1 &");
+
+			for(unsigned int i=0; i<600; i++)
+			{
+				setVelocity(0, 0, 0);
+				boost::this_thread::sleep(boost::posix_time::milliseconds(5));
+			}
+			for(unsigned int i=0; i<100; i++)
+			{
+				setVelocity(-currVelX, -currVelY, 0);
+				boost::this_thread::sleep(boost::posix_time::milliseconds(5));
+			}
+		}
+		else if(hasObstacle && nearestObsX < OBS_X_SAFETY_BACK && nearestObsY > -0.25 && nearestObsY < 0.25 && !IRSensorIsBlocked(4) && !IRSensorIsBlocked(5))
+		{
+			cout << "drive backwards" << endl;
+			currVelX = -MIN_SPEED;
+			currVelY = 0;
+			setVelocity(currVelX, currVelY, speedRotate);
 		}
 		else
 		{
-			cout << "propSidewards: " << propSidewards << " | " << "dirSidewards: " << dirSidewards << endl;
-
-			bool wayBlocked = false;
+			bool sidewardsBlocked = false;
 			if(dirSidewards > 0.0f)
 			{
-				if((propSidewards > 0.4f && readings[1] < IR_SENSOR_THRESHOLD) || (propSidewards > 0.6f && readings[2] < IR_SENSOR_THRESHOLD) || (propSidewards > 0.85f && readings[3] < IR_SENSOR_THRESHOLD))
-					wayBlocked = true;
+				if((propSidewards > 0.4f && IRSensorIsBlocked(1)) || (propSidewards > 0.6f && IRSensorIsBlocked(2)) || (propSidewards > 0.85f && IRSensorIsBlocked(3)))
+					sidewardsBlocked = true;
 			}
 			else if(dirSidewards < 0.0f)
 			{
-				if((propSidewards > 0.4f && readings[8] < IR_SENSOR_THRESHOLD) || (propSidewards > 0.6f && readings[7] < IR_SENSOR_THRESHOLD) || (propSidewards > 0.85f && readings[6] < IR_SENSOR_THRESHOLD))
-					wayBlocked = true;
+				if((propSidewards > 0.4f && IRSensorIsBlocked(8)) || (propSidewards > 0.6f && IRSensorIsBlocked(7)) || (propSidewards > 0.85f && IRSensorIsBlocked(6)))
+					sidewardsBlocked = true;
 			}
 
-			if(wayBlocked)
+			if(sidewardsBlocked)
+			{
+				cout << "sidewards way blocked." << endl;
 				setVelocity(0, 0, speedRotate);
+			}
 			else
-				setVelocity((1-propSidewards)*currBaseVel, dirSidewards*propSidewards*currBaseVel, speedRotate);
+			{
+				currVelX = (1-propSidewards)*currBaseVel;
+				currVelY = dirSidewards*propSidewards*currBaseVel;
+				cout << "xVel: " << currVelX << ", yVel: " << currVelY << ", rot: " << speedRotate << endl;
+				setVelocity(currVelX, currVelY, speedRotate);
+			}
 		}
 
 		if(counter%50==0)
@@ -590,6 +620,11 @@ void MotorController::moveToAbsPosCF_impl(float destX, float destY, float myMaxS
 	{
 		sendReadyEvent();
 	}
+}
+
+bool MotorController::IRSensorIsBlocked(unsigned int index)
+{
+	return this->readings[index] < IR_SENSOR_THRESHOLD;
 }
 
 /* converts the API degree value (range: -180 - 180) into a positive degree value (range: 0 - 360) */

@@ -85,6 +85,8 @@ private:
 	void setVelocity(float vx, float vy, float vphi);
 	void moveToAbsPos_impl(vector<vec3D> vPoints, float myMaxSpeed, float myMaxRotSpeed, bool onlyRotate, ForceRotationDirection::ForceRotationDirection forcedDir);
 	void moveToAbsPosCF_impl(float destX, float destY, float myMaxSpeed, bool allowRedefineTarget);
+	float readings[9];
+	bool IRSensorIsBlocked(unsigned int index);
 
 public:
 	MotorController(SensorServer *sensorSrv_);

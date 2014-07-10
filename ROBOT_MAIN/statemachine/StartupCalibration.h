@@ -29,6 +29,8 @@
 
 #include "StateMachine.h"
 
+#include <future>
+
 // States
 struct startupInit;
 struct startupCalibratingOnBaseFront;
@@ -190,11 +192,21 @@ struct startupDrivingToPointB : sc::state<startupDrivingToPointB, StartupCalibra
 	> reactions;
 };
 
+bool is_prime (int x) {
+  std::cout << "Calculating. Please, wait...\n";
+  for (int i=2; i<x; ++i) if (x%i==0) return false;
+  return true;
+}
+
 struct startupFinished : sc::state<startupFinished, StartupCalibration>
 {
 	startupFinished(my_context ctx) : my_base(ctx) {
 		context<StateMachine1>().logAndDisplayStateName("startupFinished");
 		DataProvider::getInstance()->setRunning(false);
+
+		// TODO: delete me
+		system("nohup play -v 0.05 /home/robotino/Yamaha-SY-35-Clarinet-C5.wav > /dev/null 2>&1 &");
+
 		post_event(EvSuccess());
 	} // entry
 

@@ -295,7 +295,7 @@ void SensorServer::calibrateOnBaseSide()
 			//cout << "scan diffs between scan curr " << i << " (" << currPosGlob.x << ", " << currPosGlob.y << ", angle: " << RADTODEG(scan.angles.at(i)) << ") and scan last " << (i-1) << " (" << lastPosGlob.x << ", " << lastPosGlob.y << ", angle: " << RADTODEG(scan.angles.at(i-1)) << ")" << endl;
 		}while(i < scan.positions.size()-1 && abs(lastPosGlob.y - currPosGlob.y) < LINE_DIFF_THRESHOLD);
 
-		//cout << "=> scan diffs between scan curr " << i << " (" << currPosGlob.x << ", " << currPosGlob.y << ", angle: " << RADTODEG(scan.angles.at(i)) << ") and scan last " << (i-1) << " (" << lastPosGlob.x << ", " << lastPosGlob.y << ", angle: " << RADTODEG(scan.angles.at(i-1)) << ")" << endl;
+		cout << "=> scan diffs between scan curr " << i << " (" << currPosGlob.x << ", " << currPosGlob.y << ", angle: " << RADTODEG(scan.angles.at(i)) << ") and scan last " << (i-1) << " (" << lastPosGlob.x << ", " << lastPosGlob.y << ", angle: " << RADTODEG(scan.angles.at(i-1)) << ")" << endl;
 
 		xDiff = (msgEnvironment.x_base_left_corner - lastPosGlob.x)*1000;
 		cout << "calibrateOnBaseSide: xDiff (desired - actual): " << xDiff << " (in mm)" << endl;

@@ -39,6 +39,7 @@
 //#include <rec/robotino/api2/all.h>
 #include <rec/robotino/api2/Com.h>
 #include <rec/robotino/api2/AnalogInput.h>
+#include <rec/robotino/api2/Bumper.h>
 #include <rec/robotino/api2/DigitalInput.h>
 #include <rec/robotino/api2/DistanceSensorArray.h>
 #include <rec/robotino/api2/Odometry.h>
@@ -73,6 +74,8 @@ private:
 	rec::robotino::api2::AnalogInput analogSensorDrinkInput1;
 	rec::robotino::api2::AnalogInput analogSensorDrinkInput2;
 	rec::robotino::api2::AnalogInput analogSensorDrinkInput3;
+
+	rec::robotino::api2::Bumper bumper;
 
 	OdometrySimulation odometry_sim;
 	rec::robotino::api2::Odometry odometry;
@@ -149,6 +152,10 @@ public:
 
 	void getIRSensors(float* readings) {
 		distanceSensorArray.distances(readings);
+	}
+
+	bool bumperHasContact() {
+		return bumper.value();
 	}
 
 	float getX() {

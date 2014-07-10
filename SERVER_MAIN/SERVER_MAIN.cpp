@@ -73,12 +73,14 @@ int main(int argc, char* argv[])
 #if SIMULATION_MODE == 1
 		CloudComm::getInstance()->init(new CloudServer(8197), new CloudClient(io_service, "localhost", 8198));
 #else
-		CloudComm::getInstance()->init(new CloudServer(8190), new CloudClient(io_service, "172.26.1.1", 8191));
+		//CloudComm::getInstance()->init(new CloudServer(8190), new CloudClient(io_service, "172.26.1.1", 8191));
+		CloudComm::getInstance()->init(new CloudServer(8190), new CloudClient(io_service, "192.168.1.244", 8191));
 #endif
 
 		CloudComm::getInstance()->getCloudServer()->handleConnections();
 
-		MsgEnvironment msgEnv((unsigned long)std::time(0), 2.8, 3.2, 1.55, 2.2, 1.05, 3.0, 90.0);
+		//MsgEnvironment msgEnv((unsigned long)std::time(0), 2.8, 3.2, 1.55, 2.2, 1.05, 3.0, 90.0);
+		MsgEnvironment msgEnv((unsigned long)std::time(0), 3.0, 5.0, 1.2, 3.9, 0.6, 4.8, 90.0);
 		CloudComm::getInstance()->getCloudClient()->send(msgEnv.save());
 
 		MsgCustomerOrder msgCustOrder1(0, 5, 22);
