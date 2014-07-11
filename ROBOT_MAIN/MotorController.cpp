@@ -352,7 +352,7 @@ void MotorController::moveToAbsPosCF_impl(float destX, float destY, float myMaxS
 {
 	const unsigned int SLOW_DISTANCE_CF = 800;
 	const unsigned int MIN_DISTANCE_CF = allowRedefineTarget ? 100 : 20;
-	const unsigned int MAX_DIST_TO_ORIG_GOAL = 800;
+	const unsigned int MAX_DIST_TO_ORIG_GOAL = 600;
 
 	enum DRIVE_DIR {BOTH, ONLY_LEFT, ONLY_RIGHT};
 	DRIVE_DIR currDriveDir = DRIVE_DIR::BOTH;
@@ -362,6 +362,10 @@ void MotorController::moveToAbsPosCF_impl(float destX, float destY, float myMaxS
 
 	vec3D pose;
 	sensorSrv->getOdometry(pose);
+
+	if(this->msgEnvironment != NULL)
+		delete this->msgEnvironment;
+	this->msgEnvironment = new MsgEnvironment(DataProvider::getInstance()->getLatestMsgEnvironment());
 
 	/* rotate: declare variables */
 	float destPhiNow = getPositiveDegree(RADTODEG(atan2(destY - pose.y, destX - pose.x)));
@@ -373,10 +377,10 @@ void MotorController::moveToAbsPosCF_impl(float destX, float destY, float myMaxS
 	float currBaseVel = MIN_SPEED;
 
 	/* variables used for local-minima-avoidance routine */
-	float lastDistToGoal = distToGoal;
+	/*float lastDistToGoal = distToGoal;
 	bool avoidToLeft = false;
-	bool avoidToRight = false;
-	bool allowDriveToRight = true;
+	bool avoidToRight = false;*/
+	//bool allowDriveToRight = true;
 
 	/* variables used for redefining target */
 	float currDestX = destX;
@@ -441,8 +445,13 @@ void MotorController::moveToAbsPosCF_impl(float destX, float destY, float myMaxS
 		// calculate the remaining distance to goal
 		distToGoal = sqrt(SQUARE(currDestX-pose.x) + SQUARE(currDestY-pose.y));
 
+		/*if(!(hasObstacle && allowRedefineTarget))
+			cout << "this is why ... " << endl;
+		cout << "distToNearestObs: " << distToNearestObs << ", distToGoal: " << distToGoal << endl;
+		cout << "rayGlobPosX: " << scan.positionsGlob.at(winnerIndex).at(0) * 1000  << ", rayGlobPosY: " << scan.positionsGlob.at(winnerIndex).at(1) * 1000 << endl;*/
+
 		// redefine goal: if obstacle in front of the original goal location, take a location in front of the obstacle as goal
-		if(hasObstacle && allowRedefineTarget && distToNearestObs < distToGoal && abs(distToNearestObs-distToOrigGoal) < MAX_DIST_TO_ORIG_GOAL)
+		if(hasObstacle && allowRedefineTarget && distToNearestObs < distToGoal && fabs(distToNearestObs-distToOrigGoal) < MAX_DIST_TO_ORIG_GOAL)
 		{
 			float rayGlobPosX = scan.positionsGlob.at(winnerIndex).at(0) * 1000;
 			float rayGlobPosY = scan.positionsGlob.at(winnerIndex).at(1) * 1000;
@@ -484,32 +493,41 @@ void MotorController::moveToAbsPosCF_impl(float destX, float destY, float myMaxS
 
 			if(nearestObsY > 0)
 			{
-				if(avoidToRight)
-					lastDistToGoal = distToGoal;
-				avoidToRight = true;
+				/*if(avoidToRight)
+					lastDistToGoal = distToGoal;*/
+				if(currDriveDir == DRIVE_DIR::BOTH)
+					currDriveDir = DRIVE_DIR::ONLY_RIGHT;
+				//avoidToRight = true;
 			}
 			else
 			{
-				if(avoidToLeft)
-					lastDistToGoal = distToGoal;
-				avoidToLeft = true;
+				/*if(avoidToLeft)
+					lastDistToGoal = distToGoal;*/
+				if(currDriveDir == DRIVE_DIR::BOTH)
+					currDriveDir = DRIVE_DIR::ONLY_LEFT;
+				//avoidToLeft = true;
 			}
 
-			if(avoidToRight && avoidToLeft && lastDistToGoal-distToGoal < 100)
-				allowDriveToRight = false;
+			/*if(avoidToRight && avoidToLeft && lastDistToGoal-distToGoal < 100)
+			{
+				if(currDriveDir == DRIVE_DIR::BOTH || currDriveDir == DRIVE_DIR::ONLY_RIGHT)
+					currDriveDir = DRIVE_DIR::ONLY_LEFT;
+				else if(currDriveDir == DRIVE_DIR::ONLY_LEFT)
+					currDriveDir = DRIVE_DIR::ONLY_RIGHT;
+			}*/
 
-			if(nearestObsY > 0 && allowDriveToRight)
+			if(currDriveDir == DRIVE_DIR::ONLY_RIGHT)
 				dirSidewards = -1.0f;
 
-			cout << "nearest ray: " << nearestObsX << ", " << nearestObsY << " => propSidewards: " << propSidewards << ", dirSidewards: " << dirSidewards << endl;
+			//cout << "nearest ray: " << nearestObsX << ", " << nearestObsY << " => propSidewards: " << propSidewards << ", dirSidewards: " << dirSidewards << endl;
 		}
 		else
 		{
-			lastDistToGoal = distToGoal;
-			avoidToLeft = false;
-			avoidToRight = false;
-			allowDriveToRight = true;
-			cout << "no obstacle in front => propSidewards: " << propSidewards << ", dirSidewards: " << dirSidewards << endl;
+			//lastDistToGoal = distToGoal;
+			//avoidToLeft = false;
+			//avoidToRight = false;
+			currDriveDir = DRIVE_DIR::BOTH;
+			//cout << "no obstacle in front => propSidewards: " << propSidewards << ", dirSidewards: " << dirSidewards << endl;
 		}
 
 
@@ -549,7 +567,7 @@ void MotorController::moveToAbsPosCF_impl(float destX, float destY, float myMaxS
 		}
 
 
-		cout << "curr (" << pose.x << ", " << pose.y << ", " << pose.phi << ") to goal (" << currDestX << ", " << currDestY << ", " << destPhiNow << ")" << endl;
+		//cout << "curr (" << pose.x << ", " << pose.y << ", " << pose.phi << ") to goal (" << currDestX << ", " << currDestY << ", " << destPhiNow << ")" << endl;
 
 
 		if(this->sensorSrv->bumperHasContact())
@@ -592,14 +610,18 @@ void MotorController::moveToAbsPosCF_impl(float destX, float destY, float myMaxS
 
 			if(sidewardsBlocked)
 			{
-				cout << "sidewards way blocked." << endl;
+				cout << "sidewards way blocked. go the other way." << endl;
 				setVelocity(0, 0, speedRotate);
+				if(dirSidewards > 0.0f)
+					currDriveDir = DRIVE_DIR::ONLY_RIGHT;
+				else
+					currDriveDir = DRIVE_DIR::ONLY_LEFT;
 			}
 			else
 			{
 				currVelX = (1-propSidewards)*currBaseVel;
 				currVelY = dirSidewards*propSidewards*currBaseVel;
-				cout << "xVel: " << currVelX << ", yVel: " << currVelY << ", rot: " << speedRotate << endl;
+				//cout << "xVel: " << currVelX << ", yVel: " << currVelY << ", rot: " << speedRotate << endl;
 				setVelocity(currVelX, currVelY, speedRotate);
 			}
 		}
@@ -624,7 +646,16 @@ void MotorController::moveToAbsPosCF_impl(float destX, float destY, float myMaxS
 
 bool MotorController::IRSensorIsBlocked(unsigned int index)
 {
-	return this->readings[index] < IR_SENSOR_THRESHOLD;
+	float posRobFrameX = cos(DEGTORAD(40)*index) * (0.23+IR_SENSOR_THRESHOLD);
+	float posRobFrameY = sin(DEGTORAD(40)*index) * (0.23+IR_SENSOR_THRESHOLD);
+
+	float posGlobX, posGlobY;
+	this->sensorSrv->transformBase2World(posRobFrameX, posRobFrameY, posGlobX, posGlobY);
+
+	//cout << "sensor " << index << ": " << posGlobX << ", " << posGlobY << endl;
+
+	// IR sensor is blocked if it is physically blocked of if game field ends after a certain distance (= also IR_SENSOR_THRESHOLD)
+	return (this->readings[index] < IR_SENSOR_THRESHOLD || posGlobX < 0 || posGlobX > this->msgEnvironment->x_max || posGlobY < 0 || posGlobY > this->msgEnvironment->y_max);
 }
 
 /* converts the API degree value (range: -180 - 180) into a positive degree value (range: 0 - 360) */

@@ -33,9 +33,12 @@
 const float OBS_X_START = 0.1;
 const float OBS_X_STILL_MAX = 0.35;
 const float OBS_X_SAFETY_BACK = 0.30;
-const float OBS_X_END = 2.0;
+const float OBS_X_END = 1.5;
 const float OBS_Y_END = 0.3;
 const float IR_SENSOR_THRESHOLD = 0.12;
+
+/* SOUND FUNCTIONS */
+#define PLAYSOUND(x) system("nohup play -v 0.05 /home/robotino/" + x + " > /dev/null 2>&1 &");
 
 /* USEFUL PREPROCESSOR DIRECTIVES */
 #define PRINT(x) std::cout << x << std::endl

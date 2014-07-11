@@ -35,6 +35,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include "SensorServer.h"
+#include "DataProvider.h"
 #include "utils/FileLogger.h"
 
 class StateBehaviorController;
@@ -85,6 +86,7 @@ private:
 	void setVelocity(float vx, float vy, float vphi);
 	void moveToAbsPos_impl(vector<vec3D> vPoints, float myMaxSpeed, float myMaxRotSpeed, bool onlyRotate, ForceRotationDirection::ForceRotationDirection forcedDir);
 	void moveToAbsPosCF_impl(float destX, float destY, float myMaxSpeed, bool allowRedefineTarget);
+	MsgEnvironment* msgEnvironment;
 	float readings[9];
 	bool IRSensorIsBlocked(unsigned int index);
 

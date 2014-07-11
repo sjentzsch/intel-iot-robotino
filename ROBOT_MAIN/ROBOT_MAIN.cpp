@@ -93,8 +93,8 @@ int main(int argc, char* argv[])
 		CloudComm::getInstance()->init(new CloudServer(8198), new CloudClient(io_service, "localhost", 8197));
 #else
 		//CloudComm::getInstance()->init(new CloudServer(8191), new CloudClient(io_service, "172.26.1.114", 8190));
-		CloudComm::getInstance()->init(new CloudServer(8191), new CloudClient(io_service, "192.168.1.25", 8190));
-		//CloudComm::getInstance()->init(new CloudServer(8191), new CloudClient(io_service, "192.168.1.22", 8190));
+		//CloudComm::getInstance()->init(new CloudServer(8191), new CloudClient(io_service, "192.168.1.25", 8190));
+		CloudComm::getInstance()->init(new CloudServer(8191), new CloudClient(io_service, "192.168.1.22", 8190));
 #endif
 		CloudComm::getInstance()->getCloudServer()->handleConnections();
 
