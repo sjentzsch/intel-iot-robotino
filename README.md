@@ -1,6 +1,10 @@
 # intel-iot-robotino
 Robotino Showcase for IOT Software Developers
 
+The Robotino "waiter", powered by an IA computer, locates a customer in the room and serves them a drink. The Customer orders the drink via a mobile app on their smartphone. The location is handled by a grid of Galileo-powered BT "radars". Visit https://software.intel.com/iot
+
+https://www.youtube.com/watch?v=HMG4UQg_bc8
+
 More Information available on project wiki:
 https://github.com/sjentzsch/intel-iot-robotino/wiki
 
